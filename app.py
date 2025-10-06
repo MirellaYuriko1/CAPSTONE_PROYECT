@@ -1,7 +1,10 @@
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 from urllib.parse import quote_plus
 
 # PARA QUE GUARDE MI ML A MI BASE DE DATOS MYSQL 
-import json  # <--- nuyyevo
+import json  # <--- nuevo
 MODEL_VERSION = "v1"  # <--- nuevo (versiona tu modelo)
 
 #Framework web para mostrar el formulario y manejar las respuestas.
