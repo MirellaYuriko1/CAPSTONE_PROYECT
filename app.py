@@ -198,91 +198,61 @@ def resultado():
     if not uid:
         return "Falta el parámetro uid.", 400
 
+    # --- helper para clasificar PHQ-A ---
+    def interpreta_phqa(total: int) -> str:
+        if total <= 4:  return "Mínimo"
+        if total <= 9:  return "Leve"
+        if total <= 14: return "Moderado"
+        if total <= 19: return "Moderadamente grave"
+        return "Grave"
+
     cn = get_db()
     cur = cn.cursor(dictionary=True)
-    cur.execute(f"""
+
+    # Solo columnas que existen: p1..p9
+    cur.execute("""
         SELECT 
                c.id_cuestionario, c.edad, c.genero, c.created_at,
-               {", ".join([f"c.p{i}" for i in range(1,39)])}, 
-               r.puntaje_Dim1, r.puntaje_Dim2, r.puntaje_Dim3,
-               r.puntaje_Dim4, r.puntaje_Dim5, r.puntaje_Dim6,
+               c.p1, c.p2, c.p3, c.p4, c.p5, c.p6, c.p7, c.p8, c.p9,
                r.puntaje_total, r.nivel,
                u.nombre
         FROM (
             SELECT *
-            FROM cuestionario
-            WHERE id_usuario=%s
-            ORDER BY created_at DESC
-            LIMIT 1
+              FROM cuestionario
+             WHERE id_usuario=%s
+             ORDER BY created_at DESC
+             LIMIT 1
         ) c
-        JOIN usuario u        ON u.id_usuario = c.id_usuario
+        JOIN usuario u        ON u.id_usuario = %s
         LEFT JOIN resultado r ON r.id_cuestionario = c.id_cuestionario
-    """, (uid,))
+    """, (uid, uid))
     row = cur.fetchone()
     cur.close(); cn.close()
 
-    # Si no hay cuestionario o aún no hay fila en 'resultado'
-    if not row or row.get('puntaje_total') is None:
+    if not row:
         return render_template('resultado.html', notfound=True, uid=uid)
 
-    sumas_dim = {
-        "Dim1": row['puntaje_Dim1'],
-        "Dim2": row['puntaje_Dim2'],
-        "Dim3": row['puntaje_Dim3'],
-        "Dim4": row['puntaje_Dim4'],
-        "Dim5": row['puntaje_Dim5'],
-        "Dim6": row['puntaje_Dim6'],
-    }
-
-    #===PARA QUE MUESTRE NIVEL Y CONFIANZA PRECISION
-    # features p1..p38 para ML
-    respuestas = {f"p{i}": row.get(f"p{i}") for i in range(1, 39)} #NUEVO ML#
-    pred_ml, proba_ml = ml_predict_from_answers(respuestas, row['edad'], row['genero']) #NUEVO ML#
-    # === Confianza del modelo (según prob. más alta) ===
-    conf_ml = None
-    conf_pct = None
-    if proba_ml:
-        top = max(proba_ml.values())# p.ej. 40.0
-        conf_pct = top
-        if top >= 70:
-            conf_ml = "Alta"
-        elif top >= 50:
-            conf_ml = "Media"
-        else:
-            conf_ml = "Baja"
-    #======================================================
-
-    # Etiquetas por norma (para las chapitas de cada subescala)
-    inter_sub, inter_total = interpreta_normas(
-        row['genero'], row['edad'], sumas_dim, row['puntaje_total']
-    )
-
-    dims_order = ["Dim1","Dim2","Dim3","Dim4","Dim5","Dim6"]
-    rows_view = []
-    for d in dims_order:
-        key = DIM_NOMBRES[d]
-        rows_view.append({
-            "code": key,
-            "label": PRETTY[key],
-            "score": sumas_dim[d],
-            "level": inter_sub.get(key) or "-"
-        })
-
-    nivel_total = inter_total or row['nivel']
+    # Si por alguna razón aún no hay fila en 'resultado', calculamos aquí
+    total = row.get('puntaje_total')
+    nivel = row.get('nivel')
+    if total is None:
+        total = sum(int(row.get(f"p{i}", 0) or 0) for i in range(1, 10))
+        nivel = interpreta_phqa(total)
 
     return render_template(
         'resultado.html',
         notfound=False,
         uid=uid,
-        nombre=row['nombre'],
-        edad=row['edad'],
-        rows=rows_view,
-        total=row['puntaje_total'],
-        nivel_total=nivel_total,
-        pred_ml=pred_ml,   #AGREGADO ML
-        proba_ml=proba_ml, #AGREGADO ML
-        conf_ml=conf_ml,   #AGREGADO ML
-        conf_pct=conf_pct  #AGREGADO ML
+        nombre=row.get('nombre'),
+        edad=row.get('edad'),
+        total=total,
+        nivel_total=nivel,
+        # ya no enviamos subescalas ni ML aquí (a menos que lo uses)
+        rows=[],           # por compatibilidad si tu template lo itera
+        pred_ml=None,
+        proba_ml=None,
+        conf_ml=None,
+        conf_pct=None
     )
 
 # Ruta para que guarde el registro de usuario (GET y POST)
@@ -461,31 +431,34 @@ def login():
 @app.post('/guardar')
 def guardar():
     try:
-        # Validar que venga id_usuario (oculto en el form)
+        # 1) id_usuario obligado
         id_usuario_raw = (request.form.get("id_usuario") or "").strip()
         if not id_usuario_raw.isdigit():
             return "Falta id_usuario. Vuelve a iniciar sesión.", 400
         id_usuario = int(id_usuario_raw)
 
-        # Datos demográficos
-        edad = int(request.form.get("edad"))
-        genero = request.form.get("genero")  # "Femenino" / "Masculino"
+        # 2) Edad y género OPCIONALES (pueden venir vacíos)
+        edad_raw = (request.form.get("edad") or "").strip()
+        edad = int(edad_raw) if edad_raw.isdigit() else None
+        genero = (request.form.get("genero") or None)
 
-        # Respuestas p1..p38 (cada una 0..3)
-        respuestas = {f"p{i}": int(request.form.get(f"p{i}", 0)) for i in range(1, 39)}
-
-        # Sumas por dimensión y total
-        sumas = {dim: sum(respuestas[f"p{i}"] for i in items) for dim, items in DIMENSIONES.items()}
+        # 3) Respuestas PHQ-A p1..p9 (0..3)
+        respuestas = {f"p{i}": int(request.form.get(f"p{i}", 0)) for i in range(1, 10)}
         puntaje_total = sum(respuestas.values())
 
-        # Interpretación por reglas
-        inter_sub, inter_total = interpreta_normas(genero, edad, sumas, puntaje_total)
-        nivel_txt = inter_total or "N/A"
+        # 4) Nivel PHQ-A
+        def interpreta_phqa(total: int) -> str:
+            if total <= 4: return "Mínimo"
+            if total <= 9: return "Leve"
+            if total <= 14: return "Moderado"
+            if total <= 19: return "Moderadamente grave"
+            return "Grave"
+        nivel_txt = interpreta_phqa(puntaje_total)
 
         cn = get_db()
         cur = cn.cursor()
 
-        # ¿Ya tiene cuestionario? Tomar el más reciente si existiera
+        # 5) ¿Tiene cuestionario previo? (tomar el último)
         cur.execute(
             "SELECT id_cuestionario FROM cuestionario WHERE id_usuario=%s ORDER BY created_at DESC LIMIT 1",
             (id_usuario,)
@@ -493,110 +466,67 @@ def guardar():
         row = cur.fetchone()
 
         if row:
-            # UPDATE sobre el existente
+            # UPDATE del último
             id_cuest = row[0]
-            set_cols_p = ", ".join([f"p{i}=%s" for i in range(1, 39)])
-            sql = f"""
+            sql = """
                 UPDATE cuestionario
-                SET edad=%s, genero=%s, {set_cols_p}
-                WHERE id_cuestionario=%s
+                   SET edad=%s, genero=%s,
+                       p1=%s,p2=%s,p3=%s,p4=%s,p5=%s,p6=%s,p7=%s,p8=%s,p9=%s
+                 WHERE id_cuestionario=%s
             """
             valores = [
                 edad, genero,
-                *[respuestas[f"p{i}"] for i in range(1, 39)],
+                respuestas["p1"],respuestas["p2"],respuestas["p3"],
+                respuestas["p4"],respuestas["p5"],respuestas["p6"],
+                respuestas["p7"],respuestas["p8"],respuestas["p9"],
                 id_cuest
             ]
             cur.execute(sql, valores)
         else:
             # INSERT nuevo
-            columnas_p = ", ".join([f"p{i}" for i in range(1, 39)])
-            placeholders_p = ", ".join(["%s"] * 38)
-            sql = f"""
+            sql = """
                 INSERT INTO cuestionario
-                (id_usuario, edad, genero, {columnas_p})
-                VALUES (%s, %s, %s, {placeholders_p})
+                    (id_usuario, edad, genero, p1,p2,p3,p4,p5,p6,p7,p8,p9)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
             valores = [
                 id_usuario, edad, genero,
-                *[respuestas[f"p{i}"] for i in range(1, 39)],
+                respuestas["p1"],respuestas["p2"],respuestas["p3"],
+                respuestas["p4"],respuestas["p5"],respuestas["p6"],
+                respuestas["p7"],respuestas["p8"],respuestas["p9"]
             ]
             cur.execute(sql, valores)
             id_cuest = cur.lastrowid
 
-        # 6) INSERT o UPDATE en 'resultado' (como NO hay UNIQUE, lo controlamos por código)
+        # 6) UPSERT en resultado (solo total + nivel)
         cur.execute("SELECT id_resultado FROM resultado WHERE id_cuestionario=%s LIMIT 1", (id_cuest,))
         row_res = cur.fetchone()
 
         if row_res:
-            # UPDATE
-            cur.execute("""
-                UPDATE resultado
-                SET puntaje_Dim1=%s, puntaje_Dim2=%s, puntaje_Dim3=%s,
-                    puntaje_Dim4=%s, puntaje_Dim5=%s, puntaje_Dim6=%s,
-                    puntaje_total=%s, nivel=%s
-                WHERE id_cuestionario=%s
-            """, (
-                sumas["Dim1"], sumas["Dim2"], sumas["Dim3"],
-                sumas["Dim4"], sumas["Dim5"], sumas["Dim6"],
-                puntaje_total, nivel_txt,
-                id_cuest
-            ))
+            cur.execute(
+                "UPDATE resultado SET puntaje_total=%s, nivel=%s WHERE id_cuestionario=%s",
+                (puntaje_total, nivel_txt, id_cuest)
+            )
         else:
-            # INSERT
-            cur.execute("""
-                INSERT INTO resultado(
-                  id_cuestionario, puntaje_Dim1, puntaje_Dim2, puntaje_Dim3,
-                  puntaje_Dim4, puntaje_Dim5, puntaje_Dim6, puntaje_total, nivel
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-            """, (
-                id_cuest,
-                sumas["Dim1"], sumas["Dim2"], sumas["Dim3"],
-                sumas["Dim4"], sumas["Dim5"], sumas["Dim6"],
-                puntaje_total, nivel_txt
-            ))
-
-        # === ML: calcular y guardar/actualizar predicción del modelo en mi MYSQL===
-        try:
-            # usa tus mismas respuestas + edad + genero
-            pred_ml, proba_ml = ml_predict_from_answers(respuestas, edad, genero)
-
-            if pred_ml is not None:
-                conf_pct = None
-                conf_label = None
-                proba_json = None
-
-                if proba_ml:
-                    conf_pct = float(max(proba_ml.values()))
-                    conf_label = _conf_label_from_pct(conf_pct)
-                    proba_json = json.dumps(proba_ml, ensure_ascii=False)
-
-                # UPSERT: una sola predicción por (id_cuestionario, model_version)
-                cur.execute("""
-                    INSERT INTO prediccion_ml
-                        (id_cuestionario, model_version, pred_label, conf_pct, conf_label, proba_json)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON DUPLICATE KEY UPDATE
-                        pred_label = VALUES(pred_label),
-                        conf_pct   = VALUES(conf_pct),
-                        conf_label = VALUES(conf_label),
-                        proba_json = VALUES(proba_json)
-                """, (
-                    id_cuest, MODEL_VERSION, pred_ml, conf_pct, conf_label, proba_json
-                ))
-        except Exception as e:
-            # no rompas el flujo por un error de ML; solo lo logueas
-            print(f"[ML] Error guardando predicción: {e}")
+            cur.execute(
+                "INSERT INTO resultado (id_cuestionario, puntaje_total, nivel) VALUES (%s,%s,%s)",
+                (id_cuest, puntaje_total, nivel_txt)
+            )
 
         cn.commit()
         cur.close(); cn.close()
 
-        # 7) Redirigir al resultado
+        # 7) Ir a resultados
         return redirect(f"/resultado?uid={id_usuario}")
 
     except Exception as e:
         return f"Error al guardar: {e}", 400
-        
 
+        # 8) Redirigir al resultado
+        return redirect(f"/resultado?uid={id_usuario}")
+
+    except Exception as e:
+        return f"Error al guardar: {e}", 400
 
 # === 9) Run ===
 if __name__ == "__main__":
