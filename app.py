@@ -290,13 +290,16 @@ def registro():
 
     nombre   = request.form.get("nombre")
     apellido = request.form.get("apellido")
+    grado    = (request.form.get("grado") or "").strip()
+    edad     = (request.form.get("edad") or "").strip()          # ← solo 'edad'
+    genero   = (request.form.get("genero") or "").strip().lower()
     password = request.form.get("password")
 
     cn = get_db(); cur = cn.cursor()
     try:
         cur.execute(
-            "INSERT INTO usuario (nombre, apellido, contraseña) VALUES (%s, %s, %s)",
-            (nombre, apellido, password)
+            "INSERT INTO usuario (nombre, apellido, grado, edad, genero, contraseña) VALUES (%s, %s, %s, %s, %s, %s)",
+            (nombre, apellido, grado, edad, genero, password)
         )
         cn.commit()
         # 👉 redirige con querystring para que el front muestre el modal
@@ -557,13 +560,5 @@ def guardar():
 
 # === 9) Run ===
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", "5000"))   # Render define PORT; 5000 de fallback local
-    debug = os.getenv("FLASK_DEBUG", "0") == "1"
-    # Si usamos el puerto por defecto (5000), asumimos entorno local → 127.0.0.1
-    # Si usamos un puerto inyectado (Render), exponemos en todas las interfaces → 0.0.0.0
-    host = "127.0.0.1" if port == 5000 else "0.0.0.0"
-
-    # Permite override manual con FLASK_HOST si quieres forzarlo
-    host = os.getenv("FLASK_HOST", host)
-
-    app.run(host=host, port=port, debug=debug)
+    # Solo local
+    app.run(host="127.0.0.1", port=5000, debug=True)  # pon debug=False si no quieres recarga/tracebacks
