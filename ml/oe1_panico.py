@@ -35,7 +35,7 @@ from Scas.regla_puntuaciones import DIMENSIONES, DIM_NOMBRES, PRETTY, interpreta
 
 # ================= Config =================
 RANDOM_STATE = 42
-LEVELS = ["Normal", "Alto", "Elevado", "Muy alto"]
+LEVELS = ["Normal", "Elevado", "Alto", "Muy alto"]
 PREGUNTAS = [f"p{i}" for i in range(1, 39)]
 DIM_KEY = "Dim1"  # Pánico/Agorafobia
 OUTDIR = Path(__file__).parent / "reports" / "oe1_panico"
@@ -43,14 +43,14 @@ RUN_LOSO = False   # True si quieres también la variante LOSO
 
 # ======= Textos para títulos y leyendas =======
 UI = {
-    "pred_title": "Ataques de pánico y agorafobia: predicho vs. esperado",
-    "pred_sub":   "Comparación por nivel (Normal, Alto, Elevado, Muy alto)",
-    "leg_esp":    "Esperado (normas SCAS)",
-    "leg_pred":   "Predicción (Random Forest)",
+    "pred_title": "Gráfico comparativo entre diagnósticos predichos y diagnósticos esperados con",
+    "pred_sub":   "respecto a la dimensión de Ataques de Pánico y Agorafobia",
+    "leg_esp":    "Esperado",
+    "leg_pred":   "Predicción",
     "x_nivel":    "Nivel",
     "y_n":        "Número de estudiantes",
 
-    "cm_title":        "Matriz de confusión — Pánico/agorafobia (Random Forest)",
+    "cm_title":        "Matriz de confusión — Pánico/agorafobia",
     "cm_title_norm":   "Matriz de confusión (porcentaje por fila) — Pánico/agorafobia",
     "color_casos":     "Casos",
     "color_pct":       "% de casos",

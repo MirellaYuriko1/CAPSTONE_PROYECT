@@ -1,46 +1,46 @@
 {
-  "timestamp": "2025-09-07T23:48:25.347566Z",
-  "n_registros_usados": 102,
+  "timestamp": "2025-09-11T06:37:10.044713Z",
+  "n_registros_usados": 104,
   "levels_order": [
     "Normal",
-    "Alto",
     "Elevado",
+    "Alto",
     "Muy alto"
   ],
   "dim_key": "Dim2",
   "dim_name": "Ansiedad por separación",
   "upperbound": {
-    "f1_macro": 0.5718374242351075,
-    "accuracy": 0.6862745098039216,
-    "balanced_accuracy": 0.5650157232704403,
-    "auc_ovr_macro": 0.8685364005030971,
-    "brier": 1.4738246414083156,
+    "f1_macro": 0.6113908931187977,
+    "accuracy": 0.7019230769230769,
+    "balanced_accuracy": 0.6038888888888889,
+    "auc_ovr_macro": 0.8907811841715496,
+    "brier": 1.3785689255537483,
     "confusion_matrix": [
       [
-        50,
+        48,
+        6,
         0,
-        3,
+        0
+      ],
+      [
+        7,
+        14,
+        4,
         0
       ],
       [
         1,
-        3,
-        9,
+        8,
+        4,
         2
       ],
       [
-        9,
-        5,
-        10,
-        0
-      ],
-      [
+        0,
         0,
         3,
-        0,
         7
       ]
     ],
-    "n": 102
+    "n": 104
   }
 }

@@ -16,6 +16,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.base import clone  # <- para la vista previa del preprocesamiento
 
 from Scas.configuracion import get_db  # conexión mysql-connector
 
@@ -64,13 +65,31 @@ def main():
     df = pd.DataFrame(rows)
     print(f"[ML] Registros leídos: {len(df)}")
 
-    # filtra solo filas con etiqueta
+    # Opcional: para que las tablas salgan bien en consola
+    pd.set_option("display.width", 120)
+    pd.set_option("display.max_columns", 60)
+
+    # ==========================================================================
+    # EVIDENCIA 1: Depuración y normalización de la etiqueta
+    # ==========================================================================
+    print("\n--- Depuración y normalización de la etiqueta ---")
+    antes_total = len(df)
+    nulos_nivel = df["nivel"].isna().sum()
+    print(f"Filas totales (antes): {antes_total}")
+    print(f"Nulos en 'nivel': {nulos_nivel}")
+
+    # Depuración + normalización
     df = df.dropna(subset=["nivel"]).copy()
-    df["nivel_norm"] = df["nivel"].map(norm_label)
+    df["nivel_norm"] = df["nivel"].map(norm_label) 
 
-    print("[ML] Distribución de clases:")
-    print(df["nivel_norm"].value_counts().sort_index())
+    despues_total = len(df)
+    print(f"Filas totales (después): {despues_total}  | Eliminadas: {antes_total - despues_total}")
 
+    print("\nClases normalizadas (conteo):")
+    print(df["nivel_norm"].value_counts().sort_index().to_string())
+
+    # -------------------------------------------------------------------------
+    # Selección de variables
     feature_cols_num = PREGUNTAS + ["edad"]
     feature_cols_cat = ["genero"]
     X = df[feature_cols_num + feature_cols_cat].copy()
@@ -84,6 +103,41 @@ def main():
         ]
     )
 
+    # ==========================================================================
+    # EVIDENCIA 2: Selección de variables y codificación de género
+    # ==========================================================================
+    print("\n--- Selección de variables y codificación de género ---")
+    print(f"Cols numéricas ({len(feature_cols_num)}): {feature_cols_num}")
+    print(f"Cols categóricas ({len(feature_cols_cat)}): {feature_cols_cat}")
+
+    print("\nValores de 'genero' (conteo):")
+    print(df["genero"].value_counts(dropna=False).to_string())
+
+    # Vista previa segura del preprocesamiento (no afecta al pipeline de CV)
+    pre_preview = clone(pre)
+    pre_preview.fit(X)
+
+    # Categorías que detectó OneHotEncoder para 'genero'
+    ohe = pre_preview.named_transformers_["cat"]
+    cats = list(ohe.categories_[0])
+    print("\nCategorías codificadas de 'genero':", cats)
+
+    # Nombres de columnas resultantes tras el preprocesamiento
+    try:
+        feat_names = pre_preview.get_feature_names_out()
+    except Exception:
+        feat_names = feature_cols_num + [f"cat__genero_{c}" for c in cats]
+
+    print(f"Total de columnas de salida: {len(feat_names)}")
+    print("Ejemplo de columnas transformadas:")
+    for n in list(feat_names)[:10]:
+        print("  -", n)
+
+    cols_preview = (feature_cols_num[:5] + feature_cols_cat)
+    print("\nMuestra rápida de X (5 filas):")
+    print(X[cols_preview].head(5).to_string(index=False))
+
+    # -------------------------------------------------------------------------
     model = RandomForestClassifier(
         n_estimators=300,
         random_state=42,
@@ -100,7 +154,13 @@ def main():
     print(f"F1_macro CV: mean={cv_f1.mean():.3f}  std={cv_f1.std():.3f}")
     print(f"Accuracy  CV: mean={cv_acc.mean():.3f}  std={cv_acc.std():.3f}")
 
-    # === Subgrupos por GÉNERO (usando predicción de cross-val) ===
+    # Tamaños de entrenamiento/validación por fold (solo para informar cantidades)
+    train_sizes_cv, val_sizes_cv = [], []
+    for tr_idx, val_idx in skf.split(X, y):
+        train_sizes_cv.append(len(tr_idx))
+        val_sizes_cv.append(len(val_idx))
+
+    # === Predicción out-of-fold para evaluación general ===
     y_pred_cv = cross_val_predict(clf, X, y, cv=skf)
 
     df_eval = pd.DataFrame({
@@ -135,7 +195,16 @@ def main():
         if m:
             print(f"Genero={g}: n={m['n']}, acc={m['accuracy']:.2f}, f1_macro={m['f1_macro']:.2f}")
 
-    # 3) Hold-out final (20%)
+    # ⬇️ NUEVO: Resumen general (una sola vez) con todo el dataset usando OOF
+    correct_cv = int((y_pred_cv == y).sum())
+    total_cv = int(len(y))
+    acc_cv_pct = 100.0 * correct_cv / total_cv
+    err_cv_pct = 100.0 - acc_cv_pct
+    print("\n=== Resumen general (Validación cruzada OOF) ===")
+    print(f"Predicciones correctas: {correct_cv}/{total_cv} ({acc_cv_pct:.2f}%)")
+    print(f"Promedio de error: {err_cv_pct:.2f}%  (1 - accuracy)")
+
+    # 3) Hold-out final (20%) — mantenemos reporte detallado, sin imprimir % extra
     Xtr, Xte, ytr, yte = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
@@ -149,7 +218,18 @@ def main():
     acc = accuracy_score(yte, ypred)
     f1m = f1_score(yte, ypred, average="macro")
 
-    # 4) Guardar modelo y métricas
+    # === Conteos solicitados (Total / Entrenamiento / Validación / Testeo) ===
+    n_total = len(X)
+    n_train = len(Xtr)
+    n_test  = len(Xte)
+    print("\n=== Tamaños de conjuntos ===")
+    print(f"Total: {n_total}")
+    print(f"Entrenamiento (hold-out): {n_train}")
+    print(f"Validación (CV k=5, por fold): {val_sizes_cv}")
+    print(f"Testeo (hold-out): {n_test}")
+    print(f"\nResumen -> Total={n_total} | Entrenamiento={n_train} | Validación(CV por fold)={val_sizes_cv} | Testeo={n_test}")
+
+    # 4) Guardar modelo y métricas (sin cambios en el esquema)
     outdir = Path(__file__).parent / "models"
     outdir.mkdir(parents=True, exist_ok=True)
     model_path = outdir / "model_v1.joblib"
@@ -166,6 +246,8 @@ def main():
             "f1_macro_std": float(cv_f1.std()),
             "accuracy_mean": float(cv_acc.mean()),
             "accuracy_std": float(cv_acc.std()),
+            "train_sizes_per_fold": train_sizes_cv,
+            "val_sizes_per_fold": val_sizes_cv,
         },
         "subgroups": {
             "genero": subgroups_genero
@@ -177,6 +259,8 @@ def main():
             "confusion_matrix": cm.tolist(),
             "labels_order": classes_sorted,
             "n_test": int(len(yte)),
+            "n_train": int(len(ytr)),
+            "n_total": int(n_total),
         },
     }
     with open(outdir / "metrics_v1.json", "w", encoding="utf-8") as f:

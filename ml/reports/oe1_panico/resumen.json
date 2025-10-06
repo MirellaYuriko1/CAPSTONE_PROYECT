@@ -1,46 +1,46 @@
 {
-  "timestamp": "2025-09-07T23:47:43.748232Z",
-  "n_registros_usados": 102,
+  "timestamp": "2025-09-11T06:22:11.781703Z",
+  "n_registros_usados": 104,
   "levels_order": [
     "Normal",
-    "Alto",
     "Elevado",
+    "Alto",
     "Muy alto"
   ],
   "dim_key": "Dim1",
   "dim_name": "Pánico/Agorafobia",
   "upperbound": {
-    "f1_macro": 0.6016580861019544,
-    "accuracy": 0.696078431372549,
-    "balanced_accuracy": 0.5645990566037735,
-    "auc_ovr_macro": 0.9075477235641181,
-    "brier": 1.4892968137254903,
+    "f1_macro": 0.5785107565293324,
+    "accuracy": 0.6923076923076923,
+    "balanced_accuracy": 0.5546207264957266,
+    "auc_ovr_macro": 0.8933500368265993,
+    "brier": 1.3734968750000003,
     "confusion_matrix": [
       [
-        50,
-        0,
+        51,
         3,
+        0,
         0
       ],
       [
-        1,
-        6,
         9,
-        0
-      ],
-      [
-        10,
-        4,
-        11,
+        12,
+        5,
         0
       ],
       [
         0,
-        3,
-        1,
+        10,
+        5,
+        1
+      ],
+      [
+        0,
+        0,
+        4,
         4
       ]
     ],
-    "n": 102
+    "n": 104
   }
 }

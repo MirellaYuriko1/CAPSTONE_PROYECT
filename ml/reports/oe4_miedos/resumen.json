@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-09-07T23:49:40.947000Z",
+  "timestamp": "2025-09-08T23:02:15.063917Z",
   "n_registros_usados": 102,
   "levels_order": [
     "Normal",
-    "Alto",
     "Elevado",
+    "Alto",
     "Muy alto"
   ],
   "dim_key": "Dim4",
@@ -14,30 +14,30 @@
     "accuracy": 0.7352941176470589,
     "balanced_accuracy": 0.5262605042016807,
     "auc_ovr_macro": 0.8790945808353811,
-    "brier": 1.628659900670009,
+    "brier": 1.5739368603460282,
     "confusion_matrix": [
       [
         63,
+        5,
         0,
-        5,
         0
-      ],
-      [
-        5,
-        6,
-        2,
-        1
       ],
       [
         12,
-        0,
         4,
+        0,
         0
       ],
       [
+        5,
+        2,
+        6,
+        1
+      ],
+      [
+        0,
         0,
         2,
-        0,
         2
       ]
     ],

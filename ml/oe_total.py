@@ -42,8 +42,8 @@ OUTDIR = Path(__file__).parent / "reports" / "oe_total"
 MODEL_PATH = Path(__file__).parent / "models" / "model_v1.joblib"  # tu pipeline entrenado
 
 UI = {
-    "pred_title": "Nivel TOTAL de ansiedad: predicho vs. esperado",
-    "pred_sub":   "Comparación por nivel (Normal, Alto, Elevado, Muy alto)",
+    "pred_title": "Gráfico comparativo entre diagnósticos predichos y diagnósticos esperados con",
+    "pred_sub":   "respecto a los niveles de ansiedad",
     "leg_esp":    "Esperado (normas SCAS)",
     "leg_pred":   "Predicción (modelo total)",
     "x_nivel":    "Nivel",
