@@ -23,7 +23,7 @@
     html, body { min-height: 100%; }
     body{
       margin:0;
-      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; 
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--ink);
       min-height: 100vh;
       background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 100%);
@@ -38,11 +38,10 @@
       font-family:'Merriweather', serif; font-weight:700; text-align:center; font-size:24px; margin-bottom:24px;
     }
     label{font-weight:600; color:#111827;}
-    /* ⬇️ Igualamos estilos para inputs y selects */
     .form-control, .form-select{
       height:48px; border-radius:var(--radius-sm); border:1px solid #e5e7eb;
       transition:border-color .2s ease, box-shadow .2s ease, background-position .2s ease;
-      background-repeat:no-repeat; background-position: right 12px center; background-size:18px;
+      background-repeat:no-repeat; background-position:right 12px center; background-size:18px;
     }
     .form-control:focus, .form-select:focus{border-color:var(--primary); box-shadow:var(--focus);}
     .form-control.is-valid, .form-select.is-valid{
@@ -113,7 +112,7 @@
           </div>
         </div>
 
-        <!-- ⬇️ Nuevo: Género -->
+        <!-- Género -->
         <div class="row g-3 mb-3">
           <div class="col-md-6">
             <label for="genero" class="form-label">Género</label>
@@ -124,6 +123,12 @@
             </select>
             <div id="generoError" class="field-error" aria-live="polite"></div>
           </div>
+        </div>
+
+        <!-- Switch Cambiar contraseña (solo se muestra en edición) -->
+        <div id="pwChangeWrap" class="form-check form-switch mb-2 d-none">
+          <input class="form-check-input" type="checkbox" id="changePw">
+          <label class="form-check-label" for="changePw">Cambiar contraseña</label>
         </div>
 
         <!-- Contraseña -->
@@ -214,8 +219,12 @@
       const params = new URLSearchParams(location.search);
       const mode   = (params.get('mode') || 'crear').toLowerCase();
       const uid    = params.get('uid') || '';
-      const nombreQS   = params.get('nombre') || '';
+      const nombreQS   = params.get('nombre')   || '';
       const apellidoQS = params.get('apellido') || '';
+      const gradoQS    = params.get('grado')    || '';
+      const edadQS     = params.get('edad')     || '';
+      const generoQS   = (params.get('genero') || '').toLowerCase();
+
       const exito  = params.get('exito') === '1';
       const error  = params.get('error');
 
@@ -229,18 +238,21 @@
       const apellido = document.getElementById('apellido');
       const grado = document.getElementById('grado');
       const edad = document.getElementById('edad');
-      const genero = document.getElementById('genero');      // ⬅️ nuevo
+      const genero = document.getElementById('genero');
       const password = document.getElementById('password');
       const confirm  = document.getElementById('confirm_password');
       const pwHint = document.getElementById('pwHint');
       const cpwHint = document.getElementById('cpwHint');
 
-      // Flags UX
+      const pwChangeWrap   = document.getElementById('pwChangeWrap');
+      const changePwSwitch = document.getElementById('changePw');
+
       let formSubmitted = false;
       let touchedPassword = false;
 
-      // Setup por modo
       form.dataset.mode = mode;
+
+      // ----- MODO EDITAR -----
       if (mode === 'editar') {
         document.title = 'Editar perfil';
         title.textContent = 'Editar perfil';
@@ -256,18 +268,53 @@
           form.appendChild(hid);
         }
 
-        nombre.value = nombreQS;
-        apellido.value = apellidoQS;
+        // precarga campos
+        nombre.value  = nombreQS;
+        apellido.value= apellidoQS;
+        grado.value   = gradoQS;
+        edad.value    = edadQS;
+        if (generoQS === 'femenino') genero.value = 'Femenino';
+        else if (generoQS === 'masculino') genero.value = 'Masculino';
+        else genero.value = '';
 
-        pwHint.textContent = '(opcional)';
+        // Switch visible y contraseñas deshabilitadas
+        pwChangeWrap.classList.remove('d-none');
+        password.disabled = true;
+        confirm.disabled  = true;
+
+        changePwSwitch.addEventListener('change', () => {
+          const on = changePwSwitch.checked;
+          password.disabled = !on;
+          confirm.disabled  = !on;
+
+          if (!on) {
+            // limpiar estados/errores si apagan el switch
+            password.value = '';
+            confirm.value  = '';
+            password.classList.remove('is-valid','is-invalid');
+            confirm.classList.remove('is-valid','is-invalid');
+            document.getElementById('passwordError').textContent = '';
+            document.getElementById('passwordError').classList.remove('show');
+            document.getElementById('confirmError').textContent = '';
+            document.getElementById('confirmError').classList.remove('show');
+          }
+          updateSubmit();
+        });
+
+        pwHint.textContent  = '(opcional: activa “Cambiar contraseña”)';
         cpwHint.textContent = '(solo si cambias)';
-      } else {
+      } 
+      // ----- MODO CREAR -----
+      else {
         document.title = 'Crea tu cuenta';
         title.textContent = 'Crea tu cuenta';
         submitBtn.textContent = 'Registrarme';
         form.action = '/registro';
         pwHint.textContent = '';
         cpwHint.textContent = '';
+        pwChangeWrap.classList.add('d-none'); // no se ve en crear
+        password.disabled = false;
+        confirm.disabled  = false;
       }
 
       if (error) {
@@ -283,12 +330,12 @@
         });
       }
 
-      // Validaciones5
+      // Validaciones
       const nombreError = document.getElementById('nombreError');
       const apellidoError = document.getElementById('apellidoError');
       const gradoError = document.getElementById('gradoError');
       const edadError = document.getElementById('edadError');
-      const generoError = document.getElementById('generoError');   // ⬅️ nuevo
+      const generoError = document.getElementById('generoError');
       const passwordError = document.getElementById('passwordError');
       const confirmError = document.getElementById('confirmError');
 
@@ -362,7 +409,6 @@
         return ok;
       }
 
-      // Edad: solo números y rango 3–20
       function validateEdad() {
         const valor = edad.value.trim();
         if (valor.length === 0) {
@@ -389,7 +435,6 @@
         return ok;
       }
 
-      // Género: requerido (Femenino/Masculino)
       function validateGenero(){
         const val = genero.value;
         const ok = !!val;
@@ -400,8 +445,15 @@
         return ok;
       }
 
-      // Password: no mostrar error hasta que se toque o envíe
       function validatePassword(){
+        // En edición, si no se activa el switch, no validar password
+        if (form.dataset.mode === 'editar' && !changePwSwitch.checked) {
+          password.classList.remove('is-valid','is-invalid');
+          passwordError.textContent = "";
+          passwordError.classList.remove('show');
+          return true;
+        }
+
         if (!touchedPassword && !formSubmitted) {
           password.classList.remove('is-valid','is-invalid');
           passwordError.textContent = "";
@@ -431,6 +483,14 @@
       }
 
       function validateConfirm(){
+        // En edición, si no se cambia contraseña, no validar confirm
+        if (form.dataset.mode === 'editar' && !changePwSwitch.checked) {
+          confirm.classList.remove('is-valid','is-invalid');
+          confirmError.textContent = "";
+          confirmError.classList.remove('show');
+          return true;
+        }
+
         const pv = password.value;
         const cv = confirm.value;
         if (form.dataset.mode === 'crear'){
@@ -458,16 +518,22 @@
 
       function updateSubmit(){
         const okBase = validateNombre() && validateApellido() && validateGrado() && validateEdad() && validateGenero();
-        const okPass = validatePassword() && validateConfirm();
+
+        let okPass = true;
+        if (form.dataset.mode === 'crear') {
+          okPass = validatePassword() && validateConfirm();
+        } else {
+          okPass = changePwSwitch.checked ? (validatePassword() && validateConfirm()) : true;
+        }
+
         submitBtn.disabled = !(okBase && okPass);
       }
 
-      // Listeners
       nombre.addEventListener('input', updateSubmit);
       apellido.addEventListener('input', updateSubmit);
       grado.addEventListener('input', updateSubmit);
       edad.addEventListener('input', updateSubmit);
-      genero.addEventListener('change', updateSubmit);   // ⬅️ nuevo
+      genero.addEventListener('change', updateSubmit);
 
       password.addEventListener('input', () => {
         touchedPassword = true;
@@ -477,7 +543,12 @@
 
       form.addEventListener('submit', (e)=>{
         formSubmitted = true;
-        if(!(validateNombre() && validateApellido() && validateGrado() && validateEdad() && validateGenero() && validatePassword() && validateConfirm())){
+        const baseOK = validateNombre() && validateApellido() && validateGrado() && validateEdad() && validateGenero();
+        const passOK = (form.dataset.mode === 'crear')
+          ? (validatePassword() && validateConfirm())
+          : (changePwSwitch.checked ? (validatePassword() && validateConfirm()) : true);
+
+        if(!(baseOK && passOK)){
           e.preventDefault();
         }
       });

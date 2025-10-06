@@ -12,7 +12,7 @@ from flask import Flask, render_template, request, redirect, Response, jsonify
 from io import BytesIO
 
 #==================================================
-#==========INTEGRACION MACHINE LEARNING
+#==========INTEtGRACION MACHINE LEARNING
 #Manipulación de datos 
 import pandas as pd
 import os
@@ -325,54 +325,91 @@ def perfil():
 
         cn = get_db(); cur = cn.cursor()
         try:
-            cur.execute("SELECT nombre, apellido FROM usuario WHERE id_usuario=%s", (uid,))
+            # ⬇️ trae también grado, edad y genero
+            cur.execute(
+                "SELECT nombre, apellido, grado, edad, genero FROM usuario WHERE id_usuario=%s",
+                (uid,)
+            )
             row = cur.fetchone()
         finally:
             cur.close(); cn.close()
 
         nombre   = row[0] if row else ''
         apellido = row[1] if row and len(row) > 1 else ''
+        grado    = row[2] if row and len(row) > 2 else ''
+        edad     = row[3] if row and len(row) > 3 else ''
+        genero   = row[4] if row and len(row) > 4 else ''
 
-        # 👉 Redirige al mismo formulario pero en modo edición
+        # 👉 Redirige al mismo formulario pero en modo edición (pasa los nuevos campos)
         return redirect(
             f"/form_registro?mode=editar&uid={uid}"
-            f"&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}"
+            f"&nombre={quote_plus(str(nombre))}"
+            f"&apellido={quote_plus(str(apellido))}"
+            f"&grado={quote_plus(str(grado))}"
+            f"&edad={quote_plus(str(edad))}"
+            f"&genero={quote_plus(str(genero))}"
         )
 
-    # POST -> guardar cambios (igual que ya lo tienes)
+    # POST -> guardar cambios
     uid = request.form.get('uid', type=int)
     if not uid:
         return redirect('/form_login')
 
     nombre    = (request.form.get('nombre') or '').strip()
     apellido  = (request.form.get('apellido') or '').strip()
+    grado     = (request.form.get('grado') or '').strip()
+    edad_str  = (request.form.get('edad') or '').strip()
+    genero    = (request.form.get('genero') or '').strip().lower()  # DB espera 'femenino'/'masculino'
     password  = (request.form.get('password') or '').strip()
     password2 = (request.form.get('confirm_password') or request.form.get('password2') or '').strip()
 
+    # Si quieres, puedes validar edad a entero (la columna es INT NOT NULL)
+    try:
+        edad = int(edad_str) if edad_str != '' else None
+    except ValueError:
+        edad = None
+
     if not nombre or not apellido:
-        return redirect(f"/form_registro?mode=editar&uid={uid}&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}&error=Nombre%20y%20apellido%20son%20obligatorios")
+        return redirect(
+            f"/form_registro?mode=editar&uid={uid}"
+            f"&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}"
+            f"&error=Nombre%20y%20apellido%20son%20obligatorios"
+        )
     if (password or password2) and password != password2:
-        return redirect(f"/form_registro?mode=editar&uid={uid}&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}&error=Las%20contrase%C3%B1as%20no%20coinciden")
+        return redirect(
+            f"/form_registro?mode=editar&uid={uid}"
+            f"&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}"
+            f"&error=Las%20contrase%C3%B1as%20no%20coinciden"
+        )
     if password and not (3 <= len(password) <= 6):
-        return redirect(f"/form_registro?mode=editar&uid={uid}&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}&error=La%20contrase%C3%B1a%20debe%20tener%20entre%203%20y%206%20caracteres")
+        return redirect(
+            f"/form_registro?mode=editar&uid={uid}"
+            f"&nombre={quote_plus(nombre)}&apellido={quote_plus(apellido)}"
+            f"&error=La%20contrase%C3%B1a%20debe%20tener%20entre%203%20y%206%20caracteres"
+        )
 
     cn = get_db(); cur = cn.cursor()
     try:
         if password:
             cur.execute(
-                "UPDATE usuario SET nombre=%s, apellido=%s, contraseña=%s WHERE id_usuario=%s",
-                (nombre, apellido, password, uid)
+                "UPDATE usuario "
+                "SET nombre=%s, apellido=%s, grado=%s, edad=%s, genero=%s, contraseña=%s "
+                "WHERE id_usuario=%s",
+                (nombre, apellido, grado, edad, genero, password, uid)
             )
         else:
             cur.execute(
-                "UPDATE usuario SET nombre=%s, apellido=%s WHERE id_usuario=%s",
-                (nombre, apellido, uid)
+                "UPDATE usuario "
+                "SET nombre=%s, apellido=%s, grado=%s, edad=%s, genero=%s "
+                "WHERE id_usuario=%s",
+                (nombre, apellido, grado, edad, genero, uid)
             )
         cn.commit()
     finally:
         cur.close(); cn.close()
 
     return redirect(f"/cuestionario?uid={uid}")
+
 
 # === Login (GET/POST) ===
 # IMPORTANTE: tu login.html debe postear a /login (action="/login")
