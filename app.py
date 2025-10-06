@@ -1,7 +1,7 @@
 from urllib.parse import quote_plus
 
 # PARA QUE GUARDE MI ML A MI BASE DE DATOS MYSQL 
-import json  # <--- nuevo
+import json  # <--- nuyyevo
 MODEL_VERSION = "v1"  # <--- nuevo (versiona tu modelo)
 
 #Framework web para mostrar el formulario y manejar las respuestas.
