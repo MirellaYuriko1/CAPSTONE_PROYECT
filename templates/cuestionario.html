@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cuestionario SCAS-Child</title>
+  <title>Cuestionario BDI-II</title>
    
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -42,10 +42,7 @@
     .progress-bar{background:var(--brand);}
     .step-indicator{color:var(--muted); font-weight:600; font-size:14px; text-align:right;}
 
-    /* Hola mundooo*/
-    /* Hola mundooo*/
-
-    /* --- Helper banner (franja informativa arriba de la pregunta) --- */
+    /* --- Helper banner --- */
     .helper-banner{
       display:flex; align-items:flex-start; gap:10px;
       background:#eaf4ff; border:1px solid #d6e9ff; color:#445b72;
@@ -102,24 +99,11 @@
     }
 
     .age-wrap{
-      display:flex; 
-      align-items:center; 
-      gap:12px; 
-      border:1.5px solid #e5e7eb; 
-      background:#fff;
-      border-radius:14px; 
-      padding:14px 16px; 
-      width:100%;
-      max-width:100%;
-      box-sizing:border-box;
+      display:flex; align-items:center; gap:12px; border:1.5px solid #e5e7eb; background:#fff;
+      border-radius:14px; padding:14px 16px; width:100%; max-width:100%; box-sizing:border-box;
     }
     .age-wrap input{
-      height:46px; 
-      border-radius:10px; 
-      border:1px solid #e5e7eb; 
-      padding:0 14px; 
-      width:140px; 
-      font-weight:600;
+      height:46px; border-radius:10px; border:1px solid #e5e7eb; padding:0 14px; width:140px; font-weight:600;
     }
 
     .navs{display:flex; justify-content:space-between; gap:12px; margin-top:22px}
@@ -134,31 +118,18 @@
     }
 
     /* === Navbar compacto === */
-    .navbar-brand{
-      font-weight:800; letter-spacing:.2px; color:var(--ink);
-      display:flex; align-items:center; gap:.6rem;
-    }
+    .navbar-brand{ font-weight:800; letter-spacing:.2px; color:var(--ink); display:flex; align-items:center; gap:.6rem; }
     .brand-badge{
       width:28px; height:28px; border-radius:10px;
       background: linear-gradient(135deg, var(--brand), var(--brand-dark));
       display:grid; place-items:center; color:#fff; font-weight:700; font-size:.9rem;
       box-shadow: 0 6px 18px rgba(21,101,192,.25);
     }
-    .user-chip{
-      display:flex; align-items:center; gap:.6rem;
-      border:1px solid #e9eef5;
-      border-radius:999px; padding:.35rem .6rem .35rem .35rem;
-      cursor:pointer; background:#fff;
-    }
-    .avatar{
-      width:28px; height:28px; border-radius:50%;
-      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-      color:#fff; font-weight:700; font-size:.85rem; display:grid; place-items:center;
-    }
+    .user-chip{ display:flex; align-items:center; gap:.6rem; border:1px solid #e9eef5; border-radius:999px; padding:.35rem .6rem .35rem .35rem; cursor:pointer; background:#fff; }
+    .avatar{ width:28px; height:28px; border-radius:50%; background: linear-gradient(135deg, var(--brand), var(--brand-dark)); color:#fff; font-weight:700; font-size:.85rem; display:grid; place-items:center; }
     .user-label{ color:#64748b; font-size:.75rem; line-height:1; }
     .user-name{ color:#0f172a; font-weight:600; line-height:1; }
 
-    /* === User menu (dropdown) === */
     .navbar .ms-auto{ position:relative; }
     .user-menu{
       position:absolute; right:0; top:calc(100% + 10px);
@@ -174,46 +145,26 @@
       width:12px; height:12px; background:#fff; border-left:1px solid #e7eef5; border-top:1px solid #e7eef5;
       transform:rotate(45deg);
     }
-    .um-header{
-      display:flex; gap:10px; align-items:center; padding:6px 8px 10px 8px;
-      border-bottom:1px solid #eef2f7; margin-bottom:8px;
-    }
-    .um-avatar{
-      width:36px; height:36px; border-radius:50%; display:grid; place-items:center;
-      background:linear-gradient(135deg, var(--brand), var(--brand-dark)); color:#fff; font-weight:700;
-    }
+    .um-header{ display:flex; gap:10px; align-items:center; padding:6px 8px 10px 8px; border-bottom:1px solid #eef2f7; margin-bottom:8px; }
+    .um-avatar{ width:36px; height:36px; border-radius:50%; display:grid; place-items:center;
+      background:linear-gradient(135deg, var(--brand), var(--brand-dark)); color:#fff; font-weight:700; }
     .um-name{ font-weight:700; line-height:1.2; }
     .um-sub{ font-size:.85rem; color:#64748b; }
     .um-list{ display:grid; gap:4px; margin:0; padding:0; list-style:none; }
-    .um-item{
-      display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:10px;
-      color:#0f172a; text-decoration:none; font-weight:600;
-    }
+    .um-item{ display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:10px; color:#0f172a; text-decoration:none; font-weight:600; }
     .um-item:hover{ background:#f6f9ff; }
     .um-item svg{ width:18px; height:18px; color:#64748b; }
     .um-danger{ color:#b42318; }
     .um-danger:hover{ background:#fff1f0; }
 
-    /* Navbar blanca tipo "chip" */
     .navbar-glass{
-      background:#ffffff;                /* fondo blanco sólido */
-      border-bottom:1px solid #e9eef5;   /* misma línea suave del chip */
-      box-shadow:0 8px 20px rgba(15,23,42,.06); /* sombrita sutil */
-      position: sticky; top:0; z-index: 1020;   /* asegurar que quede arriba */
+      background:#ffffff; border-bottom:1px solid #e9eef5; box-shadow:0 8px 20px rgba(15,23,42,.06);
+      position: sticky; top:0; z-index: 1020;
     }
-
-    /* (opcional) compacta un poco el alto de la barra */
-    .navbar-glass .container-xxl{
-      padding-top:.5rem;
-      padding-bottom:.5rem;
-    }
-
-    /* Colores de textos/links en la navbar, por si Bootstrap cambia algo */
+    .navbar-glass .container-xxl{ padding-top:.5rem; padding-bottom:.5rem; }
     .navbar-glass .navbar-brand,
     .navbar-glass .navbar-brand:focus,
-    .navbar-glass .navbar-brand:hover{
-      color: var(--ink);
-    }
+    .navbar-glass .navbar-brand:hover{ color: var(--ink); }
   </style>
 </head>
 <body>
@@ -226,8 +177,6 @@
   <!-- NAVBAR -->
   <nav class="navbar navbar-glass sticky-top">
     <div class="container-xxl">
-      
-
       <div class="ms-auto">
         <div id="userChip" class="user-chip" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-controls="userMenu">
           <div class="avatar">{{ (usuario_nombre[0] if usuario_nombre else 'I')|upper }}</div>
@@ -283,10 +232,10 @@
         <div class="progress" role="progressbar" aria-label="Progreso">
           <div id="pbar" class="progress-bar" style="width:0%"></div>
         </div>
-        <div class="step-indicator mt-1" id="stepLabel">Paso 1 de 40</div>
+        <div class="step-indicator mt-1" id="stepLabel">Paso 1</div>
       </div>
 
-      <!-- Helper banner (se muestra solo en pasos de pregunta) -->
+      <!-- Helper banner -->
       <div id="freqBanner" class="helper-banner d-none">
         <svg class="helper-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -296,8 +245,9 @@
         </svg>
         <div>
           <strong>Instrucciones:</strong>
-          Por favor responde indicando con qué frecuencia has experimentado este problema
-          las últimas 4 semanas (<em>incluyendo hoy</em>).
+          Elige <em>una opción</em> por ítem que mejor describa cómo te has sentido en las
+          <strong>últimas 2 semanas (incluyendo hoy)</strong>.
+          En los ítems de sueño (16) y apetito (18) selecciona solo una alternativa.
         </div>
       </div>
 
@@ -314,60 +264,148 @@
         <button type="submit" class="btn btn-submit d-none" id="btnSubmit">Obtener mis resultados</button>
       </div>
 
-      <!-- aquí agregaremos hidden inputs (edad, genero, p1..p38) vía JS -->
+      <!-- Hidden inputs (edad, genero, p1..p38) -->
       <div id="hiddenBox"></div>
     </form>
   </main>
 
   <script>
-    const steps = [
-      { type:'age',   text:'Ingresa tu edad' },
-      { type:'gender',text:'¿Cuál es tu identidad de género?' },
-      {type:'q', name:'p1',  text:'Hay cosas que me preocupan...'},
-      {type:'q', name:'p2',  text:'Me da miedo la oscuridad...'},
-      {type:'q', name:'p3',  text:'Cuando tengo un problema noto una sensación extraña en el estómago...'},
-      {type:'q', name:'p4',  text:'Tengo miedo...'},
-      {type:'q', name:'p5',  text:'Tendría miedo si me quedara solo en casa...'},
-      {type:'q', name:'p6',  text:'Me da miedo hacer un examen...'},
-      {type:'q', name:'p7',  text:'Me da miedo usar aseos públicos...'},
-      {type:'q', name:'p8',  text:'Me preocupo cuando estoy lejos de mis padres...'},
-      {type:'q', name:'p9',  text:'Tengo miedo de hacer el ridículo delante de la gente...'},
-      {type:'q', name:'p10', text:'Me preocupa hacer mal el trabajo de la escuela...'},
-      {type:'q', name:'p11', text:'Me preocupa que algo malo le suceda a alguien de mi familia...'},
-      {type:'q', name:'p12', text:'De repente siento que no puedo respirar sin motivo...'},
-      {type:'q', name:'p13', text:'Necesito comprobar varias veces que he hecho bien las cosas...'},
-      {type:'q', name:'p14', text:'Me da miedo dormir solo...'},
-      {type:'q', name:'p15', text:'Estoy nervioso o tengo miedo por las mañanas antes de ir al colegio...'},
-      {type:'q', name:'p16', text:'Me dan miedo los perros...'},
-      {type:'q', name:'p17', text:'No puedo dejar de pensar en cosas malas o tontas...'},
-      {type:'q', name:'p18', text:'Cuando tengo un problema mi corazón late muy fuerte...'},
-      {type:'q', name:'p19', text:'De repente empiezo a temblar sin motivo...'},
-      {type:'q', name:'p20', text:'Me preocupa que algo malo pueda pasarme...'},
-      {type:'q', name:'p21', text:'Me da miedo ir al médico o al dentista...'},
-      {type:'q', name:'p22', text:'Cuando tengo un problema me siento nervioso...'},
-      {type:'q', name:'p23', text:'Me dan miedo los lugares altos o los ascensores...'},
-      {type:'q', name:'p24', text:'Tengo que pensar en cosas especiales para evitar que pase algo malo...'},
-      {type:'q', name:'p25', text:'Me da miedo viajar en coche, autobús o tren...'},
-      {type:'q', name:'p26', text:'Me preocupa lo que otras personas piensan de mí...'},
-      {type:'q', name:'p27', text:'Me da miedo estar en lugares donde hay mucha gente...'},
-      {type:'q', name:'p28', text:'De repente tengo mucho miedo sin motivo...'},
-      {type:'q', name:'p29', text:'Me dan miedo los insectos o las arañas...'},
-      {type:'q', name:'p30', text:'De repente me siento mareado o creo que me voy a desmayar sin motivo...'},
-      {type:'q', name:'p31', text:'Me da miedo tener que hablar delante de mis compañeros de clase...'},
-      {type:'q', name:'p32', text:'De repente mi corazón late muy rápido sin motivo...'},
-      {type:'q', name:'p33', text:'Me preocupa tener miedo de repente sin que haya nada que temer...'},
-      {type:'q', name:'p34', text:'Me da miedo estar en lugares pequeños y cerrados...'},
-      {type:'q', name:'p35', text:'Tengo que hacer algunas cosas una y otra vez...'},
-      {type:'q', name:'p36', text:'Me molestan pensamientos tontos o malos, o imágenes en mi mente...'},
-      {type:'q', name:'p37', text:'Tengo que hacer algunas cosas de una forma determinada para evitar que pasen cosas malas'},
-      {type:'q', name:'p38', text:'Me daría miedo pasar la noche fuera de casa...'},
-    ];
+    // ==== Ítems BDI-II con opciones textuales ====
+     const steps = [
+    {type:'q', name:'p1',  text:'1. Tristeza', options:[
+      {letter:'A', value:'0', label:'No me siento triste.'},
+      {letter:'B', value:'1', label:'Me siento triste gran parte del tiempo.'},
+      {letter:'C', value:'2', label:'Me siento triste todo el tiempo.'},
+      {letter:'D', value:'3', label:'Me siento tan triste o soy tan infeliz que no puedo soportarlo.'},
+    ]},
+    {type:'q', name:'p2',  text:'2. Pesimismo', options:[
+      {letter:'A', value:'0', label:'No estoy desalentado respecto de mi futuro.'},
+      {letter:'B', value:'1', label:'Me siento más desalentado respecto de mi futuro que antes.'},
+      {letter:'C', value:'2', label:'No espero que las cosas funcionen para mí.'},
+      {letter:'D', value:'3', label:'Siento que no hay esperanza para mi futuro y que solo puede empeorar.'},
+    ]},
+    {type:'q', name:'p3',  text:'3. Fracaso', options:[
+      {letter:'A', value:'0', label:'No me siento como un fracasado.'},
+      {letter:'B', value:'1', label:'He fracasado más de lo que hubiera debido.'},
+      {letter:'C', value:'2', label:'Cuando miro hacia atrás, veo muchos fracasos.'},
+      {letter:'D', value:'3', label:'Siento que como persona soy un fracaso total.'},
+    ]},
+    {type:'q', name:'p4',  text:'4. Pérdida de placer', options:[
+      {letter:'A', value:'0', label:'Obtengo tanto placer como siempre por las cosas de las que disfruto.'},
+      {letter:'B', value:'1', label:'No disfruto tanto de las cosas como solía hacerlo.'},
+      {letter:'C', value:'2', label:'Obtengo muy poco placer de las cosas que solía disfrutar.'},
+      {letter:'D', value:'3', label:'No puedo obtener ningún placer de las cosas de las que solía disfrutar.'},
+    ]},
+    {type:'q', name:'p5',  text:'5. Sentimientos de culpa', options:[
+      {letter:'A', value:'0', label:'No me siento particularmente culpable.'},
+      {letter:'B', value:'1', label:'Me siento culpable respecto de varias cosas que he hecho o que debería haber hecho.'},
+      {letter:'C', value:'2', label:'Me siento bastante culpable la mayor parte del tiempo.'},
+      {letter:'D', value:'3', label:'Me siento culpable todo el tiempo.'},
+    ]},
+    {type:'q', name:'p6',  text:'6. Sentimientos de castigo', options:[
+      {letter:'A', value:'0', label:'No siento que esté siendo castigado.'},
+      {letter:'B', value:'1', label:'Siento que tal vez pueda ser castigado.'},
+      {letter:'C', value:'2', label:'Espero ser castigado.'},
+      {letter:'D', value:'3', label:'Siento que estoy siendo castigado.'},
+    ]},
+    {type:'q', name:'p7',  text:'7. Disconformidad con uno mismo', options:[
+      {letter:'A', value:'0', label:'Siento acerca de mí lo mismo que siempre.'},
+      {letter:'B', value:'1', label:'He perdido la confianza en mí mismo.'},
+      {letter:'C', value:'2', label:'Estoy decepcionado conmigo mismo.'},
+      {letter:'D', value:'3', label:'No me gusto a mí mismo.'},
+    ]},
+    {type:'q', name:'p8',  text:'8. Autocrítica', options:[
+      {letter:'A', value:'0', label:'No me critico ni me culpo más de lo habitual.'},
+      {letter:'B', value:'1', label:'Estoy más crítico conmigo mismo de lo que solía estarlo.'},
+      {letter:'C', value:'2', label:'Me critico a mí mismo por todos mis errores.'},
+      {letter:'D', value:'3', label:'Me culpo a mí mismo por todo lo malo que sucede.'},
+    ]},
+    {type:'q', name:'p9',  text:'9. Pensamientos o deseos suicidas', options:[
+      {letter:'A', value:'0', label:'No tengo ningún pensamiento de matarme.'},
+      {letter:'B', value:'1', label:'He tenido pensamientos de matarme, pero no lo haría.'},
+      {letter:'C', value:'2', label:'Querría matarme.'},
+      {letter:'D', value:'3', label:'Me mataría si tuviera la oportunidad.'},
+    ]},
+    {type:'q', name:'p10', text:'10. Llanto', options:[
+      {letter:'A', value:'0', label:'No lloro más de lo que solía hacerlo.'},
+      {letter:'B', value:'1', label:'Lloro más de lo que solía hacerlo.'},
+      {letter:'C', value:'2', label:'Lloro por cualquier pequeñez.'},
+      {letter:'D', value:'3', label:'Siento ganas de llorar pero no puedo.'},
+    ]},
+    {type:'q', name:'p11', text:'11. Agitación', options:[
+      {letter:'A', value:'0', label:'No estoy más inquieto o tenso que lo habitual.'},
+      {letter:'B', value:'1', label:'Me siento más inquieto o tenso que lo habitual.'},
+      {letter:'C', value:'2', label:'Estoy tan inquieto o agitado que me es difícil quedarme quieto.'},
+      {letter:'D', value:'3', label:'Estoy tan inquieto o agitado que tengo que estar siempre en movimiento o haciendo algo.'},
+    ]},
+    {type:'q', name:'p12', text:'12. Pérdida de interés', options:[
+      {letter:'A', value:'0', label:'No he perdido el interés en otras actividades o personas.'},
+      {letter:'B', value:'1', label:'Estoy menos interesado que antes en otras personas o cosas.'},
+      {letter:'C', value:'2', label:'He perdido casi todo el interés en otras personas o cosas.'},
+      {letter:'D', value:'3', label:'Me es difícil interesarme por algo.'},
+    ]},
+    {type:'q', name:'p13', text:'13. Indecisión', options:[
+      {letter:'A', value:'0', label:'Tomo mis decisiones tan bien como siempre.'},
+      {letter:'B', value:'1', label:'Me resulta más difícil que de costumbre tomar decisiones.'},
+      {letter:'C', value:'2', label:'Encuentro mucha más dificultad que antes para tomar decisiones.'},
+      {letter:'D', value:'3', label:'Tengo problemas para tomar cualquier decisión.'},
+    ]},
+    {type:'q', name:'p14', text:'14. Desvalorización', options:[
+      {letter:'A', value:'0', label:'No siento que yo no sea valioso.'},
+      {letter:'B', value:'1', label:'No me considero tan valioso y útil como antes.'},
+      {letter:'C', value:'2', label:'Me siento menos valioso cuando me comparo con otros.'},
+      {letter:'D', value:'3', label:'Siento que no valgo nada.'},
+    ]},
+    {type:'q', name:'p15', text:'15. Pérdida de energía', options:[
+      {letter:'A', value:'0', label:'Tengo tanta energía como siempre.'},
+      {letter:'B', value:'1', label:'Tengo menos energía que la que solía tener.'},
+      {letter:'C', value:'2', label:'No tengo suficiente energía para hacer demasiado.'},
+      {letter:'D', value:'3', label:'No tengo energía suficiente para hacer nada.'},
+    ]},
+    {type:'q', name:'p16', text:'16. Cambios en los hábitos de sueño', options:[
+      {letter:'A', value:'0', label:'No he experimentado ningún cambio en mis hábitos de sueño.'},
+      {letter:'B', value:'1', label:'Duermo un poco más que lo habitual / Duermo un poco menos que lo habitual.'},
+      {letter:'C', value:'2', label:'Duermo mucho más que lo habitual / Duermo mucho menos que lo habitual.'},
+      {letter:'D', value:'3', label:'Duermo la mayor parte del día / Me despierto 1–2 horas más temprano y no puedo volver a dormirme.'},
+    ]},
+    {type:'q', name:'p17', text:'17. Irritabilidad', options:[
+      {letter:'A', value:'0', label:'No estoy más irritable que lo habitual.'},
+      {letter:'B', value:'1', label:'Estoy más irritable que lo habitual.'},
+      {letter:'C', value:'2', label:'Estoy mucho más irritable que lo habitual.'},
+      {letter:'D', value:'3', label:'Estoy irritable todo el tiempo.'},
+    ]},
+    {type:'q', name:'p18', text:'18. Cambios en el apetito', options:[
+      {letter:'A', value:'0', label:'No he experimentado ningún cambio en mi apetito.'},
+      {letter:'B', value:'1', label:'Mi apetito es un poco menor / Mi apetito es un poco mayor que lo habitual.'},
+      {letter:'C', value:'2', label:'Mi apetito es mucho menor / Mi apetito es mucho mayor que lo habitual.'},
+      {letter:'D', value:'3', label:'No tengo apetito en absoluto / Quiero comer todo el día.'},
+    ]},
+    {type:'q', name:'p19', text:'19. Dificultad de concentración', options:[
+      {letter:'A', value:'0', label:'Puedo concentrarme tan bien como siempre.'},
+      {letter:'B', value:'1', label:'No puedo concentrarme tan bien como habitualmente.'},
+      {letter:'C', value:'2', label:'Me es difícil mantener la mente en algo por mucho tiempo.'},
+      {letter:'D', value:'3', label:'Encuentro que no puedo concentrarme en nada.'},
+    ]},
+    {type:'q', name:'p20', text:'20. Cansancio o fatiga', options:[
+      {letter:'A', value:'0', label:'No estoy más cansado o fatigado que lo habitual.'},
+      {letter:'B', value:'1', label:'Me fatigo o me canso más fácilmente que lo habitual.'},
+      {letter:'C', value:'2', label:'Estoy demasiado fatigado para hacer muchas de las cosas que solía hacer.'},
+      {letter:'D', value:'3', label:'Estoy demasiado fatigado para hacer la mayoría de las cosas que solía hacer.'},
+    ]},
+    {type:'q', name:'p21', text:'21. Pérdida de interés en el sexo', options:[
+      {letter:'A', value:'0', label:'No he notado ningún cambio reciente en mi interés por el sexo.'},
+      {letter:'B', value:'1', label:'Estoy menos interesado en el sexo que antes.'},
+      {letter:'C', value:'2', label:'Estoy mucho menos interesado en el sexo.'},
+      {letter:'D', value:'3', label:'He perdido completamente el interés en el sexo.'},
+    ]},
+  ];
 
+    // Fallback (no se usa porque cada ítem trae sus opciones)
     const optionScale = [
-      {letter:'A', label:'Nunca', value:'0'},
-      {letter:'B', label:'A veces', value:'1'},
-      {letter:'C', label:'Muchas veces', value:'2'},
-      {letter:'D', label:'Siempre', value:'3'},
+      {letter:'A', label:'0', value:'0'},
+      {letter:'B', label:'1', value:'1'},
+      {letter:'C', label:'2', value:'2'},
+      {letter:'D', label:'3', value:'3'},
     ];
 
     const totalSteps = steps.length;
@@ -383,7 +421,7 @@
     const btnNext = document.getElementById('btnNext');
     const btnSubmit = document.getElementById('btnSubmit');
 
-    // === crear inputs ocultos para edad, genero y p1..p38 ===
+    // === crear inputs ocultos para edad, genero y p1..p38 (compatibilidad backend) ===
     (function makeHidden(){
       const hiddenBox = document.getElementById('hiddenBox');
       hiddenBox.innerHTML =
@@ -410,7 +448,7 @@
       if(s.type === 'age'){
         stepContainer.innerHTML = `
           <div class="age-wrap">
-            <input id="edad" name="edad_tmp" type="number" min="12" max="15" placeholder="Ej. 12" required>
+            <input id="edad" name="edad_tmp" type="number" min="12" max="100" placeholder="Ej. 16" required>
           </div>
         `;
       } else if(s.type === 'gender'){
@@ -429,12 +467,20 @@
               <span class="ctext">Masculino</span>
               <span class="mark"></span>
             </label>
+
+            <input id="gen_O" type="radio" name="genero_tmp" value="Otro/Prefiero no decir" required>
+            <label for="gen_O" class="choice">
+              <span class="letter">C</span>
+              <span class="ctext">Otro / Prefiero no decir</span>
+              <span class="mark"></span>
+            </label>
           </div>
         `;
       } else {
         const group = s.name;
+        const opts = s.options && s.options.length ? s.options : optionScale;
         let html = `<div class="choices">`;
-        optionScale.forEach((op,i)=>{
+        opts.forEach((op,i)=>{
           const id = `${group}_${i}`;
           html += `
             <input id="${id}" type="radio" name="${group}_tmp" value="${op.value}" required>
@@ -462,13 +508,13 @@
       } else if(s.type === 'gender'){
         const saved = document.getElementById('genero_hidden').value;
         if (saved){
-          const r = form.querySelector(`input[name="genero_tmp"][value="${saved}"]`);
+          const r = form.querySelector(`input[name="genero_tmp"][value="${CSS.escape(saved)}"]`);
           if (r) r.checked = true;
         }
       } else if(s.type === 'q'){
         const saved = document.getElementById(`${s.name}_hidden`).value;
         if (saved !== ''){
-          const r = form.querySelector(`input[name="${s.name}_tmp"][value="${saved}"]`);
+          const r = form.querySelector(`input[name="${s.name}_tmp"][value="${CSS.escape(saved)}"]`);
           if (r) r.checked = true;
         }
       }
@@ -494,7 +540,7 @@
         const edad = document.getElementById('edad');
         if(!edad) return false;
         const v = Number(edad.value);
-        return Number.isFinite(v) && v >= 12 && v <= 15;
+        return Number.isFinite(v) && v >= 12 && v <= 100;
       }
       if(s.type === 'gender'){
         return !!form.querySelector('input[name="genero_tmp"]:checked');
@@ -532,7 +578,7 @@
     document.getElementById('btnNext').addEventListener('click', goNext);
     document.getElementById('btnPrev').addEventListener('click', goPrev);
 
-    // Auto-avanzar al elegir opción (género y preguntas)
+    // Auto-avanzar al elegir opción
     stepContainer.addEventListener('change', (e) => {
       const el = e.target;
       if (el.matches('input[type="radio"]')) {
@@ -585,95 +631,85 @@
       if (a) closeUserMenu();
     });
 
-    // arranque PARA INICIAR
+    // arranque
     render();
 
     // === MEMORIA LOCAL: recuerda paso y respuestas (por usuario) ===
-(function(){
-  const uid = document.querySelector('input[name="id_usuario"]')?.value || 'anon';
-  const KEY = `scas:${uid}:progreso`;
+    (function(){
+      const uid = document.querySelector('input[name="id_usuario"]')?.value || 'anon';
+      const KEY = `bdi2:${uid}:progreso`; // namespace nuevo para no chocar con SCAS previos
 
-  function persist(){
-    // Asegura que el paso actual esté volcado a los hidden antes de guardar
-    saveCurrentStep();
+      function persist(){
+        // Asegura que el paso actual esté volcado a los hidden antes de guardar
+        saveCurrentStep();
 
-    const data = {
-      step,
-      edad: document.getElementById('edad_hidden')?.value ?? '',
-      genero: document.getElementById('genero_hidden')?.value ?? '',
-      answers: {}
-    };
-    for (let i = 1; i <= 38; i++){
-      const v = document.getElementById(`p${i}_hidden`)?.value;
-      data.answers[`p${i}`] = (v ?? '');
-    }
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {}
-  }
-
-  function restore(){
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return;
-    try {
-      const st = JSON.parse(raw);
-
-      // Rellenar hidden con lo guardado
-      if (st.edad != null)   document.getElementById('edad_hidden').value   = String(st.edad);
-      if (st.genero != null) document.getElementById('genero_hidden').value = String(st.genero);
-      if (st.answers){
-        for (let i=1; i<=38; i++){
-          const val = st.answers[`p${i}`];
-          if (val != null) document.getElementById(`p${i}_hidden`).value = String(val);
+        const data = {
+          step,
+          edad: document.getElementById('edad_hidden')?.value ?? '',
+          genero: document.getElementById('genero_hidden')?.value ?? '',
+          answers: {}
+        };
+        // guardamos p1..p21 (Beck); p22..p38 quedan vacíos
+        for (let i = 1; i <= 21; i++){
+          const v = document.getElementById(`p${i}_hidden`)?.value;
+          data.answers[`p${i}`] = (v ?? '');
         }
+        try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {}
       }
 
-      // Volver al paso donde se quedó
-      if (Number.isInteger(st.step) && st.step >= 0 && st.step < steps.length){
-        step = st.step;
+      function restore(){
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return;
+        try {
+          const st = JSON.parse(raw);
+
+          // Rellenar hidden con lo guardado
+          if (st.edad != null)   document.getElementById('edad_hidden').value   = String(st.edad);
+          if (st.genero != null) document.getElementById('genero_hidden').value = String(st.genero);
+          if (st.answers){
+            for (let i=1; i<=21; i++){
+              const val = st.answers[`p${i}`];
+              if (val != null) document.getElementById(`p${i}_hidden`).value = String(val);
+            }
+          }
+
+          // Volver al paso donde se quedó
+          if (Number.isInteger(st.step) && st.step >= 0 && st.step < steps.length){
+            step = st.step;
+          }
+          render();
+        } catch {}
       }
-      // Re-render para que se marque lo restaurado en el paso visible
-      render();
-    } catch {}
-  }
 
-  function clearMem(){ localStorage.removeItem(KEY); }
+      function clearMem(){ localStorage.removeItem(KEY); }
 
-  // Restaurar al entrar
-  restore();
+      // Restaurar al entrar
+      restore();
 
-  // Guardar cuando cambian edad/género/preguntas
-  document.addEventListener('change', (e)=>{
-    const nm = e.target.name || '';
-    if (nm === 'edad_tmp' || nm === 'genero_tmp' || /_tmp$/.test(nm)) {
-      persist();
-    }
-  });
+      // Guardar cuando cambian edad/género/preguntas
+      document.addEventListener('change', (e)=>{
+        const nm = e.target.name || '';
+        if (nm === 'edad_tmp' || nm === 'genero_tmp' || /_tmp$/.test(nm)) {
+          persist();
+        }
+      });
 
-  // Guardar también al navegar entre pasos
-  document.getElementById('btnNext')?.addEventListener('click', persist);
-  document.getElementById('btnPrev')?.addEventListener('click', persist);
+      // Guardar también al navegar entre pasos
+      document.getElementById('btnNext')?.addEventListener('click', persist);
+      document.getElementById('btnPrev')?.addEventListener('click', persist);
 
-  // Guardar si el usuario se va (por si abre Editar perfil)
-  window.addEventListener('beforeunload', persist);
+      // Guardar si el usuario se va
+      window.addEventListener('beforeunload', persist);
 
-  // Guardar explícitamente al pulsar "Editar perfil"
-  document.querySelector('a[href^="/perfil"]')?.addEventListener('click', ()=>{
-    persist();
-  });
+      // Guardar explícitamente al pulsar "Editar perfil"
+      document.querySelector('a[href^="/perfil"]')?.addEventListener('click', ()=>{ persist(); });
 
-  // Limpiar memoria al enviar el formulario definitivo
-  form.addEventListener('submit', clearMem);
+      // Limpiar memoria al enviar el formulario definitivo
+      form.addEventListener('submit', clearMem);
 
-  // (Opcional) utilidades en consola:
-  window._scasProgress = { persist, restore, clearMem };
-})();
-
+      // utilidades en consola
+      window._bdi2Progress = { persist, restore, clearMem };
+    })();
   </script>
 </body>
 </html>
-
-
-
-/*------------*/
-/*------------*/
-/*------------*/
-/*------------*/
