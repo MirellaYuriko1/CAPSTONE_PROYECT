@@ -12,7 +12,7 @@ from flask import Flask, render_template, request, redirect, Response, jsonify
 from io import BytesIO
 
 #==================================================
-#==========INTEtGRACION MACHINE LEARNING
+#==========INTEGRACION MACHINE LEARNING
 #Manipulación de datos 
 import pandas as pd
 import os
@@ -75,12 +75,8 @@ def _conf_label_from_pct(top_pct: float) -> str:  #PARA LA CONFIANZA PARA QUE SE
     return "Baja"
 #========================================================
 
-# importa tu conexión BD y reglas desde el paquete scas
+# importa tu conexión BD 
 from Scas.configuracion import get_db
-from Scas.regla_puntuaciones import (
-    DIMENSIONES, DIM_NOMBRES, PRETTY,
-    interpreta_normas,
-)
 
 #----------------------------------------------
 #Inicializar la app Flask
@@ -212,7 +208,7 @@ def resultado():
     # Solo columnas que existen: p1..p9
     cur.execute("""
         SELECT 
-               c.id_cuestionario, c.edad, c.genero, c.created_at,
+               c.id_cuestionario, c.created_at,
                c.p1, c.p2, c.p3, c.p4, c.p5, c.p6, c.p7, c.p8, c.p9,
                r.puntaje_total, r.nivel,
                u.nombre
@@ -437,11 +433,6 @@ def guardar():
             return "Falta id_usuario. Vuelve a iniciar sesión.", 400
         id_usuario = int(id_usuario_raw)
 
-        # 2) Edad y género OPCIONALES (pueden venir vacíos)
-        edad_raw = (request.form.get("edad") or "").strip()
-        edad = int(edad_raw) if edad_raw.isdigit() else None
-        genero = (request.form.get("genero") or None)
-
         # 3) Respuestas PHQ-A p1..p9 (0..3)
         respuestas = {f"p{i}": int(request.form.get(f"p{i}", 0)) for i in range(1, 10)}
         puntaje_total = sum(respuestas.values())
@@ -470,12 +461,11 @@ def guardar():
             id_cuest = row[0]
             sql = """
                 UPDATE cuestionario
-                   SET edad=%s, genero=%s,
+                   SET 
                        p1=%s,p2=%s,p3=%s,p4=%s,p5=%s,p6=%s,p7=%s,p8=%s,p9=%s
                  WHERE id_cuestionario=%s
             """
             valores = [
-                edad, genero,
                 respuestas["p1"],respuestas["p2"],respuestas["p3"],
                 respuestas["p4"],respuestas["p5"],respuestas["p6"],
                 respuestas["p7"],respuestas["p8"],respuestas["p9"],
@@ -486,11 +476,11 @@ def guardar():
             # INSERT nuevo
             sql = """
                 INSERT INTO cuestionario
-                    (id_usuario, edad, genero, p1,p2,p3,p4,p5,p6,p7,p8,p9)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    (id_usuario,p1,p2,p3,p4,p5,p6,p7,p8,p9)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
             valores = [
-                id_usuario, edad, genero,
+                id_usuario, 
                 respuestas["p1"],respuestas["p2"],respuestas["p3"],
                 respuestas["p4"],respuestas["p5"],respuestas["p6"],
                 respuestas["p7"],respuestas["p8"],respuestas["p9"]
@@ -530,5 +520,6 @@ def guardar():
 
 # === 9) Run ===
 if __name__ == "__main__":
-    # Solo local
-    app.run(host="127.0.0.1", port=5000, debug=True)  # pon debug=False si no quieres recarga/tracebacks
+    port = int(os.getenv("PORT", "5000"))   # Render define PORT; 5000 de fallback local
+    debug = os.getenv("FLASK_DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
