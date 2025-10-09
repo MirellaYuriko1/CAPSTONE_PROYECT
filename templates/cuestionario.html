@@ -236,19 +236,18 @@
       </div>
 
       <!-- Helper banner -->
-        <div id="freqBanner" class="helper-banner d-none">
-           <svg class="helper-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      <div id="freqBanner" class="helper-banner">
+        <svg class="helper-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-             <circle cx="12" cy="16" r="1.2"></circle>
-          </svg>
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <circle cx="12" cy="16" r="1.2"></circle>
+        </svg>
         <div>
-    <strong>Instrucciones:</strong>
-    Durante las <strong>últimas dos semanas</strong>, ¿con qué frecuencia te han molestado
-    los siguientes síntomas? Para cada síntoma marca <strong>una sola opción.</strong>
-  </div>
-</div>
+          <strong>Instrucciones:</strong>
+          Este cuestionario consta de <strong>21 grupos de afirmaciones</strong>. Lee cada grupo y elige <strong>una sola opción</strong>: la que mejor describa cómo te has sentido durante las <strong>últimas dos semanas, incluyendo hoy</strong>.
+        </div>
+      </div>
 
       <!-- Encabezado de la pregunta -->
       <div id="qHead" class="qhead">
@@ -263,32 +262,157 @@
         <button type="submit" class="btn btn-submit d-none" id="btnSubmit">Obtener mis resultados</button>
       </div>
 
-      <!-- Hidden inputs (edad, genero, p1..p38) -->
+      <!-- Hidden inputs (edad, genero, p1..p21) -->
       <div id="hiddenBox"></div>
     </form>
   </main>
 
   <script>
-    // ==== Ítems PHQ-A con opciones textuales ====
-     const steps = [
-    {type:'q', name:'p1', text:'¿Te sientes desanimado, deprimido, irritado o sin esperanza?'},
-    {type:'q', name:'p2', text:'¿Tienes poco interés o encuentras poco placer en hacer las cosas?'},
-    {type:'q', name:'p3', text:'¿Tienes problemas para dormir, mantenerte dormido o duermes demasiado?'},
-    {type:'q', name:'p4', text:'¿Tienes falta de apetito, pérdida de peso o comes en exceso?'},
-    {type:'q', name:'p5', text:'¿Te sientes cansado o con poca energía?'},
-    {type:'q', name:'p6', text:'¿Sientes falta de amor propio, que eres un fracaso, o que te has decepcionado a ti mismo o a tu familia?'},
-    {type:'q', name:'p7', text:'¿Tienes dificultad para concentrarte en las tareas escolares, leer o ver la televisión?'},
-    {type:'q', name:'p8', text:'¿Te mueves o hablas tan lentamente que la gente a tu alrededor lo nota? O, por el contrario, ¿estás tan agitado o inquieto que te mueves mucho más de lo acostumbrado?'},
-    {type:'q', name:'p9', text:'¿Tienes pensamientos de que sería mejor estar muerto o de que quieres hacerte daño?'}
-  ];
+    // ==== Ítems BDI-II (21) SIN números visibles en opciones ====
+    const steps = [
+      {type:'q', name:'p1',  text:'1. Tristeza', options:[
+        {letter:'A', label:'No me siento triste.', value:'0'},
+        {letter:'B', label:'Me siento triste gran parte del tiempo.', value:'1'},
+        {letter:'C', label:'Me siento triste todo el tiempo.', value:'2'},
+        {letter:'D', label:'Me siento tan triste o soy tan infeliz que no puedo soportarlo.', value:'3'},
+      ]},
+      {type:'q', name:'p2',  text:'2. Pesimismo', options:[
+        {letter:'A', label:'No estoy desalentado respecto de mi futuro.', value:'0'},
+        {letter:'B', label:'Me siento más desalentado respecto de mi futuro que antes.', value:'1'},
+        {letter:'C', label:'No espero que las cosas funcionen para mí.', value:'2'},
+        {letter:'D', label:'Siento que no hay esperanza para mi futuro y que solo puede empeorar.', value:'3'},
+      ]},
+      {type:'q', name:'p3',  text:'3. Fracaso', options:[
+        {letter:'A', label:'No me siento como un fracasado.', value:'0'},
+        {letter:'B', label:'He fracasado más de lo que debiera.', value:'1'},
+        {letter:'C', label:'Cuando miro hacia atrás, veo muchos fracasos.', value:'2'},
+        {letter:'D', label:'Siento que como persona soy un fracaso total.', value:'3'},
+      ]},
+      {type:'q', name:'p4',  text:'4. Pérdida de placer', options:[
+        {letter:'A', label:'Obtengo tanto placer como siempre por las cosas que disfruto.', value:'0'},
+        {letter:'B', label:'No disfruto tanto de las cosas como solía hacerlo.', value:'1'},
+        {letter:'C', label:'Obtengo muy poco placer de las cosas que solía disfrutar.', value:'2'},
+        {letter:'D', label:'No puedo obtener ningún placer de las cosas que solía disfrutar.', value:'3'},
+      ]},
+      {type:'q', name:'p5',  text:'5. Sentimientos de culpa', options:[
+        {letter:'A', label:'No me siento particularmente culpable.', value:'0'},
+        {letter:'B', label:'Me siento culpable respecto de varias cosas que he hecho o que debería haber hecho.', value:'1'},
+        {letter:'C', label:'Me siento bastante culpable la mayor parte del tiempo.', value:'2'},
+        {letter:'D', label:'Me siento culpable todo el tiempo.', value:'3'},
+      ]},
+      {type:'q', name:'p6',  text:'6. Sentimientos de castigo', options:[
+        {letter:'A', label:'No siento que esté siendo castigado.', value:'0'},
+        {letter:'B', label:'Siento que tal vez pueda ser castigado.', value:'1'},
+        {letter:'C', label:'Espero ser castigado.', value:'2'},
+        {letter:'D', label:'Siento que estoy siendo castigado.', value:'3'},
+      ]},
+      {type:'q', name:'p7',  text:'7. Disconformidad con uno mismo', options:[
+        {letter:'A', label:'Siento acerca de mí lo mismo que siempre.', value:'0'},
+        {letter:'B', label:'He perdido la confianza en mí mismo.', value:'1'},
+        {letter:'C', label:'Estoy decepcionado conmigo mismo.', value:'2'},
+        {letter:'D', label:'No me gusto a mí mismo.', value:'3'},
+      ]},
+      {type:'q', name:'p8',  text:'8. Autocrítica', options:[
+        {letter:'A', label:'No me critico ni me culpo más de lo habitual.', value:'0'},
+        {letter:'B', label:'Estoy más crítico conmigo mismo de lo que solía estarlo.', value:'1'},
+        {letter:'C', label:'Me critico a mí mismo por todos mis errores.', value:'2'},
+        {letter:'D', label:'Me culpo a mí mismo por todo lo malo que sucede.', value:'3'},
+      ]},
+      {type:'q', name:'p9',  text:'9. Pensamientos o deseos suicidas', options:[
+        {letter:'A', label:'No tengo ningún pensamiento de matarme.', value:'0'},
+        {letter:'B', label:'He tenido pensamientos de matarme, pero no lo haría.', value:'1'},
+        {letter:'C', label:'Querría matarme.', value:'2'},
+        {letter:'D', label:'Me mataría si tuviera la oportunidad.', value:'3'},
+      ]},
+      {type:'q', name:'p10', text:'10. Llanto', options:[
+        {letter:'A', label:'No lloro más de lo que solía hacerlo.', value:'0'},
+        {letter:'B', label:'Lloro más de lo que solía hacerlo.', value:'1'},
+        {letter:'C', label:'Lloro por cualquier pequeñez.', value:'2'},
+        {letter:'D', label:'Siento ganas de llorar pero no puedo.', value:'3'},
+      ]},
+      {type:'q', name:'p11', text:'11. Agitación', options:[
+        {letter:'A', label:'No estoy más inquieto o tenso que lo habitual.', value:'0'},
+        {letter:'B', label:'Me siento más inquieto o tenso que lo habitual.', value:'1'},
+        {letter:'C', label:'Estoy tan inquieto o agitado que me es difícil quedarme quieto.', value:'2'},
+        {letter:'D', label:'Estoy tan inquieto o agitado que debo estar siempre en movimiento o haciendo algo.', value:'3'},
+      ]},
+      {type:'q', name:'p12', text:'12. Pérdida de interés', options:[
+        {letter:'A', label:'No he perdido el interés en otras actividades o personas.', value:'0'},
+        {letter:'B', label:'Estoy menos interesado que antes en otras personas o cosas.', value:'1'},
+        {letter:'C', label:'He perdido casi todo el interés en otras personas o cosas.', value:'2'},
+        {letter:'D', label:'Me es difícil interesarme por algo.', value:'3'},
+      ]},
+      {type:'q', name:'p13', text:'13. Indecisión', options:[
+        {letter:'A', label:'Tomo mis propias decisiones tan bien como siempre.', value:'0'},
+        {letter:'B', label:'Me resulta más difícil que de costumbre tomar decisiones.', value:'1'},
+        {letter:'C', label:'Encuentro mucha más dificultad que antes para tomar decisiones.', value:'2'},
+        {letter:'D', label:'Tengo problemas para tomar cualquier decisión.', value:'3'},
+      ]},
+      {type:'q', name:'p14', text:'14. Desvalorización', options:[
+        {letter:'A', label:'No siento que yo no sea valioso.', value:'0'},
+        {letter:'B', label:'No me considero tan valioso y útil como solía considerarme.', value:'1'},
+        {letter:'C', label:'Me siento menos valioso cuando me comparo con otros.', value:'2'},
+        {letter:'D', label:'Siento que no valgo nada.', value:'3'},
+      ]},
+      {type:'q', name:'p15', text:'15. Pérdida de energía', options:[
+        {letter:'A', label:'Tengo tanta energía como siempre.', value:'0'},
+        {letter:'B', label:'Tengo menos energía que la que solía tener.', value:'1'},
+        {letter:'C', label:'No tengo suficiente energía para hacer demasiado.', value:'2'},
+        {letter:'D', label:'No tengo energía suficiente para hacer nada.', value:'3'},
+      ]},
+      // Sueño: variantes a/b mapeadas al mismo valor
+      {type:'q', name:'p16', text:'16. Cambios en los hábitos de sueño', options:[
+        {letter:'A', label:'No he experimentado ningún cambio en mis hábitos de sueño.', value:'0'},
+        {letter:'B', label:'Duermo un poco más que lo habitual.', value:'1'},
+        {letter:'C', label:'Duermo un poco menos que lo habitual.', value:'1'},
+        {letter:'D', label:'Duermo mucho más que lo habitual.', value:'2'},
+        {letter:'E', label:'Duermo mucho menos que lo habitual.', value:'2'},
+        {letter:'F', label:'Duermo la mayor parte del día.', value:'3'},
+        {letter:'G', label:'Me despierto 1–2 horas más temprano y no puedo volver a dormirme.', value:'3'},
+      ]},
+      {type:'q', name:'p17', text:'17. Irritabilidad', options:[
+        {letter:'A', label:'No estoy más irritable que lo habitual.', value:'0'},
+        {letter:'B', label:'Estoy más irritable que lo habitual.', value:'1'},
+        {letter:'C', label:'Estoy mucho más irritable que lo habitual.', value:'2'},
+        {letter:'D', label:'Estoy irritable todo el tiempo.', value:'3'},
+      ]},
+      // Apetito: variantes a/b mapeadas al mismo valor
+      {type:'q', name:'p18', text:'18. Cambios en el apetito', options:[
+        {letter:'A', label:'No he experimentado ningún cambio en mi apetito.', value:'0'},
+        {letter:'B', label:'Mi apetito es un poco menor que lo habitual.', value:'1'},
+        {letter:'C', label:'Mi apetito es un poco mayor que lo habitual.', value:'1'},
+        {letter:'D', label:'Mi apetito es mucho menor que antes.', value:'2'},
+        {letter:'E', label:'Mi apetito es mucho mayor que lo habitual.', value:'2'},
+        {letter:'F', label:'No tengo apetito en absoluto.', value:'3'},
+        {letter:'G', label:'Quiero comer todo el día.', value:'3'},
+      ]},
+      {type:'q', name:'p19', text:'19. Dificultad de concentración', options:[
+        {letter:'A', label:'Puedo concentrarme tan bien como siempre.', value:'0'},
+        {letter:'B', label:'No puedo concentrarme tan bien como habitualmente.', value:'1'},
+        {letter:'C', label:'Me es difícil mantener la mente en algo por mucho tiempo.', value:'2'},
+        {letter:'D', label:'Encuentro que no puedo concentrarme en nada.', value:'3'},
+      ]},
+      {type:'q', name:'p20', text:'20. Cansancio o fatiga', options:[
+        {letter:'A', label:'No estoy más cansado o fatigado que lo habitual.', value:'0'},
+        {letter:'B', label:'Me fatigo o me canso más fácilmente que lo habitual.', value:'1'},
+        {letter:'C', label:'Estoy demasiado fatigado o cansado para hacer muchas de las cosas que solía hacer.', value:'2'},
+        {letter:'D', label:'Estoy demasiado fatigado o cansado para hacer la mayoría de las cosas que solía.', value:'3'},
+      ]},
+      {type:'q', name:'p21', text:'21. Pérdida de interés en el sexo', options:[
+        {letter:'A', label:'No he notado ningún cambio reciente en mi interés por el sexo.', value:'0'},
+        {letter:'B', label:'Estoy menos interesado en el sexo de lo que solía estarlo.', value:'1'},
+        {letter:'C', label:'Estoy mucho menos interesado en el sexo.', value:'2'},
+        {letter:'D', label:'He perdido completamente el interés en el sexo.', value:'3'},
+      ]},
+    ];
 
     // Fallback (no se usa porque cada ítem trae sus opciones)
     const optionScale = [
-    {letter:'A', label:'Nunca',                         value:'0'},
-    {letter:'B', label:'Varios días',                   value:'1'},
-    {letter:'C', label:'Más de la mitad de los días',   value:'2'},
-    {letter:'D', label:'Casi todos los días',           value:'3'},
-  ];
+      {letter:'A', label:'Nunca',                         value:'0'},
+      {letter:'B', label:'Varios días',                   value:'1'},
+      {letter:'C', label:'Más de la mitad de los días',   value:'2'},
+      {letter:'D', label:'Casi todos los días',           value:'3'},
+    ];
 
     const totalSteps = steps.length;
     let step = 0;
@@ -303,13 +427,13 @@
     const btnNext = document.getElementById('btnNext');
     const btnSubmit = document.getElementById('btnSubmit');
 
-    // === crear inputs ocultos para edad, genero y p1..p38 (compatibilidad backend) ===
+    // === crear inputs ocultos para edad, genero y p1..p21 (compatibilidad backend) ===
     (function makeHidden(){
       const hiddenBox = document.getElementById('hiddenBox');
       hiddenBox.innerHTML =
         `<input type="hidden" id="edad_hidden" name="edad">
          <input type="hidden" id="genero_hidden" name="genero">` +
-        Array.from({length:38}, (_,i)=>`<input type="hidden" id="p${i+1}_hidden" name="p${i+1}">`).join('');
+        Array.from({length:21}, (_,i)=>`<input type="hidden" id="p${i+1}_hidden" name="p${i+1}">`).join('');
     })();
 
     function render(){
@@ -519,19 +643,19 @@
     // === MEMORIA LOCAL: recuerda paso y respuestas (por usuario) ===
     (function(){
       const uid = document.querySelector('input[name="id_usuario"]')?.value || 'anon';
-      const KEY = `bdi2:${uid}:progreso`; // namespace nuevo para no chocar con SCAS previos
+      const KEY = `bdi2:${uid}:progreso`; // namespace BDI-II
 
       function persist(){
-        // Asegura que el paso actual esté volcado a los hidden antes de guardar
+        // Vuelca el paso actual a los hidden antes de guardar
         saveCurrentStep();
 
         const data = {
           step,
-          edad: document.getElementById('edad_hidden')?.value ?? '',
+          edad:   document.getElementById('edad_hidden')?.value   ?? '',
           genero: document.getElementById('genero_hidden')?.value ?? '',
           answers: {}
         };
-        // guardamos p1..p21 (Beck); p22..p38 quedan vacíos
+        // Guardamos p1..p21 (BDI-II)
         for (let i = 1; i <= 21; i++){
           const v = document.getElementById(`p${i}_hidden`)?.value;
           data.answers[`p${i}`] = (v ?? '');
@@ -546,7 +670,7 @@
           const st = JSON.parse(raw);
 
           // Rellenar hidden con lo guardado
-          if (st.edad != null)   document.getElementById('edad_hidden').value   = String(st.edad);
+          if (st.edad   != null) document.getElementById('edad_hidden').value   = String(st.edad);
           if (st.genero != null) document.getElementById('genero_hidden').value = String(st.genero);
           if (st.answers){
             for (let i=1; i<=21; i++){
