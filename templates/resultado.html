@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Resultados PHQ-A</title>
+  <title>Resultados BDI-II (Beck)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -54,7 +54,6 @@
     .lvl-min { background:#e8f7ff; color:#075985; border:1px solid #bae6fd; }
     .lvl-lev { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
     .lvl-mod { background:#ffedd5; color:#9a3412; border:1px solid #fdba74; }
-    .lvl-mods{ background:#ffe4e6; color:#9f1239; border:1px solid #fecdd3; }
     .lvl-sev { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
 
     .meter{
@@ -98,8 +97,8 @@
   <main class="hero">
     <section class="hero-card">
 
-      <h1>Resultados PHQ-A</h1>
-      <p class="subtitle">Resumen del cuestionario de 9 ítems (últimas 2 semanas)</p>
+      <h1>Resultados BDI-II (Beck)</h1>
+      <p class="subtitle">Inventario de Depresión de Beck, 21 ítems (últimas 2 semanas)</p>
 
       {% if notfound %}
         <p class="user-summary">No se encontró un cuestionario guardado para este usuario.</p>
@@ -114,25 +113,33 @@
           <strong>{{ nombre }}</strong>, tu resultado global es:
         </p>
 
-        {# Etiqueta visual según nivel_total #}
-        {% set lvl = (nivel_total or '')|lower %}
+        {# Calcular nivel automáticamente con los cortes BDI-II si no viene dado #}
+        {% set _total = total or 0 %}
+        {% set _nivel_auto = (
+            'mínimo' if _total <= 13 else
+            ('leve' if _total <= 19 else
+              ('moderado' if _total <= 28 else 'severo'))
+          )
+        %}
+        {% set nivel_mostrar = (nivel_total or _nivel_auto) | lower %}
+
+        {# Clase visual según nivel #}
         {% set lvl_class = 'lvl-min' %}
-        {% if lvl == 'leve' %}{% set lvl_class = 'lvl-lev' %}
-        {% elif lvl == 'moderado' %}{% set lvl_class = 'lvl-mod' %}
-        {% elif lvl == 'moderadamente grave' %}{% set lvl_class = 'lvl-mods' %}
-        {% elif lvl == 'grave' %}{% set lvl_class = 'lvl-sev' %}
+        {% if nivel_mostrar in ['leve'] %}{% set lvl_class = 'lvl-lev' %}
+        {% elif nivel_mostrar in ['moderado'] %}{% set lvl_class = 'lvl-mod' %}
+        {% elif nivel_mostrar in ['severo','grave'] %}{% set lvl_class = 'lvl-sev' %}
         {% endif %}
 
         <div class="d-flex justify-content-center mb-2">
-          <span class="badge badge-level {{ lvl_class }}">{{ nivel_total or '—' }}</span>
+          <span class="badge badge-level {{ lvl_class }}">{{ nivel_mostrar|title }}</span>
         </div>
 
-        <!-- Barra de total (0-27) -->
-        {% set pct = (total * 100 / 27) | round(0, 'floor') %}
+        <!-- Barra de total (0-63) -->
+        {% set pct = (_total * 100 / 63) | round(0, 'floor') %}
         <div class="scas-item mb-3">
           <div class="score-line mb-2">
             <span class="scas-name">Puntaje total</span>
-            <span class="score-chip">{{ total }} / 27 pts.</span>
+            <span class="score-chip">{{ _total }} / 63 pts.</span>
           </div>
           <div class="meter">
             <div class="meter-bar" data-pct="{{ pct }}"></div>
@@ -145,25 +152,16 @@
             <div class="ml-card" role="group" aria-label="Resultado del modelo de Machine Learning">
               <span class="badge badge-level badge-ml">🤖 Modelo (ML)</span>
 
-              {% set nivel_chip = pred_ml if pred_ml else nivel_total %}
+              {% set nivel_chip = (pred_ml or nivel_mostrar) %}
               {% set nl = (nivel_chip or '')|lower %}
               {% set chip_cls = 'lvl-min' %}
               {% if nl == 'leve' %}{% set chip_cls = 'lvl-lev' %}
               {% elif nl == 'moderado' %}{% set chip_cls = 'lvl-mod' %}
-              {% elif nl == 'moderadamente severo' %}{% set chip_cls = 'lvl-mods' %}
-              {% elif nl == 'severo' %}{% set chip_cls = 'lvl-sev' %}
+              {% elif nl in ['severo','grave'] %}{% set chip_cls = 'lvl-sev' %}
               {% endif %}
-              <span class="badge badge-level {{ chip_cls }}">{{ nivel_chip }}</span>
+              <span class="badge badge-level {{ chip_cls }}">{{ nivel_chip|title }}</span>
 
               {% if conf_ml %}
-              {% set nl = (nivel_chip or '')|lower %}
-              {% set chip_cls = 'lvl-min' %}
-              {% if nl == 'leve' %}{% set chip_cls = 'lvl-lev' %}
-              {% elif nl == 'moderado' %}{% set chip_cls = 'lvl-mod' %}
-              {% elif nl == 'moderadamente grave' %}{% set chip_cls = 'lvl-mods' %}
-              {% elif nl == 'grave' %}{% set chip_cls = 'lvl-sev' %}
-              {% endif %}
-
                 <span class="badge {{ conf_class }}">
                   Confianza: {{ conf_ml }}{% if conf_pct is not none %} ({{ conf_pct|round(0,'floor') }}%){% endif %}
                 </span>
@@ -178,16 +176,14 @@
           <p class="text-center text-muted mt-2" style="font-size:.85rem">Estimado por el modelo (no es un diagnóstico).</p>
         {% endif %}
 
-        <!-- Leyenda de cortes PHQ-A -->
+        <!-- Leyenda de cortes BDI-II -->
         <h3 class="scas-title mt-4">¿Cómo interpretar el resultado?</h3>
         <div class="legend">
-        <div class="row"><span>Mínimo</span><span>0–4</span></div>
-        <div class="row"><span>Leve</span><span>5–9</span></div>
-        <div class="row"><span>Moderado</span><span>10–14</span></div>
-        <div class="row"><span>Moderadamente grave</span><span>15–19</span></div>
-        <div class="row"><span>Grave</span><span>20–27</span></div>
+          <div class="row"><span>Mínimo</span><span>0–13</span></div>
+          <div class="row"><span>Leve</span><span>14–19</span></div>
+          <div class="row"><span>Moderado</span><span>20–28</span></div>
+          <div class="row"><span>Severo</span><span>29–63</span></div>
         </div>
-
 
         <div class="actions">
           <a href="/cuestionario?uid={{ uid }}" class="btn btn-outline-primary">Volver al cuestionario</a>
