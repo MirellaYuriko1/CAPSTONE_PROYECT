@@ -196,10 +196,9 @@ def resultado():
 
     # --- helper para clasificar PHQ-A ---
     def interpreta_phqa(total: int) -> str:
-        if total <= 4:  return "Mínimo"
-        if total <= 9:  return "Leve"
-        if total <= 14: return "Moderado"
-        if total <= 19: return "Moderadamente grave"
+        if total <= 13:  return "Mínimo"
+        if total <= 19:  return "Leve"
+        if total <= 28: return "Moderado"
         return "Grave"
 
     cn = get_db()
@@ -210,6 +209,8 @@ def resultado():
         SELECT 
                c.id_cuestionario, c.created_at,
                c.p1, c.p2, c.p3, c.p4, c.p5, c.p6, c.p7, c.p8, c.p9,
+               c.p10, c.p11, c.p12, c.p13, c.p14, c.p15, c.p16, c.p17, c.p18,
+               c.p19, c.p20, c.p21,
                r.puntaje_total, r.nivel,
                u.nombre
         FROM (
@@ -232,7 +233,7 @@ def resultado():
     total = row.get('puntaje_total')
     nivel = row.get('nivel')
     if total is None:
-        total = sum(int(row.get(f"p{i}", 0) or 0) for i in range(1, 10))
+        total = sum(int(row.get(f"p{i}", 0) or 0) for i in range(1, 22))
         nivel = interpreta_phqa(total)
 
     return render_template(
@@ -434,15 +435,14 @@ def guardar():
         id_usuario = int(id_usuario_raw)
 
         # 3) Respuestas PHQ-A p1..p9 (0..3)
-        respuestas = {f"p{i}": int(request.form.get(f"p{i}", 0)) for i in range(1, 10)}
+        respuestas = {f"p{i}": int(request.form.get(f"p{i}", 0)) for i in range(1, 22)}
         puntaje_total = sum(respuestas.values())
 
         # 4) Nivel PHQ-A
         def interpreta_phqa(total: int) -> str:
-            if total <= 4: return "Mínimo"
-            if total <= 9: return "Leve"
-            if total <= 14: return "Moderado"
-            if total <= 19: return "Moderadamente grave"
+            if total <= 13: return "Mínimo"
+            if total <= 19: return "Leve"
+            if total <= 28: return "Moderado"
             return "Grave"
         nivel_txt = interpreta_phqa(puntaje_total)
 
@@ -462,13 +462,18 @@ def guardar():
             sql = """
                 UPDATE cuestionario
                    SET 
-                       p1=%s,p2=%s,p3=%s,p4=%s,p5=%s,p6=%s,p7=%s,p8=%s,p9=%s
+                       p1=%s,p2=%s,p3=%s,p4=%s,p5=%s,p6=%s,p7=%s,p8=%s,p9=%s,
+                       p10=%s,p11=%s,p12=%s,p13=%s,p14=%s,p15=%s,p16=%s,p17=%s,p18=%s,p19=%s,p20=%s,p21=%s
                  WHERE id_cuestionario=%s
             """
             valores = [
                 respuestas["p1"],respuestas["p2"],respuestas["p3"],
                 respuestas["p4"],respuestas["p5"],respuestas["p6"],
                 respuestas["p7"],respuestas["p8"],respuestas["p9"],
+                respuestas["p10"],respuestas["p11"],respuestas["p12"],
+                respuestas["p13"],respuestas["p14"],respuestas["p15"],
+                respuestas["p16"],respuestas["p17"],respuestas["p18"],
+                respuestas["p19"],respuestas["p20"],respuestas["p21"],
                 id_cuest
             ]
             cur.execute(sql, valores)
@@ -476,14 +481,18 @@ def guardar():
             # INSERT nuevo
             sql = """
                 INSERT INTO cuestionario
-                    (id_usuario,p1,p2,p3,p4,p5,p6,p7,p8,p9)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    (id_usuario,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
             valores = [
                 id_usuario, 
                 respuestas["p1"],respuestas["p2"],respuestas["p3"],
                 respuestas["p4"],respuestas["p5"],respuestas["p6"],
-                respuestas["p7"],respuestas["p8"],respuestas["p9"]
+                respuestas["p7"],respuestas["p8"],respuestas["p9"],
+                respuestas["p10"],respuestas["p11"],respuestas["p12"],
+                respuestas["p13"],respuestas["p14"],respuestas["p15"],
+                respuestas["p16"],respuestas["p17"],respuestas["p18"],
+                respuestas["p19"],respuestas["p20"],respuestas["p21"],
             ]
             cur.execute(sql, valores)
             id_cuest = cur.lastrowid
