@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Resultados BDI-II (Beck)</title>
+  <title>Resultados PHQ-A (PHQ-9)</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -46,44 +46,36 @@
     .subtitle{ text-align:center; color:var(--muted); margin-bottom: 18px; font-size:.95rem; }
 
     .user-summary{
-      text-align:center; font-weight:700; color:#0f172a;
-      font-size: clamp(16px,1.6vw,18px); margin-bottom: 6px;
+      text-align:center; font-weight:700;
+      font-size: clamp(16px,1.6vw,18px);
+      color: var(--ink); margin-bottom: 10px;
     }
 
-    .badge-level{ font-size:.9rem; border-radius:999px; padding:.4rem .7rem; font-weight:700; }
-    .lvl-min { background:#e8f7ff; color:#075985; border:1px solid #bae6fd; }
-    .lvl-lev { background:#fef9c3; color:#854d0e; border:1px solid #fde68a; }
-    .lvl-mod { background:#ffedd5; color:#9a3412; border:1px solid #fdba74; }
-    .lvl-sev { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
-
-    .meter{
-      border:1px solid var(--line); border-radius:16px; background:#eef2f7;
-      height:16px; overflow:hidden;
-    }
-    .meter-bar{
-      height:100%; width:0; background:linear-gradient(90deg,#7ee3ff,#22c3e6);
-      transition: width .6s ease;
-    }
-    .score-line{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-    .score-chip{ font-weight:700; color:#334155; }
-
-    .legend{ display:grid; gap:6px; font-size:.92rem; color:#475569; }
-    .legend .row{ display:flex; justify-content:space-between; border-bottom:1px dashed #e5e7eb; padding:6px 0; }
-    .legend .row span:first-child{ font-weight:600; color:#0f172a; }
-
-    .ml-wrap{ display:flex; justify-content:center; margin-top:8px; }
+    /* Tarjeta ML */
     .ml-card{
       display:inline-flex; align-items:center; gap:8px; justify-content:center;
       border:1px dashed #c7d2fe; background:#f8fafc; border-radius:12px; padding:8px 12px;
     }
     .badge-ml{ background:#eef2ff; color:#3730a3; border:1px solid #c7d2fe; }
-    .hint{ position:relative; display:inline-flex; align-items:center; justify-content:center;
-           width:20px; height:20px; border-radius:50%; border:1px solid #cbd5e1; color:#475569;
-           cursor:help; background:#fff; font-size:.8rem; line-height:1; }
-    .hint .tip{ display:none; position:absolute; top:130%; left:50%; transform:translateX(-50%);
-                min-width: 240px; background:#111827; color:#fff; padding:8px 10px;
-                border-radius:8px; font-size:.75rem; z-index:10; box-shadow:0 10px 30px rgba(0,0,0,.15); }
-    .hint:hover .tip, .hint:focus .tip{ display:block; }
+
+    /* Nivel (badge) */
+    .badge-level{ font-weight:700; }
+    .bg-rose{ background:#fce7f3; color:#9f1239; }
+
+    /* Bloque puntaje */
+    .score-card{
+      border:1px solid var(--line); border-radius:16px; padding:16px; background:#fff;
+      max-width:680px; margin:18px auto 0;
+    }
+    .score-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .score-name{ font-weight:800; }
+    .meter{ width:100%; height:12px; background:#eef2f7; border-radius:999px; overflow:hidden; }
+    .meter-bar{ height:100%; width:0%; background: linear-gradient(90deg, var(--brand), var(--brand-dark)); }
+
+    .legend{
+      max-width:680px; margin:14px auto 0; font-size:.9rem; color:#475569;
+      background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:12px 14px;
+    }
 
     .actions{ margin-top: 18px; display:flex; gap:8px; justify-content:center; }
     .btn-outline-primary{
@@ -97,8 +89,8 @@
   <main class="hero">
     <section class="hero-card">
 
-      <h1>Resultados BDI-II (Beck)</h1>
-      <p class="subtitle">Inventario de Depresión de Beck, 21 ítems (últimas 2 semanas)</p>
+      <h1>Resultados PHQ-A (PHQ-9)</h1>
+      <p class="subtitle">Resumen del cuestionario (0–27 puntos)</p>
 
       {% if notfound %}
         <p class="user-summary">No se encontró un cuestionario guardado para este usuario.</p>
@@ -110,90 +102,92 @@
 
         <!-- Frase principal -->
         <p class="user-summary">
-          <strong>{{ nombre }}</strong>, tu resultado global es:
+          <strong>{{ nombre }}</strong>, tu nivel estimado es:
         </p>
 
-        {# Calcular nivel automáticamente con los cortes BDI-II si no viene dado #}
-        {% set _total = total or 0 %}
-        {% set _nivel_auto = (
-            'mínimo' if _total <= 13 else
-            ('leve' if _total <= 19 else
-              ('moderado' if _total <= 28 else 'severo'))
-          )
-        %}
-        {% set nivel_mostrar = (nivel_total or _nivel_auto) | lower %}
+        <!-- Chip de nivel (usa nivel_total del backend) -->
+        {% set nl = (nivel_total or '')|lower %}
+        <p class="text-center">
+          {% if nl == 'grave' %}
+            <span class="badge badge-level bg-danger">{{ nivel_total }}</span>
+          {% elif nl == 'moderadamente grave' %}
+            <span class="badge badge-level bg-rose">{{ nivel_total }}</span>
+          {% elif nl == 'moderado' %}
+            <span class="badge badge-level bg-warning text-dark">{{ nivel_total }}</span>
+          {% elif nl == 'leve' %}
+            <span class="badge badge-level bg-info text-dark">{{ nivel_total }}</span>
+          {% else %}
+            <span class="badge badge-level bg-success">{{ nivel_total or 'Mínimo' }}</span>
+          {% endif %}
+        </p>
 
-        {# Clase visual según nivel #}
-        {% set lvl_class = 'lvl-min' %}
-        {% if nivel_mostrar in ['leve'] %}{% set lvl_class = 'lvl-lev' %}
-        {% elif nivel_mostrar in ['moderado'] %}{% set lvl_class = 'lvl-mod' %}
-        {% elif nivel_mostrar in ['severo','grave'] %}{% set lvl_class = 'lvl-sev' %}
-        {% endif %}
-
-        <div class="d-flex justify-content-center mb-2">
-          <span class="badge badge-level {{ lvl_class }}">{{ nivel_mostrar|title }}</span>
+        <!-- Puntaje total -->
+        {% set pctTotal = (total * 100 / 27) | round(0, 'floor') %}
+        <div class="score-card" aria-label="Puntaje total PHQ-A">
+          <div class="score-top mb-2">
+            <span class="score-name">Puntaje total</span>
+            <span class="score-val"><strong>{{ total }}</strong> / 27 puntos</span>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <div class="meter-bar" data-pct="{{ pctTotal }}"></div>
+          </div>
+          <div class="text-end mt-1" style="font-size:.85rem; color:#64748b">{{ pctTotal }}%</div>
         </div>
 
-        <!-- Barra de total (0-63) -->
-        {% set pct = (_total * 100 / 63) | round(0, 'floor') %}
-        <div class="scas-item mb-3">
-          <div class="score-line mb-2">
-            <span class="scas-name">Puntaje total</span>
-            <span class="score-chip">{{ _total }} / 63 pts.</span>
-          </div>
-          <div class="meter">
-            <div class="meter-bar" data-pct="{{ pct }}"></div>
-          </div>
+        <!-- Leyenda cortes -->
+        <div class="legend">
+          <strong>Cortes PHQ-A:</strong>
+          0–4 <em>Mínimo</em> · 5–9 <em>Leve</em> · 10–14 <em>Moderado</em> ·
+          15–19 <em>Moderadamente grave</em> · 20–27 <em>Grave</em>.
+          <br>Este resultado no es un diagnóstico.
         </div>
 
-        <!-- Bloque ML opcional -->
+        <!-- (Opcional) Tarjeta ML si envías pred_ml/conf_ml -->
         {% if pred_ml or conf_ml %}
-          <div class="ml-wrap">
+          <div class="text-center mt-3">
             <div class="ml-card" role="group" aria-label="Resultado del modelo de Machine Learning">
               <span class="badge badge-level badge-ml">🤖 Modelo (ML)</span>
 
-              {% set nivel_chip = (pred_ml or nivel_mostrar) %}
-              {% set nl = (nivel_chip or '')|lower %}
-              {% set chip_cls = 'lvl-min' %}
-              {% if nl == 'leve' %}{% set chip_cls = 'lvl-lev' %}
-              {% elif nl == 'moderado' %}{% set chip_cls = 'lvl-mod' %}
-              {% elif nl in ['severo','grave'] %}{% set chip_cls = 'lvl-sev' %}
+              {% set nivel_chip = pred_ml if pred_ml else nivel_total %}
+              {% set nml = (nivel_chip or '')|lower %}
+              {% if nml == 'grave' %}
+                <span class="badge badge-level bg-danger">{{ nivel_chip }}</span>
+              {% elif nml == 'moderadamente grave' %}
+                <span class="badge badge-level bg-rose">{{ nivel_chip }}</span>
+              {% elif nml == 'moderado' %}
+                <span class="badge badge-level bg-warning text-dark">{{ nivel_chip }}</span>
+              {% elif nml == 'leve' %}
+                <span class="badge badge-level bg-info text-dark">{{ nivel_chip }}</span>
+              {% else %}
+                <span class="badge badge-level bg-success">{{ nivel_chip }}</span>
               {% endif %}
-              <span class="badge badge-level {{ chip_cls }}">{{ nivel_chip|title }}</span>
 
               {% if conf_ml %}
-                <span class="badge {{ conf_class }}">
+                {% set c = (conf_ml or '')|lower %}
+                {% set conf_class = 'bg-secondary' %}
+                {% if c == 'alta' %}
+                  {% set conf_class = 'bg-success' %}
+                {% elif c == 'media' %}
+                  {% set conf_class = 'bg-warning text-dark' %}
+                {% endif %}
+                <span class="badge badge-level {{ conf_class }}">
                   Confianza: {{ conf_ml }}{% if conf_pct is not none %} ({{ conf_pct|round(0,'floor') }}%){% endif %}
                 </span>
               {% endif %}
-
-              <span class="hint" tabindex="0" aria-label="Predicción generada por un modelo con tus respuestas. No es diagnóstico.">
-                i
-                <span class="tip">Predicción generada por un modelo con tus respuestas. No es diagnóstico.</span>
-              </span>
             </div>
+            <p class="text-center text-muted mt-2" style="font-size:.85rem">Estimado por el modelo (no es diagnóstico).</p>
           </div>
-          <p class="text-center text-muted mt-2" style="font-size:.85rem">Estimado por el modelo (no es un diagnóstico).</p>
         {% endif %}
 
-        <!-- Leyenda de cortes BDI-II -->
-        <h3 class="scas-title mt-4">¿Cómo interpretar el resultado?</h3>
-        <div class="legend">
-          <div class="row"><span>Mínimo</span><span>0–13</span></div>
-          <div class="row"><span>Leve</span><span>14–19</span></div>
-          <div class="row"><span>Moderado</span><span>20–28</span></div>
-          <div class="row"><span>Severo</span><span>29–63</span></div>
-        </div>
-
-        <div class="actions">
-          <a href="/cuestionario?uid={{ uid }}" class="btn btn-outline-primary">Volver al cuestionario</a>
-          <a href="/" class="btn btn-danger">Cerrar sesión</a>
+        <div class="actions d-flex justify-content-center">
+          <a href="/" class="btn btn-danger">Cerrar Sesión</a>
         </div>
       {% endif %}
     </section>
   </main>
 
   <script>
+    // Animar barra de puntaje
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.meter-bar[data-pct]').forEach(el => {
         const pct = Number(el.dataset.pct || 0);

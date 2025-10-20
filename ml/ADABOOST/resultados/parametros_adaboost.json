@@ -1,0 +1,28 @@
+{
+  "base_tree_params": {
+    "max_depth": 2,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "adaboost_params": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "algorithm": "SAMME.R",
+    "random_state": 42
+  },
+  "features_used": [
+    "age",
+    "genero_bin",
+    "phq1",
+    "phq2",
+    "phq3",
+    "phq4",
+    "phq5",
+    "phq6",
+    "phq7",
+    "phq8",
+    "phq9"
+  ]
+}

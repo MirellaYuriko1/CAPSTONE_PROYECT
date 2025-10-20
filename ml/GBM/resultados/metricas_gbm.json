@@ -1,0 +1,64 @@
+{
+  "model": "GradientBoostingClassifier",
+  "params": {
+    "loss": "log_loss",
+    "learning_rate": 0.05,
+    "n_estimators": 300,
+    "subsample": 0.8,
+    "max_depth": 3,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
+    "max_features": "sqrt",
+    "random_state": 42
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "f1_macro_mean": 0.7459643657260341,
+    "f1_macro_std": 0.02898176789994303
+  },
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "f1_train_mean": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "f1_valid_mean": [
+      0.47115340258153104,
+      0.6129134059918009,
+      0.6610063485825812,
+      0.6808812290232014,
+      0.7032085084874512,
+      0.7184390037738246,
+      0.7140006536355712,
+      0.7334920425451624
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.8306451612903226,
+    "balanced_accuracy": 0.7824461152882206,
+    "macro_f1": 0.7936990015303267
+  },
+  "labels": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "model": "KNeighborsClassifier",
+  "best_params": {
+    "clf__metric": "minkowski",
+    "clf__n_neighbors": 9,
+    "clf__p": 2,
+    "clf__weights": "distance"
+  },
+  "cv5_best_f1_macro": 0.7172483908851207,
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "f1_train_mean": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "f1_valid_mean": [
+      0.40061492454698067,
+      0.5491022373683404,
+      0.5750564588748048,
+      0.6218043699710083,
+      0.6246250421244876,
+      0.6493189885991268,
+      0.7028174541591584,
+      0.7185269501349076
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.7903225806451613,
+    "balanced_accuracy": 0.7384761904761905,
+    "macro_f1": 0.7598868019769365
+  },
+  "labels": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}

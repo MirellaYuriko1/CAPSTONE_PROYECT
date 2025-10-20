@@ -1,0 +1,26 @@
+{
+  "params": {
+    "n_estimators": 400,
+    "max_depth": 10,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
+    "max_features": "sqrt",
+    "class_weight": "balanced",
+    "oob_score": true,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "features_used": [
+    "age",
+    "genero_bin",
+    "phq1",
+    "phq2",
+    "phq3",
+    "phq4",
+    "phq5",
+    "phq6",
+    "phq7",
+    "phq8",
+    "phq9"
+  ]
+}

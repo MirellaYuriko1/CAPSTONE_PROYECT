@@ -1,0 +1,66 @@
+{
+  "model": "AdaBoostClassifier",
+  "base_tree_params": {
+    "max_depth": 2,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
+    "class_weight": "balanced",
+    "random_state": 42
+  },
+  "adaboost_params": {
+    "n_estimators": 300,
+    "learning_rate": 0.05,
+    "algorithm": "SAMME.R",
+    "random_state": 42
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "f1_macro_mean": 0.3386912507192764,
+    "f1_macro_std": 0.03965071444380519
+  },
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "f1_train_mean": [
+      0.7687285191495719,
+      0.677148302080604,
+      0.5685201813435741,
+      0.5092514697107177,
+      0.488314829278396,
+      0.4336261714963066,
+      0.37775183832756154,
+      0.3747584411969374
+    ],
+    "f1_valid_mean": [
+      0.3418531009660174,
+      0.35887133343174,
+      0.38343342271830927,
+      0.3149527303140561,
+      0.31872606173013224,
+      0.3567034727412709,
+      0.3489043063806177,
+      0.3510482073402526
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.4032258064516129,
+    "balanced_accuracy": 0.372952380952381,
+    "macro_f1": 0.2931157731157731
+  },
+  "labels": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}

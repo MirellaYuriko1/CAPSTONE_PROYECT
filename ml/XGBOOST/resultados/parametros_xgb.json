@@ -1,0 +1,32 @@
+{
+  "params": {
+    "objective": "multi:softprob",
+    "num_class": 5,
+    "learning_rate": 0.05,
+    "n_estimators": 800,
+    "max_depth": 4,
+    "min_child_weight": 2,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "reg_lambda": 1.0,
+    "reg_alpha": 0.0,
+    "gamma": 0.0,
+    "tree_method": "hist",
+    "n_jobs": -1,
+    "random_state": 42,
+    "verbosity": 0
+  },
+  "features_used": [
+    "age",
+    "genero_bin",
+    "phq1",
+    "phq2",
+    "phq3",
+    "phq4",
+    "phq5",
+    "phq6",
+    "phq7",
+    "phq8",
+    "phq9"
+  ]
+}

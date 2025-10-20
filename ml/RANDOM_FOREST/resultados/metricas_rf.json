@@ -1,0 +1,65 @@
+{
+  "model": "RandomForest",
+  "params": {
+    "n_estimators": 400,
+    "max_depth": 10,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
+    "max_features": "sqrt",
+    "class_weight": "balanced",
+    "oob_score": true,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "f1_macro_mean": 0.7314052225867173,
+    "f1_macro_std": 0.022461904027372283
+  },
+  "oob_score": 0.7865853658536586,
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "f1_train_mean": [
+      0.88865173932821,
+      0.8937850167986378,
+      0.9071821074211132,
+      0.942789964659043,
+      0.9412330215101831,
+      0.9387957778390602,
+      0.9429578129013436,
+      0.9489480719562554
+    ],
+    "f1_valid_mean": [
+      0.45589018089246236,
+      0.5693604751516114,
+      0.6759175926499739,
+      0.6982650205379282,
+      0.6895452053806683,
+      0.7243131892961961,
+      0.7299805599713511,
+      0.744017512768154
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.7661290322580645,
+    "balanced_accuracy": 0.7416140350877193,
+    "macro_f1": 0.725509082750462
+  },
+  "labels": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}
