@@ -1,0 +1,62 @@
+{
+  "model": "DecisionTreeClassifier (CART)",
+  "params": {
+    "criterion": "gini",
+    "max_depth": 6,
+    "min_samples_leaf": 8,
+    "min_samples_split": 20,
+    "class_weight": "balanced",
+    "ccp_alpha": 0.0,
+    "random_state": 42
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "f1_macro_mean": 0.5180218545140212,
+    "f1_macro_std": 0.04392284797105445
+  },
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "f1_train_mean": [
+      0.41355319480079206,
+      0.5441363492092529,
+      0.6411713097329979,
+      0.6470591644608265,
+      0.6847687441869775,
+      0.6958070550270167,
+      0.7039516399641986,
+      0.7087819063476423
+    ],
+    "f1_valid_mean": [
+      0.3106684972980053,
+      0.3784164152439436,
+      0.46975721172760404,
+      0.4823392253694432,
+      0.5117958619967924,
+      0.5475920637331366,
+      0.5597006835126279,
+      0.5065922383785227
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.6048387096774194,
+    "balanced_accuracy": 0.5813734335839598,
+    "macro_f1": 0.5169269549016385
+  },
+  "labels": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}
