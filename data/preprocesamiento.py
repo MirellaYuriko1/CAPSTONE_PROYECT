@@ -11,8 +11,7 @@ def eliminar_duplicados():
         raise FileNotFoundError(f"No encuentro el archivo crudo en: {RUTA_CRUDO}")
 
     df = pd.read_excel(RUTA_CRUDO)
-    print(f"Total de filas originales: {len(df)}")
-
+    
     duplicados = df.duplicated().sum()
     print(f"Duplicados detectados: {duplicados}")
 
@@ -113,8 +112,8 @@ def normalizar_genero():
         .astype(str)
         .str.strip()
         .str.lower()
-        .replace({"male": "Masculino","masculino": "Masculino","female": "Femenino","femenino": "Femenino"
-        })
+        .replace({"male": "Masculino","masculino": "Masculino",
+                  "female": "Femenino","femenino": "Femenino"})
     )
     df["genero_bin"] = df["gender"].map({
         "Masculino": 0,
@@ -128,7 +127,7 @@ def normalizar_genero():
     
 # === LLAMADAS SECUENCIALES ===
 if __name__ == "__main__":
-    eliminar_duplicados()      # Limpieza inicial
-    crear_subconjunto_phq9()   # Crear subconjunto PHQ-9
-    validar_rangos()            # Validar rangos
-    normalizar_genero()        # Normalizar género
+    eliminar_duplicados()      
+    crear_subconjunto_phq9()   
+    validar_rangos()            
+    normalizar_genero()        
