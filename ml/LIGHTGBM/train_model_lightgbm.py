@@ -10,15 +10,12 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, learning_
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# ==== LightGBM ====
+
 try:
     from lightgbm import LGBMClassifier
 except ImportError:
     raise SystemExit("LightGBM no está instalado. Ejecuta: pip install lightgbm")
 
-# =========================
-# Configuración y rutas
-# =========================
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -34,18 +31,14 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_lgbm.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_lgbm.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_lgbm.json"
 
-EVAL_TEST = True  # pon False si deseas omitir la evaluación en TEST
-
+EVAL_TEST = True  
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
-# Etiquetas (índices 0..4)
+
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name0(arr_idx): return [CLASSES[i] for i in arr_idx]
 
-# =========================
-# Hiperparámetros LightGBM (ajustados para evitar "no further splits…")
-# =========================
 LGBM_PARAMS = dict(
     objective="multiclass",
     num_class=5,                
@@ -65,9 +58,6 @@ LGBM_PARAMS = dict(
     verbose=-1                 
 )
 
-# =========================
-# Curva de aprendizaje (F1-macro, CV 5-fold en TRAIN)
-# =========================
 def construir_modelo_LightGBM(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
                       titulo="Modelo LightGBM"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
@@ -86,7 +76,6 @@ def construir_modelo_LightGBM(estimator, X_train, y_train, cv, ruta_png, ruta_cs
     tr_mean, tr_std = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfica (±1σ)
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -98,7 +87,6 @@ def construir_modelo_LightGBM(estimator, X_train, y_train, cv, ruta_png, ruta_cs
     plt.legend(); plt.tight_layout()
     plt.savefig(ruta_png, dpi=200); plt.close()
 
-    # CSV con los datos de la curva
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean, "f1_train_std": tr_std,
@@ -107,49 +95,45 @@ def construir_modelo_LightGBM(estimator, X_train, y_train, cv, ruta_png, ruta_cs
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
+
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
 
     df = pd.read_csv(RUTA_DATOS)
 
-    # Asegurar tipos y etiquetas 0..4 (evita problemas de splits)
+    
     X = df[FEATURES].astype(np.float32).copy()
-    y = df[TARGET].astype(int).values - 1   # de 1..5 → 0..4
+    y = df[TARGET].astype(int).values - 1   
 
-    # sanity checks
+    
     assert not np.isnan(X.values).any(), "Hay NaN en features; revisa el preprocesamiento."
     assert set(np.unique(y)) == set(range(5)), "Las etiquetas deben estar en 0..4."
 
-    # split 80/20 estratificado
+   
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Modelo LightGBM
     lgbm = LGBMClassifier(**LGBM_PARAMS)
 
-    # CV estratificada SOLO en TRAIN
+   
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva de aprendizaje (CV en TRAIN)
     sizes_abs, tr_scores, va_scores = construir_modelo_LightGBM(
         lgbm, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV,
         titulo="Modelo LightGBM"
     )
 
-    # 2) Puntaje global de CV en TRAIN
+
     cv_f1 = cross_val_score(lgbm, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
+
     lgbm.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
+
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -175,7 +159,7 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
+
     metricas = {
         "model": "LGBMClassifier",
         "params": LGBM_PARAMS,

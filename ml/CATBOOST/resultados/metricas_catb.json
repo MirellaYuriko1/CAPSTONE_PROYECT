@@ -40,22 +40,10 @@
       393
     ],
     "f1_train_mean": [
-      NaN,
-      NaN,
-      NaN,
-      NaN,
-      NaN,
-      NaN,
       1.0,
       1.0
     ],
     "f1_valid_mean": [
-      NaN,
-      NaN,
-      NaN,
-      NaN,
-      NaN,
-      NaN,
       0.8133126733407513,
       0.8134181982262184
     ]

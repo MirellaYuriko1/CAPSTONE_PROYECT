@@ -11,9 +11,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -29,8 +26,8 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_nb.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_nb.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_nb.json"
 
-EVAL_TEST  = True   # pon False si quieres mostrar/guardar solo ENTRENAMIENTO
-DO_TUNING  = False  # pon True si quieres buscar var_smoothing con GridSearchCV
+EVAL_TEST  = True   
+DO_TUNING  = False  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
@@ -38,18 +35,14 @@ TARGET   = "categoryphq"
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Hiperparámetros Naive Bayes (GaussianNB)
-# =========================
+s (GaussianNB)
+
 NB_PARAMS = dict(
-    var_smoothing=1e-9,  # suavizado numérico; ajusta si haces tuning
-    priors=None          # None = priors inferidos de los datos
+    var_smoothing=1e-9,  
+    priors=None          
 )
 
-# =========================
-# Curva de aprendizaje (F1-macro, CV 5-fold en TRAIN)
-# =========================
-def curva_aprendizaje(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titulo="Modelo Naive Bayes (GaussianNB)"):
+def construir_modelo_NB(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titulo="Modelo Naive Bayes (GaussianNB)"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
     sizes_abs, train_scores, valid_scores = learning_curve(
         estimator=estimator,
@@ -64,7 +57,6 @@ def curva_aprendizaje(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titul
     tr_mean, tr_std = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfica (±1σ)
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -78,7 +70,6 @@ def curva_aprendizaje(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titul
     plt.savefig(ruta_png, dpi=200)
     plt.close()
 
-    # CSV con los datos de la curva
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean, "f1_train_std": tr_std,
@@ -87,9 +78,7 @@ def curva_aprendizaje(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titul
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
+
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -98,23 +87,20 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # sanity checks
+
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
 
-    # split 80/20 estratificado
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Modelo NB
     nb = GaussianNB(**NB_PARAMS)
 
-    # CV estratificada SOLO en TRAIN
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # (Opcional) tuning de var_smoothing
+    
     if DO_TUNING:
         grid = GridSearchCV(
             estimator=nb,
@@ -128,19 +114,19 @@ def main():
         nb = grid.best_estimator_
         print("[CV-Grid NB] mejor var_smoothing:", grid.best_params_, "| F1-macro:", round(grid.best_score_, 4))
 
-    # 1) Curva de aprendizaje (CV en TRAIN)
-    sizes_abs, tr_scores, va_scores = curva_aprendizaje(
+    
+    sizes_abs, tr_scores, va_scores = construir_modelo_NB(
         nb, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV, titulo="Modelo Naive Bayes (GaussianNB)"
     )
 
-    # 2) Puntaje global de CV en TRAIN
+   
     cv_f1 = cross_val_score(nb, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
+    
     nb.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
+    
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -165,7 +151,6 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
     metricas = {
         "model": "GaussianNB",
         "params": NB_PARAMS,

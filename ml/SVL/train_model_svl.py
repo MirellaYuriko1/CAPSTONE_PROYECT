@@ -10,13 +10,11 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, learning_
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.svm import LinearSVC  # SVM lineal (one-vs-rest)
+from sklearn.svm import LinearSVC  
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
+
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -32,7 +30,7 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_svl.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_svl.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_svl.json"
 
-EVAL_TEST = True  # pon False si quieres mostrar/guardar solo ENTRENAMIENTO
+EVAL_TEST = True  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
@@ -40,9 +38,7 @@ TARGET   = "categoryphq"
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Hiperparámetros SVL
-# =========================
+
 SVL_PARAMS = dict(
     C=1.0,                      
     class_weight="balanced",    
@@ -53,9 +49,6 @@ SVL_PARAMS = dict(
     random_state=SEED
 )
 
-# =========================
-# Curva de aprendizaje
-# =========================
 def construir_modelo_SVL(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titulo="Modelo SVL (SVM lineal)"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
 
@@ -94,9 +87,7 @@ def construir_modelo_SVL(estimator, X_train, y_train, cv, ruta_png, ruta_csv, ti
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
+
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -105,17 +96,17 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # sanity checks
+
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
 
-    # split 80/20 estratificado
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Escalado de continuas (muy importante en SVM) y passthrough de 'genero_bin'
+   
     cont_cols = ["age","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
     cat_cols  = ["genero_bin"]
 
@@ -127,25 +118,24 @@ def main():
         remainder="drop"
     )
 
-    svl = LinearSVC(**SVL_PARAMS)  # SVM lineal (one-vs-rest)
+    svl = LinearSVC(**SVL_PARAMS)  
     pipe = Pipeline([("pre", pre), ("clf", svl)])
 
-    # CV 5-fold en TRAIN
+   
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva de aprendizaje (CV en TRAIN)
+    
     sizes_abs, tr_scores, va_scores = construir_modelo_SVL(
         pipe, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV
     )
 
-    # 2) Score CV global en TRAIN
     cv_f1 = cross_val_score(pipe, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
+    
     pipe.fit(X_train, y_train)
 
-    # 4) Evaluación opcional en TEST
+    
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -170,7 +160,6 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
     metricas = {
         "model": "LinearSVC (SVM lineal)",
         "params": SVL_PARAMS,
@@ -197,7 +186,7 @@ def main():
             f.write(rep)
         print("[OK] Reporte de clasificación guardado en:", RUTA_REPORTE_CLASIFICACION)
 
-    joblib.dump(pipe, RUTA_MODELO)  # guarda pipeline completo (escalado + SVL)
+    joblib.dump(pipe, RUTA_MODELO)  
     with open(RUTA_PARAMS, "w", encoding="utf-8") as f:
         json.dump({"params": SVL_PARAMS, "features_used": FEATURES}, f, ensure_ascii=False, indent=2)
     print("[OK] Modelo guardado en:", RUTA_MODELO)

@@ -14,9 +14,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score, f1_score, classification_report)
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
+
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -32,18 +30,16 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_svm.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_svm.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_svm.json"
 
-EVAL_TEST = True  # pon False si quieres mostrar/guardar solo ENTRENAMIENTO
+EVAL_TEST = True  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
-# Mapeo de clases (1..5)
+
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Hiperparámetros SVM (SVC RBF)
-# =========================
+
 SVM_PARAMS = dict(
     kernel="rbf",           
     C=1.0,                 
@@ -53,9 +49,7 @@ SVM_PARAMS = dict(
     random_state=SEED
 )
 
-# =========================
-# Curva de aprendizaje con CV 5-fold (en TRAIN)
-# =========================
+
 def construir_modelo_SVM(pipe, X_train, y_train, cv, ruta_png, ruta_csv):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
 
@@ -73,7 +67,6 @@ def construir_modelo_SVM(pipe, X_train, y_train, cv, ruta_png, ruta_csv):
     tr_mean, tr_std  = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std  = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfica (±1σ)
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -88,7 +81,6 @@ def construir_modelo_SVM(pipe, X_train, y_train, cv, ruta_png, ruta_csv):
     plt.close()
     print("[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV 5-fold) guardada en:", ruta_png)
 
-    # Guardar datos de la curva
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean,
@@ -100,9 +92,7 @@ def construir_modelo_SVM(pipe, X_train, y_train, cv, ruta_png, ruta_csv):
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
+
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -111,20 +101,19 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # Sanity checks
+  
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
 
-    # Split 80/20 estratificado
+  
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Escalado de continuas dentro del pipeline (SVM es sensible a la escala)
+  
     cont_cols = ["age","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
-    cat_cols  = ["genero_bin"]  # no escalar
-
+    cat_cols  = ["genero_bin"]  
     pre = ColumnTransformer(
         transformers=[
             ("cont", StandardScaler(), cont_cols),
@@ -136,20 +125,20 @@ def main():
     svc  = SVC(**SVM_PARAMS)
     pipe = Pipeline([("pre", pre), ("clf", svc)])
 
-    # CV estratificada SOLO en TRAIN
+    
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva aprendizaje (CV en TRAIN)
+    
     sizes_abs, tr_scores, va_scores = construir_modelo_SVM(pipe, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV)
 
-    # 2) Score CV global en TRAIN
+    
     cv_f1 = cross_val_score(pipe, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
+    
     pipe.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
+    
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -174,7 +163,6 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
     metricas = {
         "model": "SVC(RBF)",
         "params": SVM_PARAMS,
@@ -201,7 +189,7 @@ def main():
             f.write(rep)
         print("[OK] Reporte de clasificación guardado en:", RUTA_REPORTE_CLASIFICACION)
 
-    joblib.dump(pipe, RUTA_MODELO)  # guarda pipeline completo (escala + SVC)
+    joblib.dump(pipe, RUTA_MODELO)  
     with open(RUTA_PARAMS, "w", encoding="utf-8") as f:
         json.dump({"params": SVM_PARAMS, "features_used": FEATURES}, f, ensure_ascii=False, indent=2)
     print("[OK] Modelo guardado en:", RUTA_MODELO)

@@ -11,9 +11,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score, f1_score, classification_report)
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
+
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -29,36 +27,29 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_gbm.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_gbm.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_gbm.json"
 
-EVAL_TEST = True  # pon False si quieres mostrar/guardar solo ENTRENAMIENTO
+EVAL_TEST = True  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
-# Mapeo de clases (1..5)
+
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Hiperparámetros GBM (regularizados)
-# =========================
+
 GBM_PARAMS = dict(
-    loss="log_loss",        # clasificación probabilística
-    learning_rate=0.05,     # paso pequeño para estabilidad
-    n_estimators=300,       # número de árboles
-    subsample=0.8,          # Stochastic GBM (reduce varianza)
-    max_depth=3,            # profundidad de árboles base
+    loss="log_loss",        
+    learning_rate=0.05,     
+    n_estimators=300,      
+    subsample=0.8,          
+    max_depth=3,            
     min_samples_leaf=5,
     min_samples_split=12,
     max_features="sqrt",
     random_state=SEED
 )
-# Nota: GradientBoostingClassifier no soporta class_weight directamente.
-# La métrica macro-F1 y el subsample ayudan a robustecer ante desbalance.
 
-# =========================
-# Curva de aprendizaje con CV 5-fold (en TRAIN)
-# =========================
-def curva_aprendizaje(model, X_train, y_train, cv, ruta_png, ruta_csv):
+def construir_modelo_GBM(model, X_train, y_train, cv, ruta_png, ruta_csv):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
 
     sizes_abs, train_scores, valid_scores = learning_curve(
@@ -71,11 +62,8 @@ def curva_aprendizaje(model, X_train, y_train, cv, ruta_png, ruta_csv):
         shuffle=True,
         random_state=SEED
     )
-
     tr_mean, tr_std  = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std  = valid_scores.mean(axis=1), valid_scores.std(axis=1)
-
-    # Gráfica (±1σ)
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -89,8 +77,6 @@ def curva_aprendizaje(model, X_train, y_train, cv, ruta_png, ruta_csv):
     plt.savefig(ruta_png, dpi=200)
     plt.close()
     print("[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV 5-fold) guardada en:", ruta_png)
-
-    # Guardar datos de la curva
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean,
@@ -102,9 +88,6 @@ def curva_aprendizaje(model, X_train, y_train, cv, ruta_png, ruta_csv):
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -113,33 +96,27 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # Sanity checks
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
 
-    # Split 80/20 estratificado
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Modelo GBM
     gbm = GradientBoostingClassifier(**GBM_PARAMS)
 
-    # CV estratificada SOLO en TRAIN
+
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva aprendizaje (CV en TRAIN)
-    sizes_abs, tr_scores, va_scores = curva_aprendizaje(gbm, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV)
+    sizes_abs, tr_scores, va_scores = construir_modelo_GBM(gbm, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV)
 
-    # 2) Score CV global en TRAIN
     cv_f1 = cross_val_score(gbm, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
     gbm.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
+  
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -164,7 +141,7 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
+
     metricas = {
         "model": "GradientBoostingClassifier",
         "params": GBM_PARAMS,

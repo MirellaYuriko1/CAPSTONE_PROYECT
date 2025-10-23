@@ -11,9 +11,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -29,17 +26,13 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_cart.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_cart.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_cart.json"
 
-EVAL_TEST = True  # pon False si quieres omitir la evaluación en TEST
+EVAL_TEST = True  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
-def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]  # tus etiquetas vienen 1..5
-
-# =========================
-# Hiperparámetros CART (regularizado)
-# =========================
+def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]  
 CART_PARAMS = dict(
     criterion="gini",
     max_depth=6,            
@@ -50,9 +43,6 @@ CART_PARAMS = dict(
     random_state=SEED
 )
 
-# =========================
-# Curva de aprendizaje
-# =========================
 def construir_modelo_CART(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
                       titulo="Modelo CART"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
@@ -71,7 +61,7 @@ def construir_modelo_CART(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
     tr_mean, tr_std = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfico
+
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -82,7 +72,7 @@ def construir_modelo_CART(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
     plt.ylabel("F1-macro (CV)")
     plt.legend(); plt.tight_layout(); plt.savefig(ruta_png, dpi=200); plt.close()
 
-    # CSV
+
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean, "f1_train_std": tr_std,
@@ -91,9 +81,6 @@ def construir_modelo_CART(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -102,33 +89,31 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()  # 1..5
 
-    # checks
+
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
 
-    # split 80/20 estratificado
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # CV estratificada SOLO en TRAIN
+
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva de aprendizaje (CV en TRAIN)
+
     cart = DecisionTreeClassifier(**CART_PARAMS)
     sizes_abs, tr_scores, va_scores = construir_modelo_CART(
         cart, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV, titulo="Modelo CART"
     )
 
-    # 2) Score CV global en TRAIN
     cv_f1 = cross_val_score(cart, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
+  
     cart.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -153,7 +138,7 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
+ 
     metricas = {
         "model": "DecisionTreeClassifier (CART)",
         "params": CART_PARAMS,

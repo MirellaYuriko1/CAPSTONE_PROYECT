@@ -10,15 +10,13 @@ from sklearn.model_selection import train_test_split, StratifiedKFold, learning_
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# --- CatBoost (wrapper sklearn) ---
+
 try:
     from catboost import CatBoostClassifier
 except ImportError:
     raise SystemExit("CatBoost no está instalado. Ejecuta: pip install catboost")
 
-# =========================
-# Configuración y rutas
-# =========================
+
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -34,17 +32,14 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_catb.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_catb.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_catb.json"
 
-EVAL_TEST = True  # pon False si deseas omitir evaluación en TEST
-
+EVAL_TEST = True  
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name0(arr_idx): return [CLASSES[i] for i in arr_idx]  # y en 0..4
 
-# =========================
-# Hiperparámetros CatBoost
-# =========================
+
 CAT_PARAMS = dict(
     loss_function="MultiClass",
     eval_metric="TotalF1",         
@@ -61,18 +56,14 @@ CAT_PARAMS = dict(
     verbose=False
 )
 
-# =========================
-# Utilidad: pesos balanceados por clase (opcional)
-# =========================
+
 def class_weights_from_counts(y, n_classes):
     counts = np.bincount(y, minlength=n_classes).astype(float)
     inv = 1.0 / np.maximum(counts, 1.0)
-    weights = (inv / inv.sum()) * n_classes  # normaliza alrededor de 1.0
+    weights = (inv / inv.sum()) * n_classes  
     return weights.tolist()
 
-# =========================
-# Curva de aprendizaje
-# =========================
+
 def construir_modelo_CB(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
                       titulo="Modelo CatBoost"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
@@ -110,54 +101,50 @@ def construir_modelo_CB(estimator, X_train, y_train, cv, ruta_png, ruta_csv,
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
+
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
 
     df = pd.read_csv(RUTA_DATOS)
 
-    # CatBoost requiere etiquetas 0..num_class-1
+
     X = df[FEATURES].astype(np.float32).copy()
     y = df[TARGET].astype(int).values - 1
 
     assert not np.isnan(X.values).any(), "Hay NaN en features; revisa el preprocesamiento."
     assert set(np.unique(y)) == set(range(5)), "Las etiquetas deben estar en 0..4."
 
-    # Split 80/20 estratificado
+    
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # Pesos por clase (balanceo)
+
     class_weights = class_weights_from_counts(y_train, n_classes=5)
 
     catb = CatBoostClassifier(**CAT_PARAMS, class_weights=class_weights)
 
-    # CV estratificada SOLO en TRAIN
+   
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # 1) Curva de aprendizaje (CV en TRAIN)
+ 
     sizes_abs, tr_scores, va_scores = construir_modelo_CB(
         catb, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV, titulo="Modelo CatBoost"
     )
 
-    # 2) Puntaje global CV en TRAIN
+   
     cv_f1 = cross_val_score(catb, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # 3) Entrenamiento final con TODO TRAIN
     catb.fit(X_train, y_train)
 
-    # 4) (Opcional) Evaluación FINAL en TEST
+
     rep = ""
     test_metrics = None
     if EVAL_TEST:
         y_pred = catb.predict(X_test)
-        # y_pred sale shape (n,1); convertir a 1D
         y_pred = y_pred.astype(int).ravel()
 
         acc  = accuracy_score(y_test, y_pred)
@@ -180,7 +167,6 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # 5) Guardar artefactos
     metricas = {
         "model": "CatBoostClassifier",
         "params": CAT_PARAMS,

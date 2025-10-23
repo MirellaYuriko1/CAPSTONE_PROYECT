@@ -14,9 +14,6 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, f1_score, classification_report
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
 SEED = 42
 np.random.seed(SEED); random.seed(SEED)
 
@@ -32,7 +29,7 @@ RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_knn.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_knn.pkl"
 RUTA_PARAMS                = DIR_OUT / "parametros_knn.json"
 
-EVAL_TEST = True  # pon False si quieres mostrar/guardar solo ENTRENAMIENTO
+EVAL_TEST = True  
 
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
@@ -40,9 +37,7 @@ TARGET   = "categoryphq"
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int): return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Función curva de aprendizaje (misma que usas en otros modelos)
-# =========================
+
 def construir_modelo_KNN(estimator, X_train, y_train, cv, ruta_png, ruta_csv, titulo="Modelo KNN"):
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
 
@@ -59,7 +54,7 @@ def construir_modelo_KNN(estimator, X_train, y_train, cv, ruta_png, ruta_csv, ti
     tr_mean, tr_std = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfica
+
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -70,7 +65,6 @@ def construir_modelo_KNN(estimator, X_train, y_train, cv, ruta_png, ruta_csv, ti
     plt.ylabel("F1-macro (CV)")
     plt.legend(); plt.tight_layout(); plt.savefig(ruta_png, dpi=200); plt.close()
 
-    # CSV
     pd.DataFrame({
         "train_size": sizes_abs,
         "f1_train_mean": tr_mean, "f1_train_std": tr_std,
@@ -79,9 +73,6 @@ def construir_modelo_KNN(estimator, X_train, y_train, cv, ruta_png, ruta_csv, ti
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar
-# =========================
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -90,37 +81,38 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # sanity checks
+
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
     assert TARGET not in FEATURES, "El target no puede estar en FEATURES."
 
-    # split 80/20 estratificado
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # --------- Pipeline: escalado de continuas (obligatorio en KNN) ---------
     cont_cols = ["age","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
-    cat_cols  = ["genero_bin"]  # no escalar
+    cat_cols  = ["genero_bin"]  
 
     pre = ColumnTransformer([
         ("cont", StandardScaler(), cont_cols),
         ("cat",  "passthrough",    cat_cols),
     ], remainder="drop")
 
-    knn = KNeighborsClassifier()
     pipe = Pipeline([("pre", pre), ("clf", knn)])
 
-    # --------- Búsqueda de hiperparámetros ---------
+    knn = KNeighborsClassifier()
     param_grid = {
         "clf__n_neighbors": [3, 5, 7, 9, 11, 15, 21],
         "clf__weights": ["uniform", "distance"],
-        "clf__metric": ["minkowski"],  # p=2 → euclidiana
+        "clf__metric": ["minkowski"],  
         "clf__p": [2],
     }
 
+    
+
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
+    
     grid = GridSearchCV(
         estimator=pipe,
         param_grid=param_grid,
@@ -134,15 +126,14 @@ def main():
     best_pipe = grid.best_estimator_
     print("[CV-Grid] Mejor combinación:", grid.best_params_, " | F1-macro:", round(grid.best_score_, 4))
 
-    # --------- Curva de aprendizaje con los mejores hiperparámetros ---------
+    
     sizes_abs, tr_scores, va_scores = construir_modelo_KNN(
         best_pipe, X_train, y_train, cv, RUTA_CURVA, RUTA_CURVA_CSV, titulo="Modelo KNN"
     )
 
-    # --------- Entrenamiento final ---------
     best_pipe.fit(X_train, y_train)
 
-    # --------- Evaluación opcional en TEST ---------
+    
     rep = ""
     test_metrics = None
     if EVAL_TEST:
@@ -167,7 +158,6 @@ def main():
 
         test_metrics = {"accuracy": float(acc), "balanced_accuracy": float(bacc), "macro_f1": float(f1m)}
 
-    # --------- Guardar artefactos ---------
     metricas = {
         "model": "KNeighborsClassifier",
         "best_params": grid.best_params_,
@@ -189,7 +179,7 @@ def main():
             f.write(rep)
         print("[OK] Reporte de clasificación guardado en:", RUTA_REPORTE_CLASIFICACION)
 
-    joblib.dump(best_pipe, RUTA_MODELO)  # guarda pipeline completo (escalado + KNN)
+    joblib.dump(best_pipe, RUTA_MODELO)  
     with open(RUTA_PARAMS, "w", encoding="utf-8") as f:
         json.dump({"best_params": grid.best_params_, "features_used": FEATURES}, f, ensure_ascii=False, indent=2)
     print("[OK] Modelo guardado en:", RUTA_MODELO)

@@ -10,9 +10,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (accuracy_score, balanced_accuracy_score, f1_score, classification_report)
 import joblib
 
-# =========================
-# Configuración y rutas
-# =========================
 SEED = 42
 RUTA_DATOS = Path("data/final/phq9_final.csv")
 
@@ -28,14 +25,10 @@ RUTA_PARAMS                = DIR_OUT / "parametros_rf.json"
 FEATURES = ["age","genero_bin","phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
 TARGET   = "categoryphq"
 
-# Mapeo de clases (tu etiqueta es 1..5)
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 def idx_to_name(arr_int):
     return [CLASSES[i-1] for i in arr_int]
 
-# =========================
-# Hiperparámetros del RF (regularizados)
-# =========================
 RF_PARAMS = dict(
     n_estimators=400,
     max_depth=10,
@@ -48,9 +41,6 @@ RF_PARAMS = dict(
     n_jobs=-1
 )
 
-# =========================
-# Curva de entrenamiento/validación con CV 5-fold (en TRAIN)
-# =========================
 def construir_modelo_RF(X_train, y_train, cv, ruta_png):
     modelo = RandomForestClassifier(**RF_PARAMS)
 
@@ -70,7 +60,7 @@ def construir_modelo_RF(X_train, y_train, cv, ruta_png):
     tr_mean, tr_std  = train_scores.mean(axis=1), train_scores.std(axis=1)
     va_mean, va_std  = valid_scores.mean(axis=1), valid_scores.std(axis=1)
 
-    # Gráfica (con bandas de ±1σ)
+
     plt.figure(figsize=(7,5))
     plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
     plt.fill_between(sizes_abs, tr_mean-tr_std, tr_mean+tr_std, alpha=0.2)
@@ -87,9 +77,6 @@ def construir_modelo_RF(X_train, y_train, cv, ruta_png):
     print("[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV 5-fold) guardada en:", ruta_png)
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist()
 
-# =========================
-# Entrenar y evaluar en TEST
-# =========================
 def main():
     if not RUTA_DATOS.exists():
         raise FileNotFoundError(f"No se encontró el dataset: {RUTA_DATOS}")
@@ -98,38 +85,37 @@ def main():
     X = df[FEATURES].copy()
     y = df[TARGET].astype(int).copy()
 
-    # Sanity check: no debería haber NaN tras tu preprocesamiento externo
+
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
 
-    # ---- Split 80/20 (estratificado) ----
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # CV estratificada SOLO en TRAIN
+
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # ---- 1) Curva entrenamiento/validación (CV en TRAIN) ----
+
     sizes_abs, tr_scores, va_scores = construir_modelo_RF(
         X_train, y_train, cv, RUTA_CURVA
     )
 
-    # ---- 2) Score CV global en TRAIN ----
+
     cv_model = RandomForestClassifier(**RF_PARAMS)
     cv_f1 = cross_val_score(cv_model, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
     print(f"[CV-5] F1-macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
-    # ---- 3) Entrenar modelo final con TODO el TRAIN ----
+
     model = RandomForestClassifier(**RF_PARAMS)
     model.fit(X_train, y_train)
 
-    # OOB (si está activado)
+  
     oob = getattr(model, "oob_score_", None)
     if oob is not None:
         print(f"[INFO] OOB score = {oob:.4f}")
 
-    # ---- 4) Evaluación FINAL en TEST ----
     y_pred = model.predict(X_test)
 
     acc  = accuracy_score(y_test, y_pred)
@@ -141,7 +127,6 @@ def main():
     print(f"balanced_acc    = {bacc:.4f}")
     print(f"macroF1         = {f1m:.4f}")
 
-    # Reporte por clase (con nombres)
     rep = classification_report(
         idx_to_name(y_test.values),
         idx_to_name(y_pred),
@@ -151,7 +136,6 @@ def main():
     print("\n=== REPORTE POR CLASE (TEST) ===")
     print(rep)
 
-    # ---- 5) Guardar artefactos ----
     metricas = {
         "model": "RandomForest",
         "params": RF_PARAMS,
