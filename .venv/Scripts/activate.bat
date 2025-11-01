@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\AVR\OneDrive\Escritorio\Cursos\Capstone\Programa de Casptone\CAPSTONE_PROYECT\.venv
+set VIRTUAL_ENV=C:\Users\Jesus\Desktop\Capstone Proyect\CAPSTONE_PROYECT\.venv
 
 if not defined PROMPT set PROMPT=$P$G
 
