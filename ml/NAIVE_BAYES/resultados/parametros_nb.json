@@ -1,8 +1,5 @@
 {
-  "params": {
-    "var_smoothing": 1e-09,
-    "priors": null
-  },
+  "modelo": "GaussianNB",
   "features_used": [
     "age",
     "genero_bin",

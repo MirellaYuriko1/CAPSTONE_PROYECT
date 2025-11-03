@@ -1,9 +1,9 @@
 {
-  "best_params": {
-    "clf__metric": "minkowski",
-    "clf__n_neighbors": 9,
-    "clf__p": 2,
-    "clf__weights": "distance"
+  "params_knn": {
+    "n_neighbors": 7,
+    "weights": "distance",
+    "metric": "minkowski",
+    "p": 2
   },
   "features_used": [
     "age",

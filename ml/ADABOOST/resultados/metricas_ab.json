@@ -1,0 +1,112 @@
+{
+  "model": "AdaBoost",
+  "params": {
+    "estimator": {
+      "type": "DecisionTreeClassifier",
+      "max_depth": 2,
+      "min_samples_leaf": 5,
+      "random_state": 42
+    },
+    "n_estimators": 200,
+    "learning_rate": 0.8,
+    "algorithm": "SAMME",
+    "random_state": 42
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "accuracy_mean": 0.6441558441558441,
+    "accuracy_std": 0.04710838545828454
+  },
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "train_accuracy_mean": [
+      0.9641025641025642,
+      0.7932584269662921,
+      0.7585714285714286,
+      0.74,
+      0.725311203319502,
+      0.7367697594501719,
+      0.712280701754386,
+      0.7216284987277353
+    ],
+    "valid_accuracy_mean": [
+      0.5650587507730365,
+      0.5630591630591631,
+      0.58711605854463,
+      0.5914862914862915,
+      0.61581117295403,
+      0.6361368789940218,
+      0.6360956503813646,
+      0.6380333951762523
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.6935483870967742,
+    "balanced_accuracy": 0.625233082706767,
+    "precision_macro": 0.7958116883116884,
+    "recall_macro": 0.625233082706767,
+    "f1_macro": 0.6273286326024663,
+    "roc_auc_macro": 0.887888284413522
+  },
+  "confusion_matrix": [
+    [
+      15,
+      23,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      36,
+      5,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      24,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      4,
+      10,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      4,
+      1
+    ]
+  ],
+  "labels_plot": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente\nsevera",
+    "Severa"
+  ],
+  "labels_full": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}

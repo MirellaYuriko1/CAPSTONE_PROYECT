@@ -1,0 +1,117 @@
+{
+  "model": "CatBoost",
+  "params": {
+    "loss_function": "MultiClass",
+    "eval_metric": "MultiClass",
+    "random_seed": 42,
+    "auto_class_weights": "Balanced",
+    "verbose": false,
+    "iterations": 250,
+    "depth": 4,
+    "learning_rate": 0.06,
+    "l2_leaf_reg": 28,
+    "grow_policy": "Lossguide",
+    "min_data_in_leaf": 30,
+    "max_leaves": 31,
+    "bootstrap_type": "Bernoulli",
+    "subsample": 0.65,
+    "rsm": 0.7,
+    "random_strength": 8,
+    "leaf_estimation_iterations": 2,
+    "border_count": 64
+  },
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "accuracy_mean": 0.8232735518449804,
+    "accuracy_std": 0.02375941669291067
+  },
+  "curve": {
+    "train_sizes": [
+      78,
+      131,
+      183,
+      235,
+      288,
+      340,
+      393
+    ],
+    "train_accuracy_mean": [
+      0.8897435897435898,
+      0.9129770992366412,
+      0.9355191256830601,
+      0.945531914893617,
+      0.9520833333333334,
+      0.9541176470588235,
+      0.9541984732824427
+    ],
+    "valid_accuracy_mean": [
+      0.6238713667285096,
+      0.7519686662543805,
+      0.7601319315605031,
+      0.8007627293341579,
+      0.8109874252731395,
+      0.8312512883941455,
+      0.8232323232323233
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.8387096774193549,
+    "balanced_accuracy": 0.8295438596491229,
+    "precision_macro": 0.8400295031873979,
+    "recall_macro": 0.8295438596491229,
+    "f1_macro": 0.8282047347870133,
+    "roc_auc_macro": 0.9704298368299149
+  },
+  "confusion_matrix": [
+    [
+      35,
+      3,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      34,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      19,
+      6,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      12,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      4
+    ]
+  ],
+  "labels_plot": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente\nsevera",
+    "Severa"
+  ],
+  "labels_full": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ]
+}

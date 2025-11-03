@@ -1,0 +1,27 @@
+{
+  "params": {
+    "estimator": {
+      "type": "DecisionTreeClassifier",
+      "max_depth": 2,
+      "min_samples_leaf": 5,
+      "random_state": 42
+    },
+    "n_estimators": 200,
+    "learning_rate": 0.8,
+    "algorithm": "SAMME",
+    "random_state": 42
+  },
+  "features_used": [
+    "age",
+    "genero_bin",
+    "phq1",
+    "phq2",
+    "phq3",
+    "phq4",
+    "phq5",
+    "phq6",
+    "phq7",
+    "phq8",
+    "phq9"
+  ]
+}

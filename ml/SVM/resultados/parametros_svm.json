@@ -1,10 +1,10 @@
 {
   "params": {
-    "kernel": "rbf",
-    "C": 1.0,
+    "C": 2.0,
     "gamma": "scale",
+    "kernel": "rbf",
+    "probability": true,
     "class_weight": "balanced",
-    "probability": false,
     "random_state": 42
   },
   "features_used": [

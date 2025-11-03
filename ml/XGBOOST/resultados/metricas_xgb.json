@@ -1,27 +1,24 @@
 {
-  "model": "XGBClassifier",
+  "model": "XGBoost",
   "params": {
     "objective": "multi:softprob",
     "num_class": 5,
-    "learning_rate": 0.05,
-    "n_estimators": 800,
+    "eval_metric": "mlogloss",
+    "n_estimators": 300,
+    "learning_rate": 0.08,
     "max_depth": 4,
-    "min_child_weight": 2,
-    "subsample": 0.8,
-    "colsample_bytree": 0.8,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
     "reg_lambda": 1.0,
-    "reg_alpha": 0.0,
-    "gamma": 0.0,
     "tree_method": "hist",
-    "n_jobs": -1,
     "random_state": 42,
-    "verbosity": 0
+    "n_jobs": -1
   },
   "train_size": 492,
   "test_size": 124,
   "cv5_train": {
-    "f1_macro_mean": 0.7220177891758969,
-    "f1_macro_std": 0.05118174870433145
+    "accuracy_mean": 0.7865388579674295,
+    "accuracy_std": 0.0405237101328889
   },
   "curve": {
     "train_sizes": [
@@ -34,9 +31,9 @@
       342,
       393
     ],
-    "f1_train_mean": [
-      0.8473680479793011,
-      0.9845614035087721,
+    "train_accuracy_mean": [
+      1.0,
+      1.0,
       1.0,
       1.0,
       1.0,
@@ -44,27 +41,95 @@
       1.0,
       1.0
     ],
-    "f1_valid_mean": [
-      0.3728822421472711,
-      0.5648761685402125,
-      0.6152804435608011,
-      0.6461626400916405,
-      0.6938829369531765,
-      0.6910153579128973,
-      0.7003355273059029,
-      0.7393686892693856
+    "train_accuracy_std": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "valid_accuracy_mean": [
+      0.5569779426922284,
+      0.6951350237064523,
+      0.7418470418470419,
+      0.7357039785611214,
+      0.7681921253349825,
+      0.7763553906411049,
+      0.7844774273345702,
+      0.7926200783343641
+    ],
+    "valid_accuracy_std": [
+      0.031573379254631294,
+      0.015466967751389268,
+      0.016779285593254437,
+      0.02793306206824228,
+      0.024467019358847285,
+      0.03137944350715577,
+      0.03033064369693601,
+      0.042846973314294184
     ]
   },
   "test_metrics": {
-    "accuracy": 0.8467741935483871,
-    "balanced_accuracy": 0.7897343358395991,
-    "macro_f1": 0.7993866780773071
+    "accuracy": 0.8306451612903226,
+    "balanced_accuracy": 0.7764711779448622,
+    "precision_macro": 0.8042966042966043,
+    "recall_macro": 0.7764711779448622,
+    "f1_macro": 0.7879720475192173,
+    "roc_auc_macro": 0.9697499371186531
   },
-  "labels": [
+  "confusion_matrix": [
+    [
+      34,
+      4,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      35,
+      4,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      21,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      10,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      3
+    ]
+  ],
+  "labels_plot": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente\nsevera",
+    "Severa"
+  ],
+  "labels_full": [
     "Mínimo",
     "Leve",
     "Moderada",
     "Moderadamente severa",
     "Severa"
-  ]
+  ],
+  "resume": "XGBoost — Accuracy = 0.83, Precisión = 0.80, Sensibilidad = 0.78, F1-Score = 0.79, ROC-AUC = 0.97"
 }

@@ -1,35 +1,141 @@
 {
-  "best_params": {
-    "colsample_bytree": 0.8,
-    "learning_rate": 0.05,
+  "model": "LightGBM",
+  "params": {
+    "objective": "multiclass",
+    "num_class": 5,
+    "learning_rate": 0.08,
+    "n_estimators": 300,
     "max_depth": -1,
-    "min_child_samples": 5,
-    "n_estimators": 400,
-    "num_leaves": 31,
-    "reg_lambda": 0.0,
-    "subsample": 0.8
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "reg_alpha": 0.1,
+    "reg_lambda": 0.1,
+    "random_state": 42,
+    "n_jobs": -1
   },
-  "cv_best_f1_macro": 1.0,
-  "test_accuracy": 1.0,
-  "test_balanced_accuracy": 1.0,
-  "test_f1_macro": 1.0,
-  "target_col": "categoryphq",
-  "columns_used": [
-    "age",
-    "phq1",
-    "phq2",
-    "phq3",
-    "phq4",
-    "phq5",
-    "phq6",
-    "phq7",
-    "phq8",
-    "phq9",
-    "totalphq",
-    "genero_bin"
+  "train_size": 492,
+  "test_size": 124,
+  "cv5_train": {
+    "accuracy_mean": 0.8028447742733457,
+    "accuracy_std": 0.03447630416012333
+  },
+  "curve": {
+    "train_sizes": [
+      39,
+      89,
+      140,
+      190,
+      241,
+      291,
+      342,
+      393
+    ],
+    "train_accuracy_cv_mean": [
+      0.3743589743589743,
+      0.993258426966292,
+      0.9971428571428571,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "train_accuracy_cv_std": [
+      0.030769230769230767,
+      0.005504471332097043,
+      0.005714285714285694,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "valid_accuracy_cv_mean": [
+      0.30076272933415793,
+      0.6585240156668728,
+      0.7397856112141826,
+      0.7438672438672438,
+      0.7559472273757988,
+      0.7783962069676356,
+      0.782415996701711,
+      0.8028447742733457
+    ],
+    "valid_accuracy_cv_std": [
+      0.04989032664174037,
+      0.02102214576203804,
+      0.02674650439964212,
+      0.022110609377752652,
+      0.03443492611513552,
+      0.028831965034122976,
+      0.04159627858105735,
+      0.030638532468499617
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.8225806451612904,
+    "balanced_accuracy": 0.79468671679198,
+    "precision_macro": 0.8021415607985481,
+    "recall_macro": 0.79468671679198,
+    "f1_macro": 0.7966738714620615,
+    "roc_auc_macro": 0.9711847983518318
+  },
+  "confusion_matrix": [
+    [
+      35,
+      3,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      34,
+      5,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      20,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      4,
+      9,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      1,
+      4
+    ]
   ],
-  "non_numeric_removed": [
-    "gender"
+  "labels_plot": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente\nsevera",
+    "Severa"
   ],
-  "constant_removed": []
+  "labels_full": [
+    "Mínimo",
+    "Leve",
+    "Moderada",
+    "Moderadamente severa",
+    "Severa"
+  ],
+  "label_encoder_map": {
+    "0": 1,
+    "1": 2,
+    "2": 3,
+    "3": 4,
+    "4": 5
+  },
+  "resumen": "LightGBM — Accuracy = 0.82, Precisión = 0.80, Sensibilidad = 0.79, F1-Score = 0.80, ROC-AUC = 0.97"
 }

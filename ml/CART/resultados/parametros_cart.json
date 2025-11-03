@@ -1,11 +1,10 @@
 {
   "params": {
-    "criterion": "gini",
-    "max_depth": 6,
-    "min_samples_leaf": 8,
-    "min_samples_split": 20,
+    "type": "DecisionTreeClassifier",
+    "max_depth": 10,
+    "min_samples_leaf": 5,
+    "min_samples_split": 12,
     "class_weight": "balanced",
-    "ccp_alpha": 0.0,
     "random_state": 42
   },
   "features_used": [
