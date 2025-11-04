@@ -3,17 +3,15 @@ load_dotenv(override=True)
 
 from urllib.parse import quote_plus
 
-# PARA QUE GUARDE MI ML A MI BASE DE DATOS MYSQL 
-import json  # <--- nuevo
-MODEL_VERSION = "v1"  # <--- nuevo (versiona tu modelo)
+# PARA QUE GUARDE MI ML A MI BASE DE DATOS MYSQL
+import json
+MODEL_VERSION = "v1"  # versiona tu modelo
 
-#Framework web para mostrar el formulario y manejar las respuestas.
+# Framework web
 from flask import Flask, render_template, request, redirect, Response, jsonify
 from io import BytesIO
 
-#==================================================
-#==========INTEGRACION MACHINE LEARNING
-#Manipulación de datos 
+# ========== INTEGRACION MACHINE LEARNING ==========
 import pandas as pd
 import os
 
@@ -57,7 +55,7 @@ def ml_predict_from_answers(respuestas: dict, edad, genero: str):
 
     # 2) Mapear a los nombres usados en el fit
     #    Ajusta el mapeo si tu convención 0/1 fue la inversa.
-    genero_bin = 1 if gen_str.startswith("f") else 0   # Femenino=1, Masculino=0 (cámbialo si fue al revés)
+    genero_bin = 1 if gen_str.startswith("f") else 0   # Femenino=1, Masculino=0
 
     row_train = {
         "age": base_edad,
@@ -73,7 +71,6 @@ def ml_predict_from_answers(respuestas: dict, edad, genero: str):
         "phq9": base.get("p9", 0.0),
     }
 
-    import pandas as pd
     X = pd.DataFrame([row_train])
 
     # 3) Predecir
@@ -97,22 +94,57 @@ def ml_predict_from_answers(respuestas: dict, edad, genero: str):
 
     return pred, proba
 
-
-def _conf_label_from_pct(top_pct: float) -> str:  #PARA LA CONFIANZA PARA QUE SE MUESTRE EN MI MYSQL
+def _conf_label_from_pct(top_pct: float) -> str:
     if top_pct >= 70:
         return "Alta"
     if top_pct >= 50:
         return "Media"
     return "Baja"
-#========================================================
 
-# importa tu conexión BD 
+# === MAPEOS CANÓNICOS PARA BD (SIN TILDES) ===
+IDX2LBL_DB = {
+    0: 'Minimo',
+    1: 'Leve',
+    2: 'Moderado',
+    3: 'Moderadamente grave',
+    4: 'Grave',
+}
+TXT2LBL_DB = {
+    'minimo': 'Minimo',
+    'leve': 'Leve',
+    'moderado': 'Moderado',
+    'moderadamente grave': 'Moderadamente grave',
+    'grave': 'Grave',
+}
+
+def canon_label_db(y):
+    """
+    Normaliza la salida del modelo (int, numpy.int*, float '2.0', str '2' o texto)
+    a una de las 5 etiquetas EXACTAS del ENUM de la BD (sin tildes).
+    """
+    # 1) intentar convertir a entero (cubre numpy.int*, str '2', float 2.0)
+    try:
+        i = int(str(y).strip())
+        if i in IDX2LBL_DB:
+            return IDX2LBL_DB[i]
+    except Exception:
+        pass
+    # 2) texto -> quitar tildes y a minúsculas
+    import unicodedata
+    s = ''.join(
+        c for c in unicodedata.normalize('NFD', str(y).strip().lower())
+        if unicodedata.category(c) != 'Mn'
+    )
+    return TXT2LBL_DB.get(s)
+
+# ========================================================
+
+# importa tu conexión BD
 from Scas.configuracion import get_db
 
 #----------------------------------------------
-#Inicializar la app Flask
+# Inicializar la app Flask
 app = Flask(__name__)
-
 
 #----------------------------------------------
 # === 8) Rutas ===
@@ -129,7 +161,6 @@ def form_registro():
 @app.route('/form_login')
 def form_login():
     return render_template("login.html")
-
 
 # Ruta para mostrar el formulario cuestionario
 @app.route('/cuestionario')
@@ -148,12 +179,12 @@ def cuestionario():
     usuario_apellido = row[1] if row else None
 
     return render_template(
-        'cuestionario.html', 
-        uid=uid, 
+        'cuestionario.html',
+        uid=uid,
         usuario_nombre=usuario_nombre,
         usuario_apellido=usuario_apellido)
 
-#RUTA PARA VER EL PANEL DE ADMIN
+# RUTA PARA VER EL PANEL DE ADMIN
 @app.route('/form_panel')
 def form_panel():
     uid = request.args.get('uid', type=int)
@@ -172,13 +203,13 @@ def form_panel():
             return redirect(f'/cuestionario?uid={uid}')
 
         where_like = ""
-        params = [MODEL_VERSION]        # <-- aquí empezamos con la versión del modelo
+        params = [MODEL_VERSION]        # versión del modelo
         if q:
             where_like = " AND u.nombre LIKE %s "
             params.append(f"%{q}%")
 
         sql = f"""
-            SELECT 
+            SELECT
                 u.id_usuario,
                 u.nombre,
                 c.genero,
@@ -201,7 +232,7 @@ def form_panel():
                 ) ult
                   ON ult.id_usuario = c1.id_usuario AND ult.mx = c1.created_at
             ) c ON c.id_usuario = u.id_usuario
-            LEFT JOIN resultado r 
+            LEFT JOIN resultado r
                    ON r.id_cuestionario = c.id_cuestionario
             LEFT JOIN prediccion_ml pm
                    ON pm.id_cuestionario = c.id_cuestionario
@@ -238,7 +269,7 @@ def resultado():
 
     # Trae el último cuestionario del usuario (solo p1..p9)
     cur.execute("""
-        SELECT 
+        SELECT
                c.id_cuestionario,
                c.created_at,
                c.p1, c.p2, c.p3, c.p4, c.p5, c.p6, c.p7, c.p8, c.p9,
@@ -269,12 +300,12 @@ def resultado():
 
     # ====== PREDICCIÓN ML SOLO PARA MOSTRAR (NO SE GUARDA) ======
     respuestas = {f"p{i}": int(row.get(f"p{i}", 0) or 0) for i in range(1, 10)}
-    pred_ml, proba_ml = ml_predict_from_answers(respuestas, row['edad'], row['genero']) #NUEVO ML#
+    pred_ml, proba_ml = ml_predict_from_answers(respuestas, row['edad'], row['genero'])
     # === Confianza del modelo (según prob. más alta) ===
     conf_ml = None
     conf_pct = None
     if proba_ml:
-        top = max(proba_ml.values())# p.ej. 40.0
+        top = max(proba_ml.values())  # p.ej. 40.0
         conf_pct = top
         if top >= 70:
             conf_ml = "Alta"
@@ -293,22 +324,22 @@ def resultado():
         total=total,
         nivel_total=nivel,
         # compat:
-        pred_ml=pred_ml,   #AGREGADO ML
-        proba_ml=proba_ml, #AGREGADO ML
-        conf_ml=conf_ml,   #AGREGADO ML
-        conf_pct=conf_pct  #AGREGADO ML
+        pred_ml=pred_ml,   # se muestra crudo (lo cambiamos luego si quieres)
+        proba_ml=proba_ml,
+        conf_ml=conf_ml,
+        conf_pct=conf_pct
     )
 
 # Ruta para que guarde el registro de usuario (GET y POST)
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
     if request.method == 'GET':
-        return render_template("registro.html")  # sin exito/error por Jinja
+        return render_template("registro.html")
 
     nombre   = request.form.get("nombre")
     apellido = request.form.get("apellido")
     grado    = (request.form.get("grado") or "").strip()
-    edad     = (request.form.get("edad") or "").strip()          # ← solo 'edad'
+    edad     = (request.form.get("edad") or "").strip()
     genero   = (request.form.get("genero") or "").strip().lower()
     password = request.form.get("password")
 
@@ -319,12 +350,9 @@ def registro():
             (nombre, apellido, grado, edad, genero, password)
         )
         cn.commit()
-        # 👉 redirige con querystring para que el front muestre el modal
         return redirect("/form_registro?exito=1")
     except Exception as e:
         cn.rollback()
-        # 👉 redirige con error en querystring
-        from urllib.parse import quote_plus
         return redirect(f"/form_registro?error={quote_plus(str(e))}")
     finally:
         cur.close(); cn.close()
@@ -339,7 +367,6 @@ def perfil():
 
         cn = get_db(); cur = cn.cursor()
         try:
-            # ⬇️ trae también grado, edad y genero
             cur.execute(
                 "SELECT nombre, apellido, grado, edad, genero FROM usuario WHERE id_usuario=%s",
                 (uid,)
@@ -354,7 +381,6 @@ def perfil():
         edad     = row[3] if row and len(row) > 3 else ''
         genero   = row[4] if row and len(row) > 4 else ''
 
-        # 👉 Redirige al mismo formulario pero en modo edición (pasa los nuevos campos)
         return redirect(
             f"/form_registro?mode=editar&uid={uid}"
             f"&nombre={quote_plus(str(nombre))}"
@@ -373,11 +399,10 @@ def perfil():
     apellido  = (request.form.get('apellido') or '').strip()
     grado     = (request.form.get('grado') or '').strip()
     edad_str  = (request.form.get('edad') or '').strip()
-    genero    = (request.form.get('genero') or '').strip().lower()  # DB espera 'femenino'/'masculino'
+    genero    = (request.form.get('genero') or '').strip().lower()
     password  = (request.form.get('password') or '').strip()
     password2 = (request.form.get('confirm_password') or request.form.get('password2') or '').strip()
 
-    # Si quieres, puedes validar edad a entero (la columna es INT NOT NULL)
     try:
         edad = int(edad_str) if edad_str != '' else None
     except ValueError:
@@ -424,15 +449,12 @@ def perfil():
 
     return redirect(f"/cuestionario?uid={uid}")
 
-
 # === Login (GET/POST) ===
-# IMPORTANTE: tu login.html debe postear a /login (action="/login")
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html', error=None)
 
-    # POST: validar contra BD (sin hash)
     nombre = request.form.get('nombre')
     password = request.form.get('password')
 
@@ -451,7 +473,6 @@ def login():
     if row:
         uid = row[0]
 
-        # >>> NUEVO: consultar rol y redirigir según sea admin o no
         cn = get_db()
         cur = cn.cursor()
         try:
@@ -463,15 +484,12 @@ def login():
 
         rol = (rol_row[0] if rol_row and rol_row[0] else '').lower()
         if rol == 'admin':
-            return redirect(f'/form_panel?uid={uid}')              # admin -> panel
+            return redirect(f'/form_panel?uid={uid}')
         else:
-            return redirect(f'/cuestionario?uid={uid}') # estudiante/otros -> cuestionario
+            return redirect(f'/cuestionario?uid={uid}')
 
-    # credenciales incorrectas
     return render_template('login.html', error="Nombre de usuario o contraseña incorrectos.")
 
-#========================================
-#========================================
 # === Guardar/Actualizar cuestionario (PHQ-A/PHQ-9: 9 ítems) ===
 @app.post('/guardar')
 def guardar():
@@ -511,7 +529,7 @@ def guardar():
             id_cuest = row[0]
             sql = """
                 UPDATE cuestionario
-                   SET 
+                   SET
                        p1=%s,p2=%s,p3=%s,p4=%s,p5=%s,p6=%s,p7=%s,p8=%s,p9=%s
                  WHERE id_cuestionario=%s
             """
@@ -530,7 +548,7 @@ def guardar():
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
             valores = [
-                id_usuario, 
+                id_usuario,
                 respuestas["p1"],respuestas["p2"],respuestas["p3"],
                 respuestas["p4"],respuestas["p5"],respuestas["p6"],
                 respuestas["p7"],respuestas["p8"],respuestas["p9"],
@@ -553,7 +571,7 @@ def guardar():
                 (id_cuest, puntaje_total, nivel_txt)
             )
 
-        # === ML: calcular y guardar/actualizar predicción del modelo en mi MYSQL===
+        # === ML: calcular y guardar/actualizar predicción del modelo en mi MYSQL ===
         try:
             # Traer edad y genero del usuario
             cur.execute("SELECT edad, genero FROM usuario WHERE id_usuario=%s", (id_usuario,))
@@ -563,23 +581,8 @@ def guardar():
 
             pred_ml, proba_ml = ml_predict_from_answers(respuestas, edad, genero)
 
-            # --- Normalizar al ENUM EXACTO de la BD ---
-            label_map = {
-                0: "Mínimo", 1: "Leve", 2: "Moderado",
-                3: "Moderadamente grave", 4: "Grave",
-                "minimo": "Mínimo", "mínimo": "Mínimo",
-                "leve": "Leve",
-                "moderado": "Moderado",
-                "moderadamente grave": "Moderadamente grave",
-                "grave": "Grave",
-            }
-            def canon_label(y):
-                if isinstance(y, (int, float)) and int(y) in label_map:
-                    return label_map[int(y)]
-                s = str(y).strip().lower()
-                return label_map.get(s)
-
-            pred_ml_canon = canon_label(pred_ml)
+            # --- Normalizar al ENUM EXACTO de la BD (SIN tildes) ---
+            pred_ml_canon = canon_label_db(pred_ml)
             if not pred_ml_canon:
                 raise ValueError(f"Clase del modelo no mapea al ENUM: {pred_ml!r}")
 
@@ -588,7 +591,7 @@ def guardar():
             conf_label = _conf_label_from_pct(conf_pct) if conf_pct is not None else None
             proba_json = json.dumps(proba_ml, ensure_ascii=False) if proba_ml else None
 
-            # UPSERT (recomendado crear índice único ver nota abajo)
+            # UPSERT (recomendado tener UNIQUE(id_cuestionario, model_version))
             cur.execute("""
                 INSERT INTO prediccion_ml
                     (id_cuestionario, model_version, pred_label, conf_pct, conf_label, proba_json)
