@@ -576,3 +576,11 @@ def guardar():
 
     except Exception as e:
         return f"Error al guardar: {e}", 400
+
+@app.get("/_ml_health")
+def ml_health():
+    try:
+        ok = get_model() is not None
+        return {"loaded": ok}, (200 if ok else 500)
+    except Exception as e:
+        return {"loaded": False, "err": str(e)}, 500
