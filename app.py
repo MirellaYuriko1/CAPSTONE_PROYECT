@@ -86,7 +86,14 @@ def ml_predict_from_answers(respuestas: dict, edad, genero: str):
                     classes = step.classes_
                     break
         if classes is not None:
-            proba = {c: round(float(p) * 100, 1) for c, p in zip(classes, probs)}
+            # convertir clases numpy -> tipos Python
+            cls_py = []
+            for c in classes:
+                try:
+                    cls_py.append(c.item())  # numpy -> python
+                except Exception:
+                    cls_py.append(c)
+            proba = {cls_py[i]: round(float(p) * 100, 1) for i, p in enumerate(probs)}
         else:
             proba = {int(i): round(float(p) * 100, 1) for i, p in enumerate(probs)}
 
@@ -134,6 +141,22 @@ def canon_label_db(y):
         if unicodedata.category(c) != 'Mn'
     )
     return TXT2LBL_DB.get(s)
+
+def json_ready_proba(proba: dict) -> dict:
+    """Convierte claves numpy.* a tipos nativos y mapea índices a etiquetas ENUM (sin tildes)."""
+    if not proba:
+        return proba
+    out = {}
+    for k, v in proba.items():
+        # pasar numpy -> python
+        try:
+            kk = k.item()
+        except Exception:
+            kk = k
+        # si es índice 0..4, mapear a etiqueta; si no, dejar como str/int
+        lbl = canon_label_db(kk) or (kk if isinstance(kk, (int, float, bool, type(None))) else str(kk))
+        out[lbl] = float(v)
+    return out
 
 # ========================================================
 # importa tu conexión BD
@@ -572,7 +595,9 @@ def guardar():
             # Confianza
             conf_pct = float(max(proba_ml.values())) if proba_ml else None  # ya viene en %
             conf_label = _conf_label_from_pct(conf_pct) if conf_pct is not None else None
-            proba_json = json.dumps(proba_ml, ensure_ascii=False) if proba_ml else None
+
+            # Guardar proba_json con claves nativas/etiquetas
+            proba_json = json.dumps(json_ready_proba(proba_ml), ensure_ascii=False) if proba_ml else None
 
             # UPSERT (ideal tener UNIQUE(id_cuestionario, model_version))
             cur.execute("""
