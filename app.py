@@ -38,28 +38,65 @@ def get_model():
             _model = None
     return _model
 
-def ml_predict_from_answers(respuestas: dict, edad: int, genero: str):
+def ml_predict_from_answers(respuestas: dict, edad, genero: str):
+    """
+    Mapea nombres actuales -> nombres del entrenamiento:
+    p1..p9 -> phq1..phq9, edad -> age, genero -> genero_bin (0/1)
+    """
     clf = get_model()
     if clf is None:
         return None, None
 
-    row = {f"p{i}": float(respuestas.get(f"p{i}", 0)) for i in range(1, 10)}
-    row["edad"] = float(edad)
-    # 👇 Normaliza exactamente como en el entrenamiento
-    row["genero"] = (str(genero or "").strip().lower())
+    # 1) Construir fila con tus nombres actuales
+    base = {f"p{i}": float(respuestas.get(f"p{i}", 0)) for i in range(1, 10)}
+    try:
+        base_edad = float(edad) if edad is not None and str(edad).strip() != "" else 0.0
+    except Exception:
+        base_edad = 0.0
+    gen_str = str(genero or "").strip().lower()   # 'femenino' / 'masculino'
 
-    X = pd.DataFrame([row])
+    # 2) Mapear a los nombres usados en el fit
+    #    Ajusta el mapeo si tu convención 0/1 fue la inversa.
+    genero_bin = 1 if gen_str.startswith("f") else 0   # Femenino=1, Masculino=0 (cámbialo si fue al revés)
+
+    row_train = {
+        "age": base_edad,
+        "genero_bin": float(genero_bin),
+        "phq1": base.get("p1", 0.0),
+        "phq2": base.get("p2", 0.0),
+        "phq3": base.get("p3", 0.0),
+        "phq4": base.get("p4", 0.0),
+        "phq5": base.get("p5", 0.0),
+        "phq6": base.get("p6", 0.0),
+        "phq7": base.get("p7", 0.0),
+        "phq8": base.get("p8", 0.0),
+        "phq9": base.get("p9", 0.0),
+    }
+
+    import pandas as pd
+    X = pd.DataFrame([row_train])
+
+    # 3) Predecir
     pred = clf.predict(X)[0]
 
+    # 4) Probabilidades (si existen)
     proba = None
     if hasattr(clf, "predict_proba"):
         probs = clf.predict_proba(X)[0]
         classes = getattr(clf, "classes_", None)
         if classes is None and hasattr(clf, "named_steps"):
-            classes = clf.named_steps["model"].classes_
-        proba = {c: round(float(p) * 100, 1) for c, p in zip(classes, probs)}
+            # Encuentra el paso con classes_
+            for _, step in clf.named_steps.items():
+                if hasattr(step, "classes_"):
+                    classes = step.classes_
+                    break
+        if classes is not None:
+            proba = {c: round(float(p) * 100, 1) for c, p in zip(classes, probs)}
+        else:
+            proba = {int(i): round(float(p) * 100, 1) for i, p in enumerate(probs)}
 
     return pred, proba
+
 
 def _conf_label_from_pct(top_pct: float) -> str:  #PARA LA CONFIANZA PARA QUE SE MUESTRE EN MI MYSQL
     if top_pct >= 70:
