@@ -21,7 +21,7 @@ import os
 from joblib import load
 from pathlib import Path
 
-PREGUNTAS = [f"p{i}" for i in range(1, 39)]
+PREGUNTAS = [f"p{i}" for i in range(1, 10)]
 MODEL_PATH = Path(__file__).parent / "ml" / "models" / "model_v1.joblib"
 _model = None
 
@@ -39,27 +39,21 @@ def get_model():
     return _model
 
 def ml_predict_from_answers(respuestas: dict, edad: int, genero: str):
-    """
-    Usa el pipeline entrenado (con edad y genero).
-    Retorna (pred_label, proba_dict | None)
-    """
     clf = get_model()
     if clf is None:
         return None, None
 
-    # construir un dataframe con EXACTOS nombres de columnas de entrenamiento
-    row = {f"p{i}": float(respuestas.get(f"p{i}", 0)) for i in range(1, 39)}
+    row = {f"p{i}": float(respuestas.get(f"p{i}", 0)) for i in range(1, 10)}
     row["edad"] = float(edad)
-    row["genero"] = str(genero or "")
+    # 👇 Normaliza exactamente como en el entrenamiento
+    row["genero"] = (str(genero or "").strip().lower())
 
-    X = pd.DataFrame([row])  # el Pipeline se encarga del one-hot
-
+    X = pd.DataFrame([row])
     pred = clf.predict(X)[0]
 
     proba = None
     if hasattr(clf, "predict_proba"):
         probs = clf.predict_proba(X)[0]
-        # Obtener clases del modelo dentro del Pipeline
         classes = getattr(clf, "classes_", None)
         if classes is None and hasattr(clf, "named_steps"):
             classes = clf.named_steps["model"].classes_
@@ -212,7 +206,7 @@ def resultado():
                c.created_at,
                c.p1, c.p2, c.p3, c.p4, c.p5, c.p6, c.p7, c.p8, c.p9,
                r.puntaje_total, r.nivel,
-               u.nombre, u.edad
+               u.nombre, u.edad, u.genero
           FROM (
                 SELECT *
                   FROM cuestionario
@@ -236,6 +230,23 @@ def resultado():
         total = sum(int(row.get(f"p{i}", 0) or 0) for i in range(1, 10))
         nivel = interpreta_phqa(total)
 
+    # ====== PREDICCIÓN ML SOLO PARA MOSTRAR (NO SE GUARDA) ======
+    respuestas = {f"p{i}": int(row.get(f"p{i}", 0) or 0) for i in range(1, 10)}
+    pred_ml, proba_ml = ml_predict_from_answers(respuestas, row['edad'], row['genero']) #NUEVO ML#
+    # === Confianza del modelo (según prob. más alta) ===
+    conf_ml = None
+    conf_pct = None
+    if proba_ml:
+        top = max(proba_ml.values())# p.ej. 40.0
+        conf_pct = top
+        if top >= 70:
+            conf_ml = "Alta"
+        elif top >= 50:
+            conf_ml = "Media"
+        else:
+            conf_ml = "Baja"
+    # ============================================================
+
     return render_template(
         'resultado.html',
         notfound=False,
@@ -245,11 +256,10 @@ def resultado():
         total=total,
         nivel_total=nivel,
         # compat:
-        rows=[],
-        pred_ml=None,
-        proba_ml=None,
-        conf_ml=None,
-        conf_pct=None
+        pred_ml=pred_ml,   #AGREGADO ML
+        proba_ml=proba_ml, #AGREGADO ML
+        conf_ml=conf_ml,   #AGREGADO ML
+        conf_pct=conf_pct  #AGREGADO ML
     )
 
 # Ruta para que guarde el registro de usuario (GET y POST)
@@ -505,6 +515,58 @@ def guardar():
                 "INSERT INTO resultado (id_cuestionario, puntaje_total, nivel) VALUES (%s,%s,%s)",
                 (id_cuest, puntaje_total, nivel_txt)
             )
+
+        # === ML: calcular y guardar/actualizar predicción del modelo en mi MYSQL===
+        try:
+            # Traer edad y genero del usuario
+            cur.execute("SELECT edad, genero FROM usuario WHERE id_usuario=%s", (id_usuario,))
+            urow = cur.fetchone()
+            edad = urow[0] if urow else None
+            genero = urow[1] if urow else None
+
+            pred_ml, proba_ml = ml_predict_from_answers(respuestas, edad, genero)
+
+            # --- Normalizar al ENUM EXACTO de la BD ---
+            label_map = {
+                0: "Mínimo", 1: "Leve", 2: "Moderado",
+                3: "Moderadamente grave", 4: "Grave",
+                "minimo": "Mínimo", "mínimo": "Mínimo",
+                "leve": "Leve",
+                "moderado": "Moderado",
+                "moderadamente grave": "Moderadamente grave",
+                "grave": "Grave",
+            }
+            def canon_label(y):
+                if isinstance(y, (int, float)) and int(y) in label_map:
+                    return label_map[int(y)]
+                s = str(y).strip().lower()
+                return label_map.get(s)
+
+            pred_ml_canon = canon_label(pred_ml)
+            if not pred_ml_canon:
+                raise ValueError(f"Clase del modelo no mapea al ENUM: {pred_ml!r}")
+
+            # Confianza
+            conf_pct = float(max(proba_ml.values())) if proba_ml else None  # ya viene en %
+            conf_label = _conf_label_from_pct(conf_pct) if conf_pct is not None else None
+            proba_json = json.dumps(proba_ml, ensure_ascii=False) if proba_ml else None
+
+            # UPSERT (recomendado crear índice único ver nota abajo)
+            cur.execute("""
+                INSERT INTO prediccion_ml
+                    (id_cuestionario, model_version, pred_label, conf_pct, conf_label, proba_json)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    pred_label = VALUES(pred_label),
+                    conf_pct   = VALUES(conf_pct),
+                    conf_label = VALUES(conf_label),
+                    proba_json = VALUES(proba_json)
+            """, (id_cuest, MODEL_VERSION, pred_ml_canon, conf_pct, conf_label, proba_json))
+
+        except Exception as e:
+            import traceback
+            print("[ML] Error guardando predicción:", e)
+            traceback.print_exc()
 
         cn.commit()
         cur.close(); cn.close()
