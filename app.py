@@ -108,11 +108,11 @@ def _conf_label_from_pct(top_pct: float) -> str:
 
 # === MAPEOS CANÓNICOS PARA BD (SIN TILDES) ===
 IDX2LBL_DB = {
-    0: 'Mínimo',
-    1: 'Leve',
-    2: 'Moderado',
-    3: 'Moderadamente grave',
-    4: 'Grave',
+    1: 'Mínimo',
+    2: 'Leve',
+    3: 'Moderado',
+    4: 'Moderadamente grave',
+    5: 'Grave',
 }
 TXT2LBL_DB = {
     'mínimo': 'Mínimo',
