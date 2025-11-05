@@ -125,7 +125,7 @@ TXT2LBL_DB = {
 def canon_label_db(y):
     """
     Normaliza la salida del modelo (2, '2', numpy.int64(2), 2.0,
-    'Mínimo', 'minimo', etc.) a una de las 5 etiquetas EXACTAS del ENUM.
+    'Minimo', 'minimo', etc.) a una de las 5 etiquetas EXACTAS del ENUM.
     """
     # 1) intentar como índice
     try:
@@ -271,7 +271,7 @@ def resultado():
         return "Falta el parámetro uid.", 400
 
     def interpreta_phqa(total: int) -> str:
-        if 0 <= total <= 4:   return "Mínimo"
+        if 0 <= total <= 4:   return "Minimo"
         if 5 <= total <= 9:   return "Leve"
         if 10 <= total <= 14: return "Moderado"
         if 15 <= total <= 19: return "Moderadamente grave"
@@ -512,7 +512,7 @@ def guardar():
 
         # 3) Nivel PHQ-A (0–4, 5–9, 10–14, 15–19, 20–27)
         def interpreta_phqa(total: int) -> str:
-            if 0 <= total <= 4:   return "Mínimo"
+            if 0 <= total <= 4:   return "Minimo"
             if 5 <= total <= 9:   return "Leve"
             if 10 <= total <= 14: return "Moderado"
             if 15 <= total <= 19: return "Moderadamente grave"
