@@ -108,14 +108,14 @@ def _conf_label_from_pct(top_pct: float) -> str:
 
 # === MAPEOS CANÓNICOS PARA BD (SIN TILDES) ===
 IDX2LBL_DB = {
-    0: 'Minimo',
+    0: 'Mínimo',
     1: 'Leve',
     2: 'Moderado',
     3: 'Moderadamente grave',
     4: 'Grave',
 }
 TXT2LBL_DB = {
-    'minimo': 'Minimo',
+    'mínimo': 'Mínimo',
     'leve': 'Leve',
     'moderado': 'Moderado',
     'moderadamente grave': 'Moderadamente grave',
@@ -271,7 +271,7 @@ def resultado():
         return "Falta el parámetro uid.", 400
 
     def interpreta_phqa(total: int) -> str:
-        if 0 <= total <= 4:   return "Minimo"
+        if 0 <= total <= 4:   return "Mínimo"
         if 5 <= total <= 9:   return "Leve"
         if 10 <= total <= 14: return "Moderado"
         if 15 <= total <= 19: return "Moderadamente grave"
