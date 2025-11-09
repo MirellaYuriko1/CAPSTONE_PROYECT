@@ -167,8 +167,9 @@
             </p>
           </div>
         {% endif %}
-
-        <!-- Chip de nivel (usa nivel_total del backend) -->
+        
+    
+        <!-- Chip de nivel (usa nivel_total del backend) 
         {% set nl = (nivel_total or '')|lower %}
         <p class="text-center">
           {% if nl == 'grave' %}
@@ -182,8 +183,8 @@
           {% else %}
             <span class="badge badge-level bg-success">{{ nivel_total or 'Mínimo' }}</span>
           {% endif %}
-        </p>
-
+        </p> -->
+        
         <!-- Puntaje total -->
         {% set pctTotal = (total * 100 / 27) | round(0, 'floor') %}
         <div class="score-card" aria-label="Puntaje total PHQ-A">
