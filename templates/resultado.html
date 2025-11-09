@@ -105,13 +105,35 @@
           <strong>{{ nombre }}</strong>, tu nivel de depresión estimado es:
         </p>
 
-        <!-- (Opcional) Tarjeta ML si envías pred_ml/conf_ml -->
+        <!-- Tarjeta ML (usa el código 1..5 y lo traduce a texto) -->
         {% if pred_ml or conf_ml %}
           <div class="text-center mt-3">
+
+            {# 1) Convertir pred_ml (1..5) a texto de nivel #}
+            {% if pred_ml is not none %}
+              {% set code = pred_ml|int %}
+            {% else %}
+              {% set code = 0 %}
+            {% endif %}
+
+            {% if code == 1 %}
+              {% set nivel_chip = 'Mínimo' %}
+            {% elif code == 2 %}
+              {% set nivel_chip = 'Leve' %}
+            {% elif code == 3 %}
+              {% set nivel_chip = 'Moderado' %}
+            {% elif code == 4 %}
+              {% set nivel_chip = 'Moderadamente grave' %}
+            {% elif code == 5 %}
+              {% set nivel_chip = 'Grave' %}
+            {% else %}
+              {% set nivel_chip = nivel_total %}
+            {% endif %}
+
             <div class="ml-card" role="group" aria-label="Resultado del modelo de Machine Learning">
               <span class="badge badge-level badge-ml">🤖 Modelo (ML)</span>
 
-              {% set nivel_chip = pred_ml if pred_ml else nivel_total %}
+              {# 2) Badge del nivel que predijo el modelo (en texto) #}
               {% set nml = (nivel_chip or '')|lower %}
               {% if nml == 'grave' %}
                 <span class="badge badge-level bg-danger">{{ nivel_chip }}</span>
@@ -122,9 +144,10 @@
               {% elif nml == 'leve' %}
                 <span class="badge badge-level bg-info text-dark">{{ nivel_chip }}</span>
               {% else %}
-                <span class="badge badge-level bg-success">{{ nivel_chip }}</span>
+                <span class="badge badge-level bg-success">{{ nivel_chip or 'Mínimo' }}</span>
               {% endif %}
 
+              {# 3) Badge de confianza #}
               {% if conf_ml %}
                 {% set c = (conf_ml or '')|lower %}
                 {% set conf_class = 'bg-secondary' %}
@@ -138,7 +161,10 @@
                 </span>
               {% endif %}
             </div>
-            <p class="text-center text-muted mt-2" style="font-size:.85rem">Estimado por el modelo (no es diagnóstico).</p>
+
+            <p class="text-center text-muted mt-2" style="font-size:.85rem">
+              Estimado por el modelo (no es diagnóstico).
+            </p>
           </div>
         {% endif %}
 
@@ -179,8 +205,6 @@
           <br>Este resultado no es un diagnóstico.
         </div>
 
-        
-
         <div class="actions d-flex justify-content-center">
           <a href="/" class="btn btn-danger">Cerrar Sesión</a>
         </div>
@@ -193,7 +217,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.meter-bar[data-pct]').forEach(el => {
         const pct = Number(el.dataset.pct || 0);
-        requestAnimationFrame(() => { el.style.width = Math.max(0, Math.min(100, pct)) + '%'; });
+        requestAnimationFrame(() => {
+          el.style.width = Math.max(0, Math.min(100, pct)) + '%';
+        });
       });
     });
   </script>
