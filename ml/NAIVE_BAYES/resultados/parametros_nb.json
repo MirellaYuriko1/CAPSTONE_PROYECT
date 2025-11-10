@@ -1,5 +1,5 @@
 {
-  "modelo": "GaussianNB",
+  "params": {},
   "features_used": [
     "age",
     "genero_bin",

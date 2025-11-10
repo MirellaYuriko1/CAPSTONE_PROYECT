@@ -5,12 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import (
-    train_test_split,
-    StratifiedKFold,
-    learning_curve,
-    cross_val_score
-)
+from sklearn.model_selection import (train_test_split, StratifiedKFold,learning_curve,cross_val_score)
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     accuracy_score,
@@ -33,6 +28,7 @@ DIR_OUT.mkdir(parents=True, exist_ok=True)
 
 RUTA_CURVA_IMG             = DIR_OUT / "curva_entrenamiento_validacion_rf.png"
 RUTA_CURVA_CSV             = DIR_OUT / "curva_entrenamiento_validacion_rf.csv"
+RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_rf.png"     
 RUTA_MATRIZ_CONFUSION      = DIR_OUT / "matriz_confusion_rf.png"
 RUTA_METRICAS              = DIR_OUT / "metricas_rf.json"
 RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_rf.txt"
@@ -43,7 +39,7 @@ FEATURES = [
     "age","genero_bin",
     "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
 ]
-TARGET = "categoryphq"
+TARGET   = "nivel_idx"
 
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 CLASSES_FIG = ["Mínimo","Leve","Moderada","Moderadamente\nsevera","Severa"]
@@ -65,7 +61,7 @@ RF_PARAMS = dict(
 )
 
 # ----------------------------------------------------------
-# Curva de aprendizaje (sin números, Y en 0..1, exporta CSV)
+# Curva de aprendizaje (Accuracy y Pérdida, exporta CSV)
 # ----------------------------------------------------------
 def construir_modelo_rf(X_train, y_train, cv, ruta_png, ruta_csv):
     modelo = RandomForestClassifier(**RF_PARAMS)
@@ -77,7 +73,7 @@ def construir_modelo_rf(X_train, y_train, cv, ruta_png, ruta_csv):
         y=y_train,
         train_sizes=train_sizes_rel,
         cv=cv,
-        scoring="accuracy",
+        scoring="accuracy",   
         n_jobs=-1,
         shuffle=True,
         random_state=SEED
@@ -86,12 +82,17 @@ def construir_modelo_rf(X_train, y_train, cv, ruta_png, ruta_csv):
     tr_mean = train_scores.mean(axis=1); tr_std = train_scores.std(axis=1)
     va_mean = valid_scores.mean(axis=1); va_std = valid_scores.std(axis=1)
 
+    loss_train_mean = 1.0 - tr_mean
+    loss_valid_mean = 1.0 - va_mean
+
     df_curve = pd.DataFrame({
         "train_size": sizes_abs,
         "acc_train_cv_mean": np.round(tr_mean, 4),
         "acc_train_cv_std":  np.round(tr_std, 4),
         "acc_valid_cv_mean": np.round(va_mean, 4),
         "acc_valid_cv_std":  np.round(va_std, 4),
+        "loss_train_mean":   np.round(loss_train_mean, 4),
+        "loss_valid_mean":   np.round(loss_valid_mean, 4),
     })
     df_curve.to_csv(ruta_csv, index=False, encoding="utf-8-sig")
     print(f"[OK] CSV de curva guardado en: {ruta_csv}")
@@ -118,7 +119,21 @@ def construir_modelo_rf(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.tight_layout()
     plt.savefig(ruta_png, dpi=300)
     plt.close()
-    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV-5) guardada en: {ruta_png}")
+    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (Accuracy CV-5) guardada en: {ruta_png}")
+
+    plt.figure(figsize=(7.8, 5.6))
+    plt.plot(sizes_abs, loss_train_mean, marker="o", label="Pérdida entrenamiento")
+    plt.plot(sizes_abs, loss_valid_mean, marker="s", label="Pérdida validación")
+
+    plt.ylim(0.0, 1.0)
+    plt.title("Curva de pérdida del Random Forest")
+    plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
+    plt.ylabel("Pérdida")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)
+    plt.close()
+    print(f"[OK] Curva de PÉRDIDA (1 - accuracy) guardada en: {RUTA_CURVA_PERDIDA_IMG}")
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist(), tr_std.tolist(), va_std.tolist()
 
@@ -141,14 +156,17 @@ def main():
 
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # Curva CV-5 (solo TRAIN)
     sizes_abs, tr_mean, va_mean, tr_std, va_std = construir_modelo_rf(
         X_train, y_train, cv, RUTA_CURVA_IMG, RUTA_CURVA_CSV
     )
 
-    # Rendimiento promedio en TRAIN con CV-5
     cv_model = RandomForestClassifier(**RF_PARAMS)
-    cv_acc = cross_val_score(cv_model, X_train, y_train, cv=cv, scoring="accuracy", n_jobs=-1)
+    cv_acc = cross_val_score(
+        cv_model, X_train, y_train,
+        cv=cv,
+        scoring="accuracy",
+        n_jobs=-1
+    )
     print(f"[CV-5] Accuracy (TRAIN) = {cv_acc.mean():.4f} ± {cv_acc.std():.4f}")
 
     # Entrenamiento final y evaluación en TEST
@@ -162,6 +180,7 @@ def main():
     y_pred = model.predict(X_test)
     proba_test = model.predict_proba(X_test)
 
+    # Métricas en TEST
     acc_test   = accuracy_score(y_test, y_pred)
     bacc_test  = balanced_accuracy_score(y_test, y_pred)
     f1m_test   = f1_score(y_test, y_pred, average="macro")
@@ -176,7 +195,7 @@ def main():
     print("\n=== MÉTRICAS EN TEST (GLOBAL / PROMEDIO ENTRE CLASES) ===")
     print(f"Accuracy                = {acc_test:.4f}")
     print(f"Balanced Accuracy       = {bacc_test:.4f}")
-    print(f"Precision (macro)       = {prec_macro:.4f}")
+    print(f"Precisión (macro)       = {prec_macro:.4f}")
     print(f"Recall (macro)          = {rec_macro:.4f}")
     print(f"F1-Score (macro)        = {f1m_test:.4f}")
     print(f"ROC-AUC (macro OVR)     = {roc_auc_macro:.4f}" if roc_auc_macro is not None else "ROC-AUC (macro OVR)     = N/A")
@@ -211,12 +230,19 @@ def main():
     plt.close()
     print("[OK] Matriz de confusión guardada en:", RUTA_MATRIZ_CONFUSION)
 
+    # Para el JSON también guardamos las pérdidas (1 - accuracy)
+    loss_train_mean = [1.0 - float(x) for x in tr_mean]
+    loss_valid_mean = [1.0 - float(x) for x in va_mean]
+
     metricas = {
         "model": "RandomForest",
         "params": RF_PARAMS,
         "train_size": int(len(X_train)),
         "test_size": int(len(X_test)),
-        "cv5_train": {"accuracy_mean": float(cv_acc.mean()), "accuracy_std": float(cv_acc.std())},
+        "cv5_train": {
+            "accuracy_mean": float(cv_acc.mean()),
+            "accuracy_std":  float(cv_acc.std())
+        },
         "oob_score": float(oob) if oob is not None else None,
         "curve": {
             "train_sizes": sizes_abs,
@@ -224,6 +250,8 @@ def main():
             "train_accuracy_std":  [float(x) for x in tr_std],
             "valid_accuracy_mean": [float(x) for x in va_mean],
             "valid_accuracy_std":  [float(x) for x in va_std],
+            "train_loss_mean":      loss_train_mean,
+            "valid_loss_mean":      loss_valid_mean,
         },
         "test_metrics": {
             "accuracy": float(acc_test),

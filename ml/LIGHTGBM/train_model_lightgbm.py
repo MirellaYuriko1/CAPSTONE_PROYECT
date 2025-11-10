@@ -23,13 +23,14 @@ RUTA_DATOS = Path("data/final/phq9_final.csv")
 DIR_OUT = Path("ml/LIGHTGBM/resultados")
 DIR_OUT.mkdir(parents=True, exist_ok=True)
 
-RUTA_CURVA_IMG            = DIR_OUT / "curva_entrenamiento_validacion_lgbm.png"
-RUTA_CURVA_CSV            = DIR_OUT / "curva_entrenamiento_validacion_lgbm.csv"
-RUTA_MATRIZ_CONFUSION     = DIR_OUT / "matriz_confusion_lgbm.png"
-RUTA_METRICAS             = DIR_OUT / "metricas_lgbm.json"
-RUTA_REPORTE_CLASIFICACION= DIR_OUT / "reporte_clasificacion_lgbm.txt"
-RUTA_MODELO               = DIR_OUT / "modelo_lgbm.pkl"
-RUTA_PARAMS               = DIR_OUT / "parametros_lgbm.json"
+RUTA_CURVA_IMG             = DIR_OUT / "curva_entrenamiento_validacion_lgbm.png"
+RUTA_CURVA_CSV             = DIR_OUT / "curva_entrenamiento_validacion_lgbm.csv"
+RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_lgbm.png"
+RUTA_MATRIZ_CONFUSION      = DIR_OUT / "matriz_confusion_lgbm.png"
+RUTA_METRICAS              = DIR_OUT / "metricas_lgbm.json"
+RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_lgbm.txt"
+RUTA_MODELO                = DIR_OUT / "modelo_lgbm.pkl"
+RUTA_PARAMS                = DIR_OUT / "parametros_lgbm.json"
 
 # =========================
 # VARIABLES DEL MODELO
@@ -38,25 +39,28 @@ FEATURES = [
     "age", "genero_bin",
     "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
 ]
-TARGET = "categoryphq"  # valores 1..5
+TARGET   = "nivel_idx"
 
 CLASSES = ["Mínimo", "Leve", "Moderada", "Moderadamente severa", "Severa"]
 CLASSES_FIG = ["Mínimo", "Leve", "Moderada", "Moderadamente\nsevera", "Severa"]
 
 def idx_to_name(arr_int):
-    return [CLASSES[i-1] for i in arr_int]
+    return [CLASSES[int(i) - 1] for i in arr_int]
 
 # Hiperparámetros LightGBM
 LGBM_PARAMS = dict(
     objective="multiclass",
     num_class=5,
-    learning_rate=0.08,
-    n_estimators=300,
-    max_depth=-1,
-    subsample=0.9,
-    colsample_bytree=0.9,
-    reg_alpha=0.1,
-    reg_lambda=0.1,
+    learning_rate=0.05,      # un poco más bajo
+    n_estimators=200,        # menos árboles
+    num_leaves=15,           # menos hojas (modelo más simple)
+    max_depth=4,             # limitar profundidad
+    min_child_samples=20,    # mínimo de muestras por hoja
+    min_split_gain=0.01,     # ganancia mínima para hacer un split
+    subsample=0.7,           # usar solo una parte de las filas por árbol
+    colsample_bytree=0.7,    # usar solo una parte de las columnas por árbol
+    reg_alpha=0.5,           # L1 más fuerte
+    reg_lambda=1.0,          # L2 más fuerte
     random_state=SEED,
     n_jobs=-1
 )
@@ -86,26 +90,40 @@ def construir_modelo_LightGBM(X_train, y_train_enc, cv, ruta_png, ruta_csv):
     tr_mean = train_scores.mean(axis=1); tr_std = train_scores.std(axis=1)
     va_mean = valid_scores.mean(axis=1); va_std = valid_scores.std(axis=1)
 
-    
+    # Pérdidas (1 - accuracy)
+    loss_train_mean = 1.0 - tr_mean
+    loss_valid_mean = 1.0 - va_mean
+
+    # ---- CSV de curva (incluye pérdidas) ----
     df_curve = pd.DataFrame({
-        "train_size": sizes_abs,
+        "train_size":        sizes_abs,
         "acc_train_cv_mean": np.round(tr_mean, 4),
         "acc_train_cv_std":  np.round(tr_std, 4),
         "acc_valid_cv_mean": np.round(va_mean, 4),
         "acc_valid_cv_std":  np.round(va_std, 4),
+        "loss_train_mean":   np.round(loss_train_mean, 4),
+        "loss_valid_mean":   np.round(loss_valid_mean, 4),
     })
     df_curve.to_csv(ruta_csv, index=False, encoding="utf-8-sig")
     print(f"[OK] CSV de curva guardado en: {ruta_csv}")
 
-    # ---- Plot (sin números en los puntos) ----
+    # ---- Plot Accuracy (similar al RF) ----
+    eps = 1e-3
+    tr_line = np.clip(tr_mean, 0.0, 1.0 - eps)
+    va_line = np.clip(va_mean, 0.0, 1.0 - eps)
+    tr_low  = np.clip(tr_mean - tr_std, 0.0, 1.0)
+    tr_high = np.clip(tr_mean + tr_std, 0.0, 1.0 - eps/2)
+    va_low  = np.clip(va_mean - va_std, 0.0, 1.0)
+    va_high = np.clip(va_mean + va_std, 0.0, 1.0 - eps/2)
+
     plt.figure(figsize=(7.8, 5.6))
-    plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento", color="tab:blue")
-    plt.fill_between(sizes_abs, tr_mean - tr_std, tr_mean + tr_std, alpha=0.15, color="tab:blue")
+    plt.plot(sizes_abs, tr_line, marker="o", label="Entrenamiento", color="tab:blue")
+    plt.fill_between(sizes_abs, tr_low, tr_high, alpha=0.15, color="tab:blue")
 
-    plt.plot(sizes_abs, va_mean, marker="s", label="Validación", color="tab:orange")
-    plt.fill_between(sizes_abs, va_mean - va_std, va_mean + va_std, alpha=0.15, color="tab:orange")
+    plt.plot(sizes_abs, va_line, marker="s", label="Validación", color="tab:orange")
+    plt.fill_between(sizes_abs, va_low, va_high, alpha=0.15, color="tab:orange")
 
-    plt.ylim(0.0, 1.2)  # escala fija 0–1
+    plt.ylim(0.0, 1.0)
     plt.title("Curva de aprendizaje de LightGBM")
     plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
     plt.ylabel("Accuracy (CV 5-fold)")
@@ -113,7 +131,22 @@ def construir_modelo_LightGBM(X_train, y_train_enc, cv, ruta_png, ruta_csv):
     plt.tight_layout()
     plt.savefig(ruta_png, dpi=300)
     plt.close()
-    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV-5) guardada en: {ruta_png}")
+    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (Accuracy CV-5) guardada en: {ruta_png}")
+
+    # ---- Plot de PÉRDIDA ----
+    plt.figure(figsize=(7.8, 5.6))
+    plt.plot(sizes_abs, loss_train_mean, marker="o", label="Pérdida entrenamiento")
+    plt.plot(sizes_abs, loss_valid_mean, marker="s", label="Pérdida validación")
+
+    plt.ylim(0.0, 1.0)
+    plt.title("Curva de pérdida de LightGBM")
+    plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
+    plt.ylabel("Pérdida (1 - accuracy)")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)
+    plt.close()
+    print(f"[OK] Curva de PÉRDIDA (1 - accuracy) guardada en: {RUTA_CURVA_PERDIDA_IMG}")
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist(), tr_std.tolist(), va_std.tolist()
 
@@ -136,7 +169,10 @@ def main():
 
     # Split 80/20 estratificado
     X_train, X_test, y_train_enc, y_test_enc, y_train_raw, y_test_raw = train_test_split(
-        X, y_enc, y_raw, test_size=0.20, stratify=y_enc, random_state=SEED
+        X, y_enc, y_raw,
+        test_size=0.20,
+        stratify=y_enc,
+        random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
@@ -144,13 +180,19 @@ def main():
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
     # Curva + CSV
+    sizes_abs, tr_mean, va_mean, va_std, tr_std = None, None, None, None, None
     sizes_abs, tr_mean, va_mean, tr_std, va_std = construir_modelo_LightGBM(
         X_train, y_train_enc, cv, RUTA_CURVA_IMG, RUTA_CURVA_CSV
     )
 
     # CV promedio en TRAIN
     cv_model = make_lgbm()
-    cv_acc = cross_val_score(cv_model, X_train, y_train_enc, cv=cv, scoring="accuracy", n_jobs=-1)
+    cv_acc = cross_val_score(
+        cv_model, X_train, y_train_enc,
+        cv=cv,
+        scoring="accuracy",
+        n_jobs=-1
+    )
     print(f"[CV-5] Accuracy (TRAIN) = {cv_acc.mean():.4f} ± {cv_acc.std():.4f}")
 
     # Entrenamiento final y evaluación
@@ -175,7 +217,7 @@ def main():
     print("\n=== MÉTRICAS EN TEST (GLOBAL / PROMEDIO ENTRE CLASES) ===")
     print(f"Accuracy                = {acc_test:.4f}")
     print(f"Balanced Accuracy       = {bacc_test:.4f}")
-    print(f"Precision (macro)       = {prec_macro:.4f}")
+    print(f"Precisión (macro)       = {prec_macro:.4f}")
     print(f"Recall (macro)          = {rec_macro:.4f}")
     print(f"F1-Score (macro)        = {f1m_test:.4f}")
     print(f"ROC-AUC (macro OVR)     = {roc_auc_macro:.4f}" if roc_auc_macro is not None else "ROC-AUC (macro OVR)     = N/A")
@@ -191,14 +233,18 @@ def main():
     print(resumen_lgbm)
 
     # Reporte por clase
-    rep = classification_report(idx_to_name(y_test_raw.values), idx_to_name(y_pred_raw),
-                                target_names=CLASSES, zero_division=0)
+    rep = classification_report(
+        idx_to_name(y_test_raw.values),
+        idx_to_name(y_pred_raw),
+        target_names=CLASSES,
+        zero_division=0
+    )
     print("\n=== REPORTE POR CLASE (TEST) ===")
     print(rep)
 
     # Matriz de confusión
-    cm = confusion_matrix(y_test_raw, y_pred_raw, labels=[1,2,3,4,5])
-    fig, ax = plt.subplots(figsize=(6.5,5))
+    cm = confusion_matrix(y_test_raw, y_pred_raw, labels=[1, 2, 3, 4, 5])
+    fig, ax = plt.subplots(figsize=(6.5, 5))
     ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=CLASSES_FIG).plot(
         cmap="Blues", values_format="d", ax=ax, xticks_rotation=0
     )
@@ -212,34 +258,44 @@ def main():
     plt.close()
     print("[OK] Matriz de confusión guardada en:", RUTA_MATRIZ_CONFUSION)
 
-    # Guardar métricas, modelo y params
+    # Pérdidas para el JSON
+    loss_train_mean = [1.0 - float(x) for x in tr_mean]
+    loss_valid_mean = [1.0 - float(x) for x in va_mean]
+
+    # Guardar métricas, modelo y params (estructura alineada con RF)
     metricas = {
         "model": "LightGBM",
         "params": LGBM_PARAMS,
         "train_size": int(len(X_train)),
         "test_size": int(len(X_test)),
-        "cv5_train": {"accuracy_mean": float(cv_acc.mean()), "accuracy_std": float(cv_acc.std())},
+        "cv5_train": {
+            "accuracy_mean": float(cv_acc.mean()),
+            "accuracy_std":  float(cv_acc.std())
+        },
+        "oob_score": None,
         "curve": {
-            "train_sizes": sizes_abs,
-            "train_accuracy_cv_mean": [float(x) for x in tr_mean],
-            "train_accuracy_cv_std":  [float(x) for x in tr_std],
-            "valid_accuracy_cv_mean": [float(x) for x in va_mean],
-            "valid_accuracy_cv_std":  [float(x) for x in va_std],
+            "train_sizes":         sizes_abs,
+            "train_accuracy_mean": [float(x) for x in tr_mean],
+            "train_accuracy_std":  [float(x) for x in tr_std],
+            "valid_accuracy_mean": [float(x) for x in va_mean],
+            "valid_accuracy_std":  [float(x) for x in va_std],
+            "train_loss_mean":     loss_train_mean,
+            "valid_loss_mean":     loss_valid_mean,
         },
         "test_metrics": {
-            "accuracy": float(acc_test),
+            "accuracy":          float(acc_test),
             "balanced_accuracy": float(bacc_test),
-            "precision_macro": float(prec_macro),
-            "recall_macro": float(rec_macro),
-            "f1_macro": float(f1m_test),
-            "roc_auc_macro": (float(roc_auc_macro) if roc_auc_macro is not None else None)
+            "precision_macro":   float(prec_macro),
+            "recall_macro":      float(rec_macro),
+            "f1_macro":          float(f1m_test),
+            "roc_auc_macro":     (float(roc_auc_macro) if roc_auc_macro is not None else None)
         },
         "confusion_matrix": cm.tolist(),
         "labels_plot": CLASSES_FIG,
         "labels_full": CLASSES,
-        "label_encoder_map": {int(k): int(v) for k, v in inv_map.items()},
-        "resumen": resumen_lgbm
+        "label_encoder_map": {int(k): int(v) for k, v in inv_map.items()}
     }
+
     with open(RUTA_METRICAS, "w", encoding="utf-8") as f:
         json.dump(metricas, f, ensure_ascii=False, indent=2)
     print("[OK] Métricas guardadas en:", RUTA_METRICAS)

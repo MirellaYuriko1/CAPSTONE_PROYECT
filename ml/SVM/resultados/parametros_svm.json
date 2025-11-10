@@ -1,6 +1,6 @@
 {
   "params": {
-    "C": 2.0,
+    "C": 1.0,
     "gamma": "scale",
     "kernel": "rbf",
     "probability": true,

@@ -26,6 +26,7 @@ DIR_OUT.mkdir(parents=True, exist_ok=True)
 
 RUTA_CURVA_IMG             = DIR_OUT / "curva_entrenamiento_validacion_svm.png"
 RUTA_CURVA_CSV             = DIR_OUT / "curva_entrenamiento_validacion_svm.csv"
+RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_svm.png"   # NUEVA: curva de pérdida
 RUTA_MATRIZ_CONFUSION      = DIR_OUT / "matriz_confusion_svm.png"
 RUTA_METRICAS              = DIR_OUT / "metricas_svm.json"
 RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_svm.txt"
@@ -37,7 +38,7 @@ FEATURES = [
     "age", "genero_bin",
     "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
 ]
-TARGET = "categoryphq"
+TARGET   = "nivel_idx"
 
 # Etiquetas
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
@@ -48,7 +49,7 @@ def idx_to_name(arr_int):
 
 # Parámetros SVM (kernel RBF) + escalado
 SVM_PARAMS = dict(
-    C=2.0,
+    C=1.0,
     gamma="scale",
     kernel="rbf",
     probability=True,
@@ -57,7 +58,7 @@ SVM_PARAMS = dict(
 )
 
 # ----------------------------------------------------------
-# Curva de aprendizaje (SIN números, Y en 0..1, exporta CSV)
+# Curva de aprendizaje (Accuracy y Pérdida, exporta CSV)
 # ----------------------------------------------------------
 def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
     modelo = Pipeline(steps=[
@@ -78,25 +79,44 @@ def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
         random_state=SEED
     )
 
+    # Medias y desviaciones de accuracy
     tr_mean = train_scores.mean(axis=1); tr_std = train_scores.std(axis=1)
     va_mean = valid_scores.mean(axis=1); va_std = valid_scores.std(axis=1)
 
+    # Pérdida = 1 - accuracy
+    loss_train_mean = 1.0 - tr_mean
+    loss_valid_mean = 1.0 - va_mean
+
+    # Guardar todo en CSV (accuracy + pérdida)
     df_curve = pd.DataFrame({
         "train_size": sizes_abs,
         "acc_train_cv_mean": np.round(tr_mean, 4),
         "acc_train_cv_std":  np.round(tr_std, 4),
         "acc_valid_cv_mean": np.round(va_mean, 4),
         "acc_valid_cv_std":  np.round(va_std, 4),
+        "loss_train_mean":   np.round(loss_train_mean, 4),
+        "loss_valid_mean":   np.round(loss_valid_mean, 4),
     })
     df_curve.to_csv(ruta_csv, index=False, encoding="utf-8-sig")
     print(f"[OK] CSV de curva guardado en: {ruta_csv}")
 
-    plt.figure(figsize=(7.8, 5.6))
-    plt.plot(sizes_abs, tr_mean, marker="o", label="Entrenamiento")
-    plt.fill_between(sizes_abs, tr_mean - tr_std, tr_mean + tr_std, alpha=0.15)
+    # -------------------------
+    # FIGURA 1: Accuracy
+    # -------------------------
+    eps = 1e-3
+    tr_line = np.clip(tr_mean, 0.0, 1.0 - eps)
+    va_line = np.clip(va_mean, 0.0, 1.0 - eps)
+    tr_low  = np.clip(tr_mean - tr_std, 0.0, 1.0)
+    tr_high = np.clip(tr_mean + tr_std, 0.0, 1.0 - eps/2)
+    va_low  = np.clip(va_mean - va_std, 0.0, 1.0)
+    va_high = np.clip(va_mean + va_std, 0.0, 1.0 - eps/2)
 
-    plt.plot(sizes_abs, va_mean, marker="s", label="Validación")
-    plt.fill_between(sizes_abs, va_mean - va_std, va_mean + va_std, alpha=0.15)
+    plt.figure(figsize=(7.8, 5.6))
+    plt.plot(sizes_abs, tr_line, marker="o", label="Entrenamiento")
+    plt.fill_between(sizes_abs, tr_low, tr_high, alpha=0.15)
+
+    plt.plot(sizes_abs, va_line, marker="s", label="Validación")
+    plt.fill_between(sizes_abs, va_low, va_high, alpha=0.15)
 
     plt.ylim(0.0, 1.0)
     plt.title("Curva de aprendizaje — SVM (RBF)")
@@ -106,10 +126,30 @@ def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.tight_layout()
     plt.savefig(ruta_png, dpi=300)
     plt.close()
-    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (CV-5) guardada en: {ruta_png}")
+    print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (Accuracy CV-5) guardada en: {ruta_png}")
+
+    # -------------------------
+    # FIGURA 2: Pérdida (1 - accuracy)
+    # -------------------------
+    plt.figure(figsize=(7.8, 5.6))
+    plt.plot(sizes_abs, loss_train_mean, marker="o", label="Pérdida entrenamiento")
+    plt.plot(sizes_abs, loss_valid_mean, marker="s", label="Pérdida validación")
+
+    plt.ylim(0.0, 1.0)
+    plt.title("Curva de pérdida — SVM (RBF)")
+    plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
+    plt.ylabel("Pérdida (1 - accuracy)")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)
+    plt.close()
+    print(f"[OK] Curva de PÉRDIDA (1 - accuracy) guardada en: {RUTA_CURVA_PERDIDA_IMG}")
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist(), tr_std.tolist(), va_std.tolist()
 
+# ==========================================================
+# PROCESO PRINCIPAL
+# ==========================================================
 def main():
     # ===== Datos =====
     if not RUTA_DATOS.exists():
@@ -130,14 +170,21 @@ def main():
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
     # ===== Curva de aprendizaje =====
-    sizes_abs, tr_mean, va_mean, tr_std, va_std = construir_modelo_SVM(X_train, y_train, cv, RUTA_CURVA_IMG, RUTA_CURVA_CSV)
+    sizes_abs, tr_mean, va_mean, tr_std, va_std = construir_modelo_SVM(
+        X_train, y_train, cv, RUTA_CURVA_IMG, RUTA_CURVA_CSV
+    )
 
     # ===== CV accuracy promedio en TRAIN =====
     modelo_cv = Pipeline([
         ("scaler", StandardScaler()),
         ("svc", SVC(**SVM_PARAMS))
     ])
-    cv_acc = cross_val_score(modelo_cv, X_train, y_train, cv=cv, scoring="accuracy", n_jobs=-1)
+    cv_acc = cross_val_score(
+        modelo_cv, X_train, y_train,
+        cv=cv,
+        scoring="accuracy",
+        n_jobs=-1
+    )
     print(f"[CV-5] Accuracy (TRAIN) = {cv_acc.mean():.4f} ± {cv_acc.std():.4f}")
 
     # ===== Entrenamiento final (entrenar con TODO TRAIN) =====
@@ -165,7 +212,7 @@ def main():
     print("\n=== MÉTRICAS EN TEST (GLOBAL / PROMEDIO ENTRE CLASES) ===")
     print(f"Accuracy                = {acc_test:.4f}")
     print(f"Balanced Accuracy       = {bacc_test:.4f}")
-    print(f"Precision (macro)       = {prec_macro:.4f}")
+    print(f"Precisión (macro)       = {prec_macro:.4f}")
     print(f"Recall (macro)          = {rec_macro:.4f}")
     print(f"F1-Score (macro)        = {f1m_test:.4f}")
     if roc_auc_macro is not None:
@@ -209,19 +256,28 @@ def main():
     plt.close()
     print("[OK] Matriz de confusión guardada en:", RUTA_MATRIZ_CONFUSION)
 
+    # ===== Para el JSON también guardamos las pérdidas (1 - accuracy) =====
+    loss_train_mean = [1.0 - float(x) for x in tr_mean]
+    loss_valid_mean = [1.0 - float(x) for x in va_mean]
+
     # ===== Guardar métricas y modelo =====
     metricas = {
         "model": "SVM_RBF",
         "params": SVM_PARAMS,
         "train_size": int(len(X_train)),
         "test_size": int(len(X_test)),
-        "cv5_train": {"accuracy_mean": float(cv_acc.mean()), "accuracy_std": float(cv_acc.std())},
+        "cv5_train": {
+            "accuracy_mean": float(cv_acc.mean()),
+            "accuracy_std":  float(cv_acc.std())
+        },
         "curve": {
             "train_sizes": sizes_abs,
             "train_accuracy_mean": [float(x) for x in tr_mean],
             "train_accuracy_std":  [float(x) for x in tr_std],
             "valid_accuracy_mean": [float(x) for x in va_mean],
             "valid_accuracy_std":  [float(x) for x in va_std],
+            "train_loss_mean":      loss_train_mean,
+            "valid_loss_mean":      loss_valid_mean,
         },
         "test_metrics": {
             "accuracy": float(acc_test),
@@ -248,9 +304,15 @@ def main():
     # Guardar pipeline completo (scaler+svc)
     joblib.dump(model, RUTA_MODELO)
     with open(RUTA_PARAMS, "w", encoding="utf-8") as f:
-        json.dump({"params": SVM_PARAMS, "features_used": FEATURES}, f, ensure_ascii=False, indent=2)
+        json.dump(
+            {"params": SVM_PARAMS, "features_used": FEATURES},
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
     print("[OK] Modelo guardado en:", RUTA_MODELO)
     print("[OK] Parámetros guardados en:", RUTA_PARAMS)
 
 if __name__ == "__main__":
     main()
+

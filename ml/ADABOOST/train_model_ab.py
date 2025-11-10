@@ -48,7 +48,7 @@ FEATURES = [
     "age", "genero_bin",
     "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
 ]
-TARGET   = "categoryphq"
+TARGET   = "nivel_idx"
 
 CLASSES = ["Mínimo","Leve","Moderada","Moderadamente severa","Severa"]
 CLASSES_FIG = ["Mínimo","Leve","Moderada","Moderadamente\nsevera","Severa"]
