@@ -1,24 +1,25 @@
 # ml/preprocesamiento.py
 from __future__ import annotations
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
+import re
+import unicodedata
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap, BoundaryNorm
+
 # =========================
-# Rutas (NO MODIFICADAS)
+# Rutas (no cambies nombres de salida)
 # =========================
 RUTA_CRUDO = Path("data/crudo/Test_inicial.xlsx")
-RUTA_SALIDA_SIN_DUPLICADOS = Path("data/transformado/Test_sin_duplicados.csv")
 
-RUTA_SIN_DUPLICADOS = Path("data/transformado/Test_sin_duplicados.csv")
-RUTA_SALIDA_SUBCONJUNTO = Path("data/transformado/phq9_subconjunto_v1.csv")
-
-RUTA_SUBCONJUNTO = Path("data/transformado/phq9_subconjunto_v1.csv")
-RUTA_SALIDA_RANGOS_VALIDOS = Path("data/transformado/phq9_rangos_validos.csv")
-
-RUTA_RANGOS_VALIDOS = Path("data/transformado/phq9_rangos_validos.csv")
-RUTA_SALIDA_FINAL = Path("data/final/phq9_final.csv")
+# Intermedios explícitos de la fase de limpieza
+RUTA_SALIDA_SIN_NULOS       = Path("data/transformado/Test_sin_nulos.csv")
+RUTA_SALIDA_SIN_DUPLICADOS  = Path("data/transformado/Test_sin_duplicados.csv")
+RUTA_SALIDA_NORMALIZADO     = Path("data/transformado/Test_normalizado.csv")
+RUTA_SEL_CARAC              = Path("data/transformado/seleccion_caracteristicas.csv")
+RUTA_SALIDA_FINAL           = Path("data/final/phq9_final.csv")  # <- final oficial
 
 # =========================
 # Config EDA
@@ -26,10 +27,62 @@ RUTA_SALIDA_FINAL = Path("data/final/phq9_final.csv")
 EDA_DIR = Path("data/analisis EDA")
 EDA_DIR.mkdir(parents=True, exist_ok=True)
 
+# Ítems canónicos (tras renombrar)
 PHQ_ITEMS = [f"phq{i}" for i in range(1, 10)]
 
-def _save_simple_bar(labels, values, title, filename, xlabel="", ylabel="Conteo"):
-    """Gráfico simple de barras con anotaciones (para duplicados, etc.)."""
+# Conjunto FINAL que quieres conservar (orden explícito)
+KEEP_COLS = ["age", "genero_bin", *PHQ_ITEMS, "nivel_idx"]
+
+# Mapeo español -> canónico
+MAP_CRUDO = {
+    "edad": "age",
+    "genero": "gender",
+    "p1": "phq1", "p2": "phq2", "p3": "phq3", "p4": "phq4", "p5": "phq5",
+    "p6": "phq6", "p7": "phq7", "p8": "phq8", "p9": "phq9",
+    "puntaje_total": "puntaje_total",
+    "nivel": "nivel",
+    "grado": "grado",
+}
+
+# Columnas clave esperadas
+COLS_REQUERIDAS = ["age", "gender", *PHQ_ITEMS, "puntaje_total", "nivel"]
+
+# Orden de severidad (para nivel_idx)
+CLASES_ORDEN = ["Mínimo", "Leve", "Moderado", "Moderadamente grave", "Grave"]
+
+# =========================
+# Utilidades
+# =========================
+def _renombrar_a_canonico(df: pd.DataFrame) -> pd.DataFrame:
+    return df.rename(columns={c: MAP_CRUDO[c] for c in df.columns if c in MAP_CRUDO})
+
+def _canon_str(s: str) -> str:
+    s = (s or "").strip().lower()
+    s = "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+    return s
+
+def _estandariza_nulos(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    obj = df.select_dtypes(include="object").columns
+    for c in obj:
+        s = df[c].astype(str)
+        s = (s.str.replace("\u00a0", " ", regex=False)
+               .str.replace("\u200b", "", regex=False)
+               .str.strip())
+        df[c] = s
+    df.replace(r"^\s*$", np.nan, regex=True, inplace=True)
+    df.replace(to_replace=r"(?i)^(nan|null|na|n/?a|none)$", value=np.nan, regex=True, inplace=True)
+    df.replace(to_replace=r"^(?:-+|—)$", value=np.nan, regex=True, inplace=True)
+    return df
+
+def _coerce_numeric(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
+    df = df.copy()
+    for c in cols:
+        if c in df.columns:
+            df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
+
+def _save_bar(labels, values, title, filename, xlabel="", ylabel="Conteo"):
     plt.figure(figsize=(6,4))
     plt.bar(labels, values)
     for i, v in enumerate(values):
@@ -38,409 +91,280 @@ def _save_simple_bar(labels, values, title, filename, xlabel="", ylabel="Conteo"
         except Exception:
             txt = f"{v}"
         plt.text(i, v, txt, ha="center", va="bottom")
-    plt.title(title)
+    if title:
+        plt.title(title)
     plt.xlabel(xlabel); plt.ylabel(ylabel)
     plt.tight_layout()
     out = EDA_DIR / filename
-    plt.savefig(out, dpi=200)
-    plt.close()
+    plt.savefig(out, dpi=200); plt.close()
     print(f"[FIG] {out}")
 
 # =========================
-# ETAPA 0: Nulos (solo heatmap)
+# A) EDA inicial + eliminación TEMPRANA de nulos
 # =========================
-def eliminar_nulos():
-    """Genera únicamente: 00_mapa_missing.png (todas las columnas)."""
-    if not RUTA_CRUDO.exists():
-        raise FileNotFoundError(f"No encuentro el archivo crudo en: {RUTA_CRUDO}")
+def eda_mapa_faltantes_y_drop(df_in: pd.DataFrame) -> pd.DataFrame:
+    df_norm = _estandariza_nulos(df_in)
 
-    df = pd.read_excel(RUTA_CRUDO)
-    print(f"[NULOS] Filas: {len(df)} | Columnas: {len(df.columns)}")
-
-    mask = df.isna().values
-    ancho = max(10, 0.45 * len(df.columns))
+    present = df_norm.notna().values.astype(int)
+    ancho = max(10, 0.45 * len(df_norm.columns))
     fig, ax = plt.subplots(figsize=(ancho, 6))
-    ax.imshow(mask, aspect="auto", interpolation="nearest")
-    ax.set_title("Mapa de valores faltantes", fontsize=14, weight="bold")
+    cmap = ListedColormap(["#ffffff", "#6a51a3"])
+    norm = BoundaryNorm([-0.5, 0.5, 1.5], cmap.N)
+    ax.imshow(present, aspect="auto", interpolation="nearest", cmap=cmap, norm=norm)
+    ax.set_title("Mapa de valores faltantes", fontsize=16, weight="bold")
     ax.set_xlabel("Columnas"); ax.set_ylabel("Filas")
-    ax.set_xticks(range(len(df.columns)))
-    ax.set_xticklabels(df.columns.astype(str), rotation=90, ha="right", fontsize=9)
+    ax.set_xticks(range(len(df_norm.columns)))
+    ax.set_xticklabels(df_norm.columns.astype(str), rotation=90, ha="right", fontsize=9)
     fig.tight_layout()
+    out_fig = EDA_DIR / "00_mapa_missing.png"
+    fig.savefig(out_fig, dpi=300, bbox_inches="tight"); plt.close(fig)
+    print(f"[FIG] {out_fig} (morado = dato, blanco = vacío)")
 
-    out = EDA_DIR / "00_mapa_missing.png"
-    fig.savefig(out, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-    print(f"[FIG] {out}")
+    if not set(COLS_REQUERIDAS).issubset(df_norm.columns):
+        falt = [c for c in COLS_REQUERIDAS if c not in df_norm.columns]
+        raise ValueError(f"Faltan columnas clave para validar nulos tempranos: {falt}")
 
-# =========================
-# ETAPA 1: Eliminar duplicados (1 gráfico simple)
-# =========================
-def eliminar_duplicados():
-    if not RUTA_CRUDO.exists():
-        raise FileNotFoundError(f"No encuentro el archivo crudo en: {RUTA_CRUDO}")
+    print("[EARLY NULOS] NaN por columna requerida:")
+    print(df_norm[COLS_REQUERIDAS].isna().sum().to_string())
 
-    df = pd.read_excel(RUTA_CRUDO)
-    duplicados = int(df.duplicated().sum())
-    unicos = len(df) - duplicados
+    mask_notnull_req = df_norm[COLS_REQUERIDAS].notna().all(axis=1)
+    n_eliminadas = int((~mask_notnull_req).sum())
+    print(f"[EARLY NULOS] Filas eliminadas por nulos (temprano): {n_eliminadas}")
 
-    _save_simple_bar(
-        ["Duplicados", "Únicos"],
-        [duplicados, unicos],
-        "",  # sin título (lo pones en el pie de figura del paper)
-        "01_duplicados.png"
-    )
-
-    df_sin_dup = df.drop_duplicates()
-    RUTA_SALIDA_SIN_DUPLICADOS.parent.mkdir(parents=True, exist_ok=True)
-    df_sin_dup.to_csv(RUTA_SALIDA_SIN_DUPLICADOS, index=False, encoding="utf-8")
-    print(f"[OK] Archivo sin duplicados guardado en: {RUTA_SALIDA_SIN_DUPLICADOS}")
+    df_clean = df_norm.loc[mask_notnull_req].copy()
+    RUTA_SALIDA_SIN_NULOS.parent.mkdir(parents=True, exist_ok=True)
+    df_clean.to_csv(RUTA_SALIDA_SIN_NULOS, index=False, encoding="utf-8")
+    print(f"[OK] Guardado sin nulos -> {RUTA_SALIDA_SIN_NULOS}")
+    return df_clean
 
 # =========================
-# ETAPA 2: Subconjunto PHQ-9
+# EDA: Distribuciones y Boxplots
 # =========================
-COLUMNAS_UTILIZADAS = [
-    "age", "gender",
-    "phq1", "phq2", "phq3", "phq4", "phq5", "phq6", "phq7", "phq8", "phq9",
-    "totalphq", "categoryphq"
-]
+def eda_distribuciones(df_can: pd.DataFrame):
+    df = _coerce_numeric(df_can, ["age", "puntaje_total", *PHQ_ITEMS])
 
-def crear_subconjunto_phq9():
-    if not RUTA_SIN_DUPLICADOS.exists():
-        raise FileNotFoundError(f"No se encontró el archivo: {RUTA_SIN_DUPLICADOS}")
+    if "age" in df.columns:
+        edades = df["age"].dropna().astype(int)
+        plt.figure(figsize=(7, 4))
+        bins_edad = np.arange(11.5, 18.5 + 1, 1)
+        plt.hist(edades, bins=bins_edad, edgecolor="black", linewidth=0.6, alpha=0.9)
+        plt.title("Distribución de las edades")
+        plt.xlabel("Edades"); plt.ylabel("Frecuencia")
+        plt.xticks(np.arange(12, 19, 1)); plt.xlim(12, 18)
+        plt.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        out = EDA_DIR / "11_hist_edad.png"
+        plt.savefig(out, dpi=300); plt.close(); print(f"[FIG] {out}")
 
-    df = pd.read_csv(RUTA_SIN_DUPLICADOS)
-    faltantes = [c for c in COLUMNAS_UTILIZADAS if c not in df.columns]
-    if faltantes:
-        raise ValueError(f"Faltan columnas en el archivo: {faltantes}")
+    if "puntaje_total" in df.columns:
+        punt = df["puntaje_total"].dropna().astype(int)
+        plt.figure(figsize=(7, 4))
+        bins_punt = np.arange(-0.5, 27.5 + 1, 1)
+        plt.hist(punt, bins=bins_punt, edgecolor="black", linewidth=0.6, alpha=0.9)
+        plt.title("Distribución de los puntajes totales")
+        plt.xlabel("Puntaje"); plt.ylabel("Frecuencia")
+        plt.xticks(np.arange(0, 28, 3)); plt.xlim(0, 27)
+        plt.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        out = EDA_DIR / "12_hist_puntaje_total.png"
+        plt.savefig(out, dpi=300); plt.close(); print(f"[FIG] {out}")
 
-    df_sub = df[COLUMNAS_UTILIZADAS].copy()
-    RUTA_SALIDA_SUBCONJUNTO.parent.mkdir(parents=True, exist_ok=True)
-    df_sub.to_csv(RUTA_SALIDA_SUBCONJUNTO, index=False, encoding="utf-8")
-
-    print(f"[OK] Subconjunto PHQ-9 creado: {RUTA_SALIDA_SUBCONJUNTO} "
-          f"(Filas {len(df_sub)} | Columnas {len(df_sub.columns)})")
-
-# --- EDA: Selección de características (SOLO gráfica VERTICAL)
-def eda_seleccion_caracteristicas():
-    """
-    Genera una única figura VERTICAL con las variables seleccionadas
-    (ordenadas como en COLUMNAS_UTILIZADAS). Guarda: 02_seleccion_caracteristicas.png
-    """
-    if RUTA_SIN_DUPLICADOS.exists():
-        df_in = pd.read_csv(RUTA_SIN_DUPLICADOS)
-        columnas_iniciales = set(df_in.columns.astype(str))
-        seleccionadas = [c for c in COLUMNAS_UTILIZADAS if c in columnas_iniciales]
-    elif RUTA_CRUDO.exists():
-        df_in = pd.read_excel(RUTA_CRUDO)
-        columnas_iniciales = set(df_in.columns.astype(str))
-        seleccionadas = [c for c in COLUMNAS_UTILIZADAS if c in columnas_iniciales]
-    else:
-        seleccionadas = COLUMNAS_UTILIZADAS[:]
-
-    n = len(seleccionadas)
-    x = np.arange(n)
-
-    fig_w = max(10, 0.6 * n)
-    fig, ax = plt.subplots(figsize=(fig_w, 5))
-
-    ax.bar(x, np.ones(n))
-    ax.set_xticks(x)
-    ax.set_xticklabels(seleccionadas, rotation=45, ha="right")
-    ax.set_ylim(0, 1.05)
-    ax.get_yaxis().set_visible(False)
-    ax.set_xlabel("Características")
-    ax.set_title("", fontsize=18, fontweight="bold", pad=10)
-
-    for spine in ["right", "top", "left"]:
-        ax.spines[spine].set_visible(False)
-
-    fig.tight_layout()
-    out = EDA_DIR / "02_seleccion_caracteristicas.png"
-    fig.savefig(out, dpi=300)
-    plt.close(fig)
-    print(f"[FIG] {out}")
-
-# =========================
-# ETAPA 3: Validar rangos (SIN gráfico)
-# =========================
-def validar_rangos():
-    if not RUTA_SUBCONJUNTO.exists():
-        raise FileNotFoundError(f"No se encontró el archivo: {RUTA_SUBCONJUNTO}")
-
-    df = pd.read_csv(RUTA_SUBCONJUNTO)
-
-    phq_cols = ["phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"]
-    mask_age   = df["age"].between(12, 19)
-    mask_phq   = df[phq_cols].apply(lambda s: s.between(0, 3)).all(axis=1)
-    mask_total = df["totalphq"].between(0, 27)
-    mask_cat   = df["categoryphq"].between(1, 5)
-
-    mask_final = mask_age & mask_phq & mask_total & mask_cat
-    df_valid = df[mask_final].copy()
-
-    RUTA_SALIDA_RANGOS_VALIDOS.parent.mkdir(parents=True, exist_ok=True)
-    df_valid.to_csv(RUTA_SALIDA_RANGOS_VALIDOS, index=False, encoding="utf-8")
-    print(f"[OK] Archivo validado guardado en: {RUTA_SALIDA_RANGOS_VALIDOS}")
-
-# =========================
-# ETAPA 4: Normalizar género (con figura Antes vs Después)
-# =========================
-def normalizar_genero():
-    """
-    Normaliza 'gender' y crea 'genero_bin' (Masculino->0, Femenino->1).
-    Además genera: data/analisis EDA/04_normalizacion_genero.png con la
-    comparación de conteos Antes vs Después y el mapeo explícito.
-    """
-    if not RUTA_RANGOS_VALIDOS.exists():
-        raise FileNotFoundError(f"No se encontró el archivo: {RUTA_RANGOS_VALIDOS}")
-
-    df = pd.read_csv(RUTA_RANGOS_VALIDOS)
-
-    # --- Conteos "ANTES"
-    gender_raw = df["gender"].astype(str).str.strip()
-    vc_antes = gender_raw.value_counts()
-
-    # --- Normalización a etiquetas homogéneas
-    df["gender"] = (
-        gender_raw.str.lower()
-                  .replace({
-                      "male": "Masculino", "masculino": "Masculino",
-                      "female": "Femenino", "femenino": "Femenino"
-                  })
-    )
-
-    # Advertir si hay valores no mapeados
-    valores_inusuales = sorted(set(df["gender"].unique()) - {"Masculino", "Femenino"})
-    if valores_inusuales:
-        print(f"[WARN] Valores no estandarizados en 'gender': {valores_inusuales}")
-
-    # --- Codificación binaria
-    df["genero_bin"] = df["gender"].map({"Masculino": 0, "Femenino": 1})
-
-    # --- Guardar dataset final
-    RUTA_SALIDA_FINAL.parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(RUTA_SALIDA_FINAL, index=False, encoding="utf-8")
-    print(f"[OK] Dataset final guardado en: {RUTA_SALIDA_FINAL}")
-
-    # --- Figura: Antes vs Después
-    vc_despues_texto = df["gender"].value_counts()
-
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-
-    # Antes (texto crudo)
-    axes[0].bar(vc_antes.index.astype(str), vc_antes.values)
-    for i, v in enumerate(vc_antes.values):
-        axes[0].text(i, v, str(int(v)), ha="center", va="bottom")
-    axes[0].set_title("Antes")
-    axes[0].set_xlabel("Género (crudo)")
-    axes[0].set_ylabel("Conteo")
-
-    # Después (texto normalizado / codificado)
-    axes[1].bar(["0","1"], [vc_despues_texto.get("Masculino",0), vc_despues_texto.get("Femenino",0)])
-    for i, v in enumerate([vc_despues_texto.get("Masculino",0), vc_despues_texto.get("Femenino",0)]):
-        axes[1].text(i, v, str(int(v)), ha="center", va="bottom")
-    axes[1].set_title("Después")
-    axes[1].set_xlabel("Género (normalizado)")
-
-    fig.suptitle("", fontsize=12, fontweight="bold", y=1.02)
+def eda_boxplots_items(df_can: pd.DataFrame,
+                       items: list[str] = PHQ_ITEMS,
+                       outname: str = "13_boxitems_phq9.png"):
+    if not set(items).issubset(df_can.columns):
+        falt = [c for c in items if c not in df_can.columns]
+        print(f"[BOXPLOTS] Omitido. Faltan columnas: {falt}")
+        return
+    df_num = df_can.copy()
+    for c in items:
+        df_num[c] = pd.to_numeric(df_num[c], errors="coerce")
+    datos = [df_num[c].dropna().values for c in items]
+    plt.figure(figsize=(9, 5))
+    plt.boxplot(datos, showfliers=True)
+    plt.xticks(range(1, len(items) + 1), items)
+    plt.ylim(-0.1, 3.1)
+    plt.ylabel("Puntaje"); plt.title("Distribución de puntajes por ítem")
     plt.tight_layout()
-    out_fig = EDA_DIR / "04_normalizacion_genero.png"
-    plt.savefig(out_fig, dpi=200, bbox_inches="tight")
-    plt.close()
-    print(f"[FIG] {out_fig}")
+    out = EDA_DIR / outname
+    plt.savefig(out, dpi=300); plt.close()
+    print(f"[FIG] {out}")
 
 # =========================
-# ==== EDA ADICIONAL
+# EDA: Correlaciones (Pearson)
 # =========================
-def _coerce_numeric(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
-    df = df.copy()
-    for c in cols:
+def _plot_corr_heatmap(corr: pd.DataFrame, title: str, outfile: Path):
+    labels = corr.columns.tolist()
+    n = len(labels)
+    fig_w = max(8, 0.6 * n + 4)
+    fig_h = max(6, 0.6 * n + 2)
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    im = ax.imshow(corr.values, vmin=-1, vmax=1)
+    plt.colorbar(im, ax=ax, label="r de Pearson")
+    ax.set_title(title, fontsize=14, weight="bold")
+    ax.set_xticks(range(n)); ax.set_yticks(range(n))
+    ax.set_xticklabels(labels, rotation=45, ha="right")
+    ax.set_yticklabels(labels)
+
+    for i in range(n):
+        for j in range(n):
+            ax.text(j, i, f"{corr.values[i, j]:.2f}", ha="center", va="center", fontsize=8)
+    fig.tight_layout()
+    fig.savefig(outfile, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"[FIG] {outfile}")
+
+def eda_correlaciones_pearson(df_can: pd.DataFrame, thr_abs: float = 0.8):
+    df = df_can.copy()
+    num_cols = ["age", *PHQ_ITEMS]
+    for c in num_cols:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce")
+
+    cols_pred = [c for c in ["age", "genero_bin", "grado_ordinal", *PHQ_ITEMS] if c in df.columns]
+    cols_full = cols_pred + [c for c in ["puntaje_total", "nivel_idx"] if c in df.columns]
+
+    if len(cols_full) >= 2:
+        corr_full = df[cols_full].corr(method="pearson")
+        _plot_corr_heatmap(corr_full,
+                           "Matriz de correlaciones de las variables del estudio",
+                           EDA_DIR / "20_corr_full_pearson.png")
+
+    if len(cols_pred) >= 2:
+        corr_pred = df[cols_pred].corr(method="pearson")
+        _plot_corr_heatmap(corr_pred,
+                           "Mapa de calor — Correlaciones (Pearson) entre predictores (sin variables de resultado)",
+                           EDA_DIR / "21_corr_predictoras_pearson.png")
+
+        abs_corr = corr_pred.abs()
+        pairs = []
+        for i in range(len(cols_pred)):
+            for j in range(i+1, len(cols_pred)):
+                r = abs_corr.iloc[i, j]
+                if pd.notna(r) and r >= thr_abs:
+                    pairs.append({"var_1": cols_pred[i],
+                                  "var_2": cols_pred[j],
+                                  "abs_r": float(r),
+                                  "r": float(corr_pred.iloc[i, j])})
+        pd.DataFrame(pairs).sort_values("abs_r", ascending=False)\
+            .to_csv(EDA_DIR / "21_corr_pairs_ge08.csv", index=False, encoding="utf-8")
+        print(f"[OK] Pares con |r| >= {thr_abs:.2f} -> {EDA_DIR / '21_corr_pairs_ge08.csv'}")
+
+# =========================
+# B) Limpieza informada por EDA
+# =========================
+def eliminar_duplicados(df_in: pd.DataFrame) -> pd.DataFrame:
+    duplicados_mask = df_in.duplicated(keep=False)
+    dups_detalle = df_in.loc[duplicados_mask].copy()
+    if not dups_detalle.empty:
+        dups_detalle.to_csv(EDA_DIR / "duplicados_detalle_full.csv", index=False, encoding="utf-8")
+        print(f"[CHECK] Detalle de duplicados -> {EDA_DIR / 'duplicados_detalle_full.csv'}")
+
+    duplicados = int(df_in.duplicated().sum())
+    unicos = len(df_in) - duplicados
+    _save_bar(["Duplicados", "Únicos"], [duplicados, unicos], "", "01_duplicados.png")
+
+    df_sin_dup = df_in.drop_duplicates().copy()
+    RUTA_SALIDA_SIN_DUPLICADOS.parent.mkdir(parents=True, exist_ok=True)
+    df_sin_dup.to_csv(RUTA_SALIDA_SIN_DUPLICADOS, index=False, encoding="utf-8")
+    print(f"[OK] Guardado sin duplicados: {RUTA_SALIDA_SIN_DUPLICADOS}")
+    return df_sin_dup
+
+# =========================
+# C) Normalización ligera (sin escalado)
+# =========================
+def normalizar_genero(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()
+    g = df["gender"].astype(str).str.strip().str.lower()
+    df["gender"] = g.replace({
+        "male":"Masculino","masculino":"Masculino",
+        "female":"Femenino","femenino":"Femenino"
+    })
+    df["genero_bin"] = df["gender"].map({"Masculino":0, "Femenino":1})
     return df
 
-def eda_subconjunto_phq9():
-    """EDA del subconjunto PHQ-9 (boxplots de ítems)."""
-    if not RUTA_SALIDA_SUBCONJUNTO.exists():
-        print("[WARN] eda_subconjunto_phq9: no existe el subconjunto; omito.")
-        return
+def normalizar_grado(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()
+    def _to_ord(x: str):
+        if pd.isna(x): return np.nan
+        s = _canon_str(str(x))
+        s = (s.replace("primero","1").replace("segundo","2").replace("tercero","3")
+               .replace("cuarto","4").replace("quinto","5").replace("sexto","6"))
+        m = re.search(r"([1-6])", s)
+        return int(m.group(1)) if m else np.nan
+    if "grado" in df.columns:
+        df["grado_ordinal"] = df["grado"].map(_to_ord)
+    return df
 
-    df = pd.read_csv(RUTA_SALIDA_SUBCONJUNTO)
-    df = _coerce_numeric(df, ["age", "totalphq", "categoryphq", *PHQ_ITEMS])
+def normalizar_nivel(df_in: pd.DataFrame) -> pd.DataFrame:
+    df = df_in.copy()
+    def _canon_nivel(x: str) -> str:
+        s = _canon_str(x)
+        m = {
+            "minimo":"Mínimo", "mínimo":"Mínimo",
+            "leve":"Leve",
+            "moderado":"Moderado",
+            "moderadamente grave":"Moderadamente grave",
+            "moderadamente severa":"Moderadamente grave",
+            "moderadamente severo":"Moderadamente grave",
+            "moderadamente_grave":"Moderadamente grave",
+            "grave":"Grave",
+        }
+        return m.get(s, x)
+    df["nivel"] = df["nivel"].astype(str).map(_canon_nivel)
+    mapa_idx = {n:i+1 for i,n in enumerate(CLASES_ORDEN)}
+    df["nivel_idx"] = df["nivel"].map(mapa_idx)
+    if df["nivel_idx"].isna().any():
+        desconocidos = sorted(df.loc[df["nivel_idx"].isna(), "nivel"].astype(str).unique())
+        raise ValueError(f"Valores de 'nivel' no reconocidos: {desconocidos}.")
+    df["nivel_idx"] = df["nivel_idx"].astype(int)
+    return df
 
-    # (ELIMINADO el histograma de totalphq)
-
-    # Boxplot ítems PHQ-9
-    if set(PHQ_ITEMS).issubset(df.columns):
-        plt.figure(figsize=(8,4))
-        datos = [df[c].dropna().values for c in PHQ_ITEMS]
-        plt.boxplot(datos, showfliers=True)
-        plt.xticks(range(1, 10), PHQ_ITEMS)
-        plt.title("Distribución de ítems PHQ-9 (0–3)")
-        plt.ylabel("Puntaje (0–3)")
-        plt.tight_layout()
-        out = EDA_DIR / "13_boxitems_phq9.png"
-        plt.savefig(out, dpi=200)
-        plt.close()
-        print(f"[FIG] {out}")
-
-def eda_bivariado_phq9():
-    """(Vacío intencionalmente: quitamos scatter/box antiguos)."""
-    if not RUTA_SALIDA_SUBCONJUNTO.exists():
-        print("[WARN] eda_bivariado_phq9: no existe el subconjunto; omito.")
-        return
-    # Sin figuras en esta etapa
-
-def eda_multivariado_phq9():
-    """Heatmap de correlaciones y figura conjunta totalphq vs ítems PHQ-9."""
-    if not RUTA_SALIDA_SUBCONJUNTO.exists():
-        print("[WARN] eda_multivariado_phq9: no existe el subconjunto; omito.")
-        return
-
-    # Cargamos el subconjunto (antes de normalizar género final)
-    df = pd.read_csv(RUTA_SALIDA_SUBCONJUNTO)
-    df = _coerce_numeric(df, ["age", "totalphq", "categoryphq", *PHQ_ITEMS])
-
-    # =====================
-    # 1. Heatmap de correlación (pearson)
-    # =====================
-    cols_corr = [c for c in (PHQ_ITEMS + ["totalphq"]) if c in df.columns]
-    if len(cols_corr) >= 2:
-        corr = df[cols_corr].corr(method="pearson")
-        fig, ax = plt.subplots(figsize=(0.6*len(cols_corr)+4, 0.6*len(cols_corr)+4))
-        im = ax.imshow(corr, vmin=-1, vmax=1)
-        plt.colorbar(im, ax=ax, label="correlación")
-        ax.set_title("Correlación PHQ-9 y totalphq")
-        ax.set_xticks(range(len(cols_corr))); ax.set_yticks(range(len(cols_corr)))
-        ax.set_xticklabels(cols_corr, rotation=45, ha="right")
-        ax.set_yticklabels(cols_corr)
-        for i in range(len(cols_corr)):
-            for j in range(len(cols_corr)):
-                ax.text(j, i, f"{corr.iloc[i, j]:.2f}",
-                        ha="center", va="center", fontsize=8, color="black")
-        fig.tight_layout()
-        out = EDA_DIR / "19_heatmap_corr_phq.png"
-        fig.savefig(out, dpi=300)
-        plt.close(fig)
-        print(f"[FIG] {out}")
-
-    # =====================
-    # 2. Figura conjunta tipo strip/jitter:
-    #    totalphq frente a ítems phq1..phq9, todos en una gráfica
-    # =====================
-    cols_necesarias = ["totalphq"] + PHQ_ITEMS
-    faltantes_items = [c for c in cols_necesarias if c not in df.columns]
-    if not faltantes_items:
-        # Formato largo: cada fila = (item, valor_item, totalphq)
-        registros = []
-        for item in PHQ_ITEMS:
-            sub = df[[item, "totalphq"]].dropna()
-            for v_item, v_total in zip(sub[item].values, sub["totalphq"].values):
-                registros.append({"item": item, "valor_item": v_item, "totalphq": v_total})
-
-        if len(registros) == 0:
-            print("[WARN] eda_multivariado_phq9: no hay datos para figura conjunta; se omite.")
-        else:
-            df_long = pd.DataFrame(registros)
-
-            plt.figure(figsize=(12, 6))
-
-            # posición base por ítem en el eje X
-            items_orden = PHQ_ITEMS[:]  # ["phq1", ..., "phq9"]
-            x_positions = {item: ix for ix, item in enumerate(items_orden)}
-
-            rng = np.random.default_rng(42)  # jitter reproducible
-            xs_plot = []
-            ys_plot = []
-
-            for item in items_orden:
-                base_x = x_positions[item]
-                datos_item = df_long[df_long["item"] == item]
-
-                for _, fila in datos_item.iterrows():
-                    # desplazamiento interno según el valor del ítem (0..3)
-                    offset_por_valor = (fila["valor_item"] - 1.5) * 0.15
-                    jitter_peq = rng.normal(0, 0.03)
-                    x_final = base_x + offset_por_valor + jitter_peq
-
-                    xs_plot.append(x_final)
-                    ys_plot.append(fila["totalphq"])
-
-            plt.scatter(xs_plot, ys_plot, alpha=0.6, s=20)
-            plt.xticks(
-                [x_positions[it] for it in items_orden],
-                items_orden,
-                rotation=45,
-                ha="right"
-            )
-            plt.ylabel("totalphq")
-            plt.title("totalphq frente a los ítems PHQ-9 (distribución conjunta)")
-
-            plt.tight_layout()
-            out_fig = EDA_DIR / "22_strip_total_vs_items.png"
-            plt.savefig(out_fig, dpi=200)
-            plt.close()
-            print(f"[FIG] {out_fig}")
-    else:
-        print(f"[WARN] eda_multivariado_phq9: faltan columnas para figura conjunta: {faltantes_items}")
-
-def eda_dispersion_items_vs_total():
-    """
-    Genera una figura 3x3 con la relación entre cada ítem del PHQ-9 (phq1..phq9)
-    y la puntuación totalphq. Guarda: 21_dispersion_items_vs_total.png
-    """
-    if not RUTA_SALIDA_SUBCONJUNTO.exists():
-        print("[WARN] eda_dispersion_items_vs_total: no existe el subconjunto; omito.")
-        return
-
-    # cargamos el subconjunto antes de normalizar género final
-    df = pd.read_csv(RUTA_SALIDA_SUBCONJUNTO)
-    df = _coerce_numeric(df, ["totalphq", *PHQ_ITEMS])
-
-    # asegurarnos de que las columnas necesarias estén
-    necesarios = ["totalphq"] + PHQ_ITEMS
-    faltantes = [c for c in necesarios if c not in df.columns]
-    if faltantes:
-        print(f"[WARN] eda_dispersion_items_vs_total: faltan columnas {faltantes}; omito.")
-        return
-
-    fig, axes = plt.subplots(3, 3, figsize=(12, 10))
-    fig.suptitle("", fontsize=14, fontweight="bold")
-
-    # iterar sobre los 9 ítems y graficar contra totalphq
-    for idx, item in enumerate(PHQ_ITEMS):
-        row = idx // 3
-        col = idx % 3
-        ax = axes[row, col]
-
-        ax.scatter(df[item], df["totalphq"], alpha=0.6, s=20)
-        ax.set_xlabel(item)
-        ax.set_ylabel("totalphq")
-        ax.set_title(f"{item} vs totalphq", fontsize=10)
-
-    plt.tight_layout(rect=[0, 0, 1, 0.96])  # deja espacio para el título general
-    out_path = EDA_DIR / "21_dispersion_items_vs_total.png"
-    plt.savefig(out_path, dpi=200)
-    plt.close()
-    print(f"[FIG] {out_path}")
-
-
-# === LLAMADAS SECUENCIALES ===
+# =========================
+# === PIPELINE (hasta normalizado + correlaciones + selección estricta)
+# =========================
 if __name__ == "__main__":
-    # CRUDO
-    eliminar_nulos()             # Heatmap nulos (00_mapa_missing.png)
+    if not RUTA_CRUDO.exists():
+        raise FileNotFoundError(f"No encuentro el archivo crudo: {RUTA_CRUDO}")
 
-    # TRANSFORMADO 1
-    eliminar_duplicados()        # Crea Test_sin_duplicados.csv (01_duplicados.png)
+    # 0) Leer crudo y renombrar a canónico
+    df_raw = pd.read_excel(RUTA_CRUDO)
+    print(f"[CRUDO] Filas: {len(df_raw)} | Columnas: {len(df_raw.columns)}")
+    df_can0 = _renombrar_a_canonico(df_raw)
 
-    # TRANSFORMADO 2 (subconjunto)
-    crear_subconjunto_phq9()     # Crea phq9_subconjunto_v1.csv
-    eda_seleccion_caracteristicas()  # 02_seleccion_caracteristicas.png
-    eda_subconjunto_phq9()       # Boxplots ítems PHQ-9 (13_boxitems_phq9.png)
-    eda_bivariado_phq9()         # (sin figuras)
-    eda_multivariado_phq9()      # Heatmap + strip conjunta (19_heatmap_corr_phq.png / 22_strip_total_vs_items.png)
-    eda_dispersion_items_vs_total()  # Figura 3x3 clásica (21_dispersion_items_vs_total.png)
+    # 1) Missing + drop (guarda Test_sin_nulos.csv)
+    df1 = eda_mapa_faltantes_y_drop(df_can0)
 
-    # TRANSFORMADO 3
-    validar_rangos()             # Guarda phq9_rangos_validos.csv
-    normalizar_genero()          # Guarda phq9_final.csv + 04_normalizacion_genero.png
+    # 2) EDA esencial
+    eda_distribuciones(df1)
+    eda_boxplots_items(df1)
+
+    # 3) Duplicados (guarda Test_sin_duplicados.csv)
+    df2 = eliminar_duplicados(df1)
+
+    # 4) Normalización ligera (sin escalado): gender, grado, nivel
+    df3 = normalizar_genero(df2)
+    df4 = normalizar_grado(df3)
+    df5 = normalizar_nivel(df4)
+
+    # 5) Correlaciones (figuras + pares |r|>=0.8) — informativo
+    eda_correlaciones_pearson(df5, thr_abs=0.8)
+
+    # 6) Guardar dataset normalizado (trazabilidad)
+    RUTA_SALIDA_NORMALIZADO.parent.mkdir(parents=True, exist_ok=True)
+    df5.to_csv(RUTA_SALIDA_NORMALIZADO, index=False, encoding="utf-8")
+    print(f"[OK] Test_normalizado -> {RUTA_SALIDA_NORMALIZADO}")
+
+    # 7) SELECCIÓN ESTRICTA: solo las 12 columnas finales
+    keep_cols = [c for c in KEEP_COLS if c in df5.columns]
+    df_sel = df5[keep_cols].copy()
+
+    # Guardar en transformado y final
+    RUTA_SEL_CARAC.parent.mkdir(parents=True, exist_ok=True)
+    df_sel.to_csv(RUTA_SEL_CARAC, index=False, encoding="utf-8")
+    RUTA_SALIDA_FINAL.parent.mkdir(parents=True, exist_ok=True)
+    df_sel.to_csv(RUTA_SALIDA_FINAL, index=False, encoding="utf-8")
+
+    print(f"[OK] seleccion_caracteristicas -> {RUTA_SEL_CARAC}")
+    print(f"[OK] phq9_final -> {RUTA_SALIDA_FINAL}")
+    print(f"[INFO] Columnas finales ({len(df_sel.columns)}): {list(df_sel.columns)}")

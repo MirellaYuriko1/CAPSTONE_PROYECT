@@ -1,0 +1,389 @@
+nombre,apellido,grado,age,gender,rol,phq1,phq2,phq3,phq4,phq5,phq6,phq7,phq8,phq9,puntaje_total,nivel,genero_bin,grado_ordinal,nivel_idx
+andrea,conche,1ro,13,Femenino,estudiante,0,1,3,3,0,2,3,3,1,16.0,Moderadamente grave,1,1,4
+ivana,bustamante,1ero,12,Femenino,estudiante,1,0,1,3,1,1,1,0,1,9.0,Leve,1,1,2
+DARIO,BERECHE,1A,12,Masculino,estudiante,1,1,2,3,1,0,0,1,0,9.0,Leve,0,1,2
+Kiara,Lobatón,1ero A,13,Femenino,estudiante,1,2,1,2,0,3,1,0,3,13.0,Moderado,1,1,3
+alejandro,salazar,1 A SC,13,Masculino,estudiante,1,0,0,0,1,1,1,3,0,7.0,Leve,0,1,2
+Diego,Nolasco,1ro secundaria,12,Masculino,estudiante,1,1,0,1,1,1,0,0,0,5.0,Leve,0,1,2
+Sayen,Yangali,1ro A,13,Femenino,estudiante,1,1,2,3,1,1,0,1,1,11.0,Moderado,1,1,3
+Adriana,Santamaria,1ero,13,Femenino,estudiante,2,1,2,2,2,3,2,2,2,18.0,Moderadamente grave,1,1,4
+Diego,Arostegui,1ro,13,Masculino,estudiante,1,1,1,1,0,1,1,0,0,6.0,Leve,0,1,2
+Johan Javier,Gonzales Gallegos,1A,13,Masculino,estudiante,1,1,1,1,0,1,1,0,0,6.0,Leve,0,1,2
+Joaquín,Leal,1,13,Masculino,estudiante,3,0,1,3,0,3,1,1,3,15.0,Moderadamente grave,0,1,4
+benjamin,Marcos,1 Sec,12,Masculino,estudiante,1,2,3,3,1,1,0,0,0,11.0,Moderado,0,1,3
+engie,huaman,1secundaria,13,Femenino,estudiante,1,0,0,1,2,1,1,0,1,7.0,Leve,1,1,2
+facundo castillejo,Castillejo,1ro secundaria,12,Masculino,estudiante,1,0,0,1,0,1,0,0,1,4.0,Mínimo,0,1,1
+Ximena Fernanda,Hernandez Ginocchio,1roA,12,Femenino,estudiante,1,1,2,2,2,1,2,1,1,13.0,Moderado,1,1,3
+Nadia Karyme,Quinde Saavedra,"1° ""A""",13,Femenino,estudiante,1,3,2,3,2,3,1,0,3,18.0,Moderadamente grave,1,1,4
+Dayana,Almanza,1roA Secundaria,13,Femenino,estudiante,1,2,3,0,1,3,0,1,0,11.0,Moderado,1,1,3
+Estela,Siesquen,"1""A""",12,Femenino,estudiante,2,2,1,0,0,1,0,0,0,6.0,Leve,1,1,2
+Ashley,Vidal,1ro,12,Femenino,estudiante,2,1,0,1,3,2,1,1,1,12.0,Moderado,1,1,3
+Zahid,Puma,1 A,12,Masculino,estudiante,1,2,3,1,0,0,1,1,0,9.0,Leve,0,1,2
+Lyssander,Sandoval,1ro A,12,Masculino,estudiante,1,2,1,2,1,1,1,0,1,10.0,Moderado,0,1,3
+Maria,Montañez,4,16,Femenino,estudiante,1,1,1,3,3,2,1,2,0,14.0,Moderado,1,4,3
+Fatima,Najarro Gonzales,4,15,Femenino,estudiante,1,1,2,1,1,2,1,1,0,10.0,Moderado,1,4,3
+Jhoan André,Galiano,4to,16,Masculino,estudiante,2,2,0,1,0,2,1,0,0,8.0,Leve,0,4,2
+Claudia,Navarro,4,16,Femenino,estudiante,1,2,2,1,2,1,1,1,1,12.0,Moderado,1,4,3
+joel,torbisco garcía,4to C,16,Masculino,estudiante,3,2,3,3,2,2,3,1,0,19.0,Moderadamente grave,0,4,4
+Nicol,Perez,4,15,Femenino,estudiante,2,3,2,1,2,2,3,1,1,17.0,Moderadamente grave,1,4,4
+Anahi,Sanchez,4to,15,Femenino,estudiante,1,3,0,1,1,1,0,0,0,7.0,Leve,1,4,2
+Hector,Espinoza,4,16,Masculino,estudiante,1,1,0,1,0,1,1,0,0,5.0,Leve,0,4,2
+Jade,Cruz,4to,16,Femenino,estudiante,3,2,3,3,3,1,1,1,0,17.0,Moderadamente grave,1,4,4
+Adriel,Salvador,4,16,Masculino,estudiante,1,1,1,1,0,1,1,0,1,7.0,Leve,0,4,2
+Mauricio Emerson,Pérez Saavedra,"4 ""c """,16,Masculino,estudiante,1,0,0,1,0,0,0,0,0,2.0,Mínimo,0,4,1
+Adamari,Alejandrez,4 C,16,Femenino,estudiante,1,1,1,2,2,2,1,1,1,12.0,Moderado,1,4,3
+Naomi,Gutierrez,4,15,Femenino,estudiante,1,1,1,3,2,1,3,1,0,13.0,Moderado,1,4,3
+Dairo,villalobos delgado,4 C,15,Masculino,estudiante,3,1,2,3,1,3,3,1,0,17.0,Moderadamente grave,0,4,4
+alexandra,roldan,4to sec,16,Femenino,estudiante,1,1,0,1,1,1,1,0,3,9.0,Leve,1,4,2
+luhana Saori,Escobar Ticona,4to c,15,Femenino,estudiante,1,1,2,1,1,0,1,1,0,8.0,Leve,1,4,2
+cristianojr,grandes,4to C,16,Masculino,estudiante,0,1,2,1,2,1,2,1,0,10.0,Moderado,0,4,3
+Juan,Ortega Tello,4,16,Masculino,estudiante,2,1,1,1,1,1,1,2,0,10.0,Moderado,0,4,3
+Justin,Cruz Calderon,4to C,16,Masculino,estudiante,3,1,1,1,0,0,0,0,0,6.0,Leve,0,4,2
+ELMA,LATORRE,4TO,16,Femenino,estudiante,3,3,3,3,2,2,3,1,3,23.0,Grave,1,4,5
+miguel angel,marquiño,4to,16,Masculino,estudiante,0,1,0,1,0,0,1,0,0,3.0,Mínimo,0,4,1
+valentina,castillo,4to sec,16,Femenino,estudiante,1,1,3,1,1,1,1,3,1,13.0,Moderado,1,4,3
+Anyela Lucia,Mamani,4to C,16,Femenino,estudiante,1,1,2,1,1,1,1,1,0,9.0,Leve,1,4,2
+Betty,Saenz,4to,16,Femenino,estudiante,1,1,2,2,2,3,2,2,1,16.0,Moderadamente grave,1,4,4
+Nickole de los Angeles,Arcila,4to C,16,Femenino,estudiante,1,3,3,3,3,1,3,3,0,20.0,Grave,1,4,5
+Tilsa Milena,Albornoz Romero,"4to ""C""",16,Femenino,estudiante,1,2,2,2,3,2,3,1,2,18.0,Moderadamente grave,1,4,4
+francisco,loyola,4to sec,16,Masculino,estudiante,1,1,2,1,2,3,3,2,0,15.0,Moderadamente grave,0,4,4
+Sharlin Gianira,Perez Huiza,"4to ""C""",15,Femenino,estudiante,1,1,1,1,0,1,2,0,0,7.0,Leve,1,4,2
+Alexa,Trujillo,2 B,14,Femenino,estudiante,3,2,3,2,3,3,2,2,1,21.0,Grave,1,2,5
+sofia,perez,2do,14,Femenino,estudiante,1,3,2,1,3,3,2,1,2,18.0,Moderadamente grave,1,2,4
+Cecilia,Bardales,2do de secundar,14,Femenino,estudiante,0,0,1,0,0,0,0,0,0,1.0,Mínimo,1,2,1
+Gerard,villalobos,2B,14,Masculino,estudiante,1,1,1,2,2,2,2,1,1,13.0,Moderado,0,2,3
+Valerie,Flores,2do,13,Femenino,estudiante,1,1,3,2,1,2,3,2,0,15.0,Moderadamente grave,1,2,4
+jamil,pelaez,2b,14,Masculino,estudiante,2,1,1,1,1,1,1,0,1,9.0,Leve,0,2,2
+camila,morillo,2b,13,Femenino,estudiante,1,1,3,1,3,1,0,0,0,10.0,Moderado,1,2,3
+Kaori,Justo,2do,13,Femenino,estudiante,1,2,2,1,1,1,0,0,1,9.0,Leve,1,2,2
+Kimberly,Grandez,2do,14,Femenino,estudiante,0,0,1,0,0,1,0,0,0,2.0,Mínimo,1,2,1
+Carla,Sicha,2do B,14,Femenino,estudiante,3,3,3,3,3,3,3,3,3,27.0,Grave,1,2,5
+Anderson,Preciado,2do,13,Masculino,estudiante,2,2,2,1,1,1,1,2,1,13.0,Moderado,0,2,3
+milagros coral,ramos,2do B,13,Femenino,estudiante,1,1,3,3,1,0,0,0,1,10.0,Moderado,1,2,3
+Fabiana,Lopez Castellares,2do,14,Femenino,estudiante,1,2,3,1,0,2,1,1,0,11.0,Moderado,1,2,3
+kamyl,cornejo,2do B,14,Femenino,estudiante,3,2,3,1,1,2,1,1,2,16.0,Moderadamente grave,1,2,4
+Suemi,Gordillo,2do B,14,Femenino,estudiante,1,1,1,1,1,1,0,1,0,7.0,Leve,1,2,2
+Genesis Fernanda,Angulo,"2""B""",14,Femenino,estudiante,1,1,1,1,1,1,1,0,0,7.0,Leve,1,2,2
+Joaquin,Castillo,2do,14,Masculino,estudiante,1,1,0,1,0,0,1,0,0,4.0,Mínimo,0,2,1
+ethan,paredes,2b,15,Masculino,estudiante,3,2,3,3,0,1,1,2,0,15.0,Moderadamente grave,0,2,4
+Rominaa,Gutiérrez,2do,14,Femenino,estudiante,1,3,3,3,2,3,2,3,3,23.0,Grave,1,2,5
+Milessi,Mercedes,2do,14,Femenino,estudiante,1,1,3,1,2,1,1,1,0,11.0,Moderado,1,2,3
+Nicolas,Cordero,2B,14,Masculino,estudiante,1,1,1,1,1,0,1,1,0,7.0,Leve,0,2,2
+Raphaela belu,Santisteban,"2""B""",14,Femenino,estudiante,1,1,1,2,0,1,1,1,1,9.0,Leve,1,2,2
+Flavia valentina,Jaime,2do B,14,Femenino,estudiante,1,1,1,1,1,1,1,1,0,8.0,Leve,1,2,2
+Gerardo fuentes,rivera zuñiga,2,14,Masculino,estudiante,3,3,1,2,0,3,3,3,1,19.0,Moderadamente grave,0,2,4
+jhogan,lomas,3,15,Masculino,estudiante,2,1,2,3,3,3,3,3,3,23.0,Grave,0,3,5
+yulied,roque,3,14,Femenino,estudiante,1,1,1,3,3,1,3,0,0,13.0,Moderado,1,3,3
+Thiago,Tuesta,3,14,Masculino,estudiante,1,2,3,2,1,1,2,0,0,12.0,Moderado,0,3,3
+liam,taipe,3c,15,Masculino,estudiante,1,2,1,1,1,2,1,1,0,10.0,Moderado,0,3,3
+Antonella,Saenz,3ro,15,Femenino,estudiante,1,0,1,1,1,1,1,0,1,7.0,Leve,1,3,2
+favio,cuellar,3ro,14,Masculino,estudiante,0,0,1,2,3,0,1,1,0,8.0,Leve,0,3,2
+Luis Maello,Risco Domínguez,2de secundaria,15,Masculino,estudiante,1,2,0,1,1,1,1,0,1,8.0,Leve,0,2,2
+Lionel,Hilares,"3 ""c""",14,Masculino,estudiante,1,1,2,1,0,2,0,0,0,7.0,Leve,0,3,2
+leandro,esqueche,3ro,14,Masculino,estudiante,2,1,1,2,1,1,3,1,1,13.0,Moderado,0,3,3
+Amil,Huillca,3C,15,Femenino,estudiante,1,0,1,1,1,1,1,0,0,6.0,Leve,1,3,2
+Maricielo,PEÑA,3c,14,Femenino,estudiante,1,3,1,0,1,3,1,0,1,11.0,Moderado,1,3,3
+Fernando,Lopez,3 C,14,Masculino,estudiante,1,2,1,1,2,1,2,1,2,13.0,Moderado,0,3,3
+Benjamin tomas,Gutierrez Limas,3ro c,14,Masculino,estudiante,1,0,1,1,1,1,1,1,1,8.0,Leve,0,3,2
+jimena,Figueroa,3ro C,14,Femenino,estudiante,1,1,2,1,0,1,0,0,0,6.0,Leve,1,3,2
+adrianho miguel,huaranca,3,14,Masculino,estudiante,1,1,2,1,3,1,0,1,0,10.0,Moderado,0,3,3
+Damaris  Jimena,Huanca,3,15,Femenino,estudiante,1,3,2,3,1,0,1,2,3,16.0,Moderadamente grave,1,3,4
+Edgard Leonardo,Ovalle,3ro sec,15,Masculino,estudiante,2,1,0,1,1,1,1,1,3,11.0,Moderado,0,3,3
+José Gabriel,Chunga,3,14,Masculino,estudiante,1,1,1,1,0,1,2,1,0,8.0,Leve,0,3,2
+dan angeles,utush,3 C,15,Femenino,estudiante,3,2,3,1,2,1,3,1,1,17.0,Moderadamente grave,1,3,4
+iker,ticse torres,3,14,Masculino,estudiante,3,2,2,3,1,2,1,1,3,18.0,Moderadamente grave,0,3,4
+akemi dayanna,camones,3ro C,14,Femenino,estudiante,1,1,1,1,1,2,0,0,0,7.0,Leve,1,3,2
+Marina M,capcha,3ro C,16,Femenino,estudiante,3,1,1,2,1,2,2,2,3,17.0,Moderadamente grave,1,3,4
+Eymi,Calla,3ero,15,Femenino,estudiante,2,2,3,1,3,1,2,3,1,18.0,Moderadamente grave,1,3,4
+Dustin fabian,Ramos,3ro de sec.,14,Masculino,estudiante,1,0,1,1,0,0,0,0,0,3.0,Mínimo,0,3,1
+Luciana,Puellles,3C,14,Femenino,estudiante,1,1,2,1,0,0,1,1,0,7.0,Leve,1,3,2
+amy,milian,1,12,Femenino,estudiante,3,2,1,2,1,3,2,1,3,18.0,Moderadamente grave,1,1,4
+dayiro,barja,1 de secundaria,12,Masculino,estudiante,2,2,1,3,3,1,1,3,1,17.0,Moderadamente grave,0,1,4
+Yaakov,Altamirano,1,13,Masculino,estudiante,1,0,0,1,0,1,2,0,3,8.0,Leve,0,1,2
+Luana,Ferrer,1ro,12,Femenino,estudiante,1,1,1,0,3,1,2,0,1,10.0,Moderado,1,1,3
+Samantha,Peláez,1ro C,13,Femenino,estudiante,2,1,2,1,3,1,0,0,2,12.0,Moderado,1,1,3
+jesiel leonella,Rivero Gonzalez,1,13,Femenino,estudiante,1,3,1,3,2,1,3,3,0,17.0,Moderadamente grave,1,1,4
+juan victor,huaman,1,13,Masculino,estudiante,3,2,2,3,3,2,2,2,2,21.0,Grave,0,1,5
+Anahí,Dávila,1ero C,13,Femenino,estudiante,2,1,1,2,3,3,1,0,3,16.0,Moderadamente grave,1,1,4
+Alejandra Gabriela,Juarez Marcos,1ro,13,Femenino,estudiante,2,1,2,2,1,2,1,1,2,14.0,Moderado,1,1,3
+Ruth  Antonella,León,1ero,13,Femenino,estudiante,2,3,3,1,1,3,1,0,1,15.0,Moderadamente grave,1,1,4
+LUCIA,Garces,1 C,12,Femenino,estudiante,2,2,3,2,3,2,2,1,2,19.0,Moderadamente grave,1,1,4
+julian andres,ospina rodriguez,1ro,13,Masculino,estudiante,1,1,0,0,1,1,1,1,0,6.0,Leve,0,1,2
+antonella JULIANKA,GOMEZ,1 C,13,Femenino,estudiante,1,0,1,1,1,1,0,0,0,5.0,Leve,1,1,2
+Max Harry,Obregon Tafur,1ro C,13,Masculino,estudiante,1,2,1,0,0,0,0,0,0,4.0,Mínimo,0,1,1
+Nicolle Alessandra,Avila Saravia,1ro secundaria,13,Femenino,estudiante,2,1,1,1,1,3,1,1,1,12.0,Moderado,1,1,3
+LUCIA ELIZABETH,vasquez herrera,1ro,12,Femenino,estudiante,3,2,3,1,3,3,1,1,3,20.0,Grave,1,1,5
+Nadia dignabell,Soto arenas,1ro,13,Femenino,estudiante,3,3,3,3,3,1,0,2,2,20.0,Grave,1,1,5
+Victor Oswaldo,Manallay Huaman,1ro A,12,Masculino,estudiante,2,0,0,2,0,1,0,1,1,7.0,Leve,0,1,2
+Andrew,Rivera,1er año A sec,13,Masculino,estudiante,1,0,1,0,0,0,0,0,0,2.0,Mínimo,0,1,1
+luciana,perez,3ro sec,15,Femenino,estudiante,1,1,1,1,2,1,3,1,0,11.0,Moderado,1,3,3
+Rodolfo,Ramos,3er secundaria,14,Masculino,estudiante,1,2,2,1,2,1,3,3,1,16.0,Moderadamente grave,0,3,4
+maziel,miranda,3ero,14,Femenino,estudiante,1,1,0,2,1,2,1,3,3,14.0,Moderado,1,3,3
+Gael,Guzmán,3 D Secundaria,15,Masculino,estudiante,1,1,1,1,0,0,0,1,0,5.0,Leve,0,3,2
+penelope,zevallos,3ro D secu,14,Femenino,estudiante,1,1,0,1,0,0,0,1,0,4.0,Mínimo,1,3,1
+Roniel,Miranda,"3ro ""D""",15,Masculino,estudiante,2,0,1,1,3,3,2,0,0,12.0,Moderado,0,3,3
+Joaquin,Zelada,3ro secundaria,14,Masculino,estudiante,1,2,3,1,3,1,1,1,1,14.0,Moderado,0,3,3
+GONZALO,ZELADA,3D,15,Masculino,estudiante,1,1,3,1,0,2,1,3,1,13.0,Moderado,0,3,3
+Danniel,Ccencho,3ro,15,Masculino,estudiante,3,1,3,3,2,3,1,2,1,19.0,Moderadamente grave,0,3,4
+Fabrizzio Balcazar,Ruiz,3ero,15,Masculino,estudiante,1,1,2,2,1,0,1,0,1,9.0,Leve,0,3,2
+Andrew,Reyes Barrionuevo,3ero secundaria,15,Masculino,estudiante,1,2,0,1,1,1,0,0,1,7.0,Leve,0,3,2
+FÁTIMA,HILARIO,3D,15,Femenino,estudiante,3,2,2,1,1,2,1,1,2,15.0,Moderadamente grave,1,3,4
+mateo,iparraguirre,3d,14,Masculino,estudiante,1,1,1,0,0,1,1,0,0,5.0,Leve,0,3,2
+Nallely milagros,chiscul,3ero D,15,Femenino,estudiante,1,1,1,1,0,1,1,0,0,6.0,Leve,1,3,2
+Alejandro,Villanueva,3 D,14,Masculino,estudiante,2,2,2,3,2,3,3,0,0,17.0,Moderadamente grave,0,3,4
+Rosaura Lucciana,Flores Sanchez,3D,14,Femenino,estudiante,1,1,1,1,1,1,1,3,1,11.0,Moderado,1,3,3
+ENRIQUE,Grillo Sanchez,3ero,15,Masculino,estudiante,1,1,2,3,2,1,2,0,0,12.0,Moderado,0,3,3
+Alejandra Y,Cardenas,3 D,14,Femenino,estudiante,2,1,2,1,3,3,3,2,0,17.0,Moderadamente grave,1,3,4
+ADRIANA SOFIA,VASQUEZ,3RO,14,Femenino,estudiante,1,2,0,0,0,0,1,0,0,4.0,Mínimo,1,3,1
+Megan Garcia,Diaz,3ro sec,15,Femenino,estudiante,1,1,2,2,2,2,2,1,2,15.0,Moderadamente grave,1,3,4
+Emily Luciana,Márquez Pinedo,3,15,Femenino,estudiante,2,3,1,1,2,2,3,1,1,16.0,Moderadamente grave,1,3,4
+Valeria,Aguilar,3ero,15,Femenino,estudiante,2,1,2,2,1,1,0,1,0,10.0,Moderado,1,3,3
+CLAUDIA,FARFAN,3D,15,Femenino,estudiante,1,2,2,1,1,0,2,2,1,12.0,Moderado,1,3,3
+Piero A,Del castillo,3ro D,15,Masculino,estudiante,0,1,0,1,0,0,0,1,0,3.0,Mínimo,0,3,1
+FABIANNA KHYSTHEL,de la cruz,3ero,15,Femenino,estudiante,1,1,3,3,1,2,3,1,0,15.0,Moderadamente grave,1,3,4
+ALLAN DAVID,TOYO,3D,15,Masculino,estudiante,1,0,1,1,0,1,2,1,1,8.0,Leve,0,3,2
+Mishell,Ramirez,4D,15,Femenino,estudiante,1,3,3,1,1,3,3,1,1,17.0,Moderadamente grave,1,4,4
+Danitza,Pérez,4to,16,Femenino,estudiante,3,2,3,2,2,2,2,1,0,17.0,Moderadamente grave,1,4,4
+Jerson,Castillo,4,16,Femenino,estudiante,3,2,3,2,3,2,2,2,3,22.0,Grave,1,4,5
+Valeria,Lacunza,4to,16,Femenino,estudiante,3,2,1,3,1,3,2,1,1,17.0,Moderadamente grave,1,4,4
+Emily,Conde,4to sec,15,Femenino,estudiante,1,1,1,1,1,1,1,0,0,7.0,Leve,1,4,2
+jerson,castillo,4,15,Masculino,estudiante,0,1,2,1,0,0,1,1,0,6.0,Leve,0,4,2
+Luz,Castillón,4,15,Femenino,estudiante,1,1,1,1,1,2,0,0,0,7.0,Leve,1,4,2
+Maite,Quiroz,4to,16,Femenino,estudiante,2,2,3,2,3,2,3,2,0,19.0,Moderadamente grave,1,4,4
+Christian JeanLuc,Gutierrez Bernal,4,16,Masculino,estudiante,0,1,1,1,0,0,2,3,0,8.0,Leve,0,4,2
+Luciana,Huamani,4to,16,Femenino,estudiante,1,2,1,2,1,1,2,0,1,11.0,Moderado,1,4,3
+aaron,pichihua,4to,16,Masculino,estudiante,0,1,1,2,1,1,2,1,0,9.0,Leve,0,4,2
+María Isabelle,Alvarez,4 D,15,Femenino,estudiante,2,2,2,2,1,2,2,1,2,16.0,Moderadamente grave,1,4,4
+Nicole Stacy,Alamo Guerrero,4to D,16,Femenino,estudiante,1,1,1,2,0,1,2,3,0,11.0,Moderado,1,4,3
+Leandro,Tapullima,4TO SECUNDARIA,15,Masculino,estudiante,2,2,1,1,0,3,1,0,0,10.0,Moderado,0,4,3
+Sol ariana,gomez suca,4to D,16,Femenino,estudiante,2,1,3,1,2,3,3,2,2,19.0,Moderadamente grave,1,4,4
+SEBASTIAN,PANDURO,4TO SECUNDARIA,16,Masculino,estudiante,0,2,1,1,1,2,1,1,3,12.0,Moderado,0,4,3
+Joaquin Ismael,Gonzales Alcantara,4to,16,Masculino,estudiante,1,1,3,1,0,0,1,0,0,7.0,Leve,0,4,2
+Mijail,Lamas,"4TO ""D""",16,Masculino,estudiante,1,0,1,3,1,1,0,1,0,8.0,Leve,0,4,2
+FLAVIO ALESSANDRO,MEDEL,4to,16,Masculino,estudiante,1,1,3,1,1,1,3,0,0,11.0,Moderado,0,4,3
+MINERVA,LLACUASH,4,16,Femenino,estudiante,1,1,0,1,1,0,1,1,0,6.0,Leve,1,4,2
+Santiago,valqui,4to,16,Masculino,estudiante,1,1,1,1,1,1,1,1,0,8.0,Leve,0,4,2
+enrique,juarez,4to,15,Masculino,estudiante,2,2,1,3,0,2,0,1,1,12.0,Moderado,0,4,3
+lu,C,4to,15,Femenino,estudiante,2,2,2,2,2,2,2,1,1,16.0,Moderadamente grave,1,4,4
+Thiago mathias,Vera,4to,16,Masculino,estudiante,2,1,0,0,2,3,2,3,3,16.0,Moderadamente grave,0,4,4
+Jaqueline,Cuba Rodriguez,2do,14,Femenino,estudiante,1,2,1,1,0,0,1,0,0,6.0,Leve,1,2,2
+Mariana,Trejo,2do,13,Femenino,estudiante,1,1,2,0,0,1,1,0,0,6.0,Leve,1,2,2
+Mathias,Gabriel,2A,13,Masculino,estudiante,3,1,2,1,0,3,0,1,1,12.0,Moderado,0,2,3
+Letizia,Sandoval,2do sec.,13,Femenino,estudiante,1,3,3,3,1,1,1,1,0,14.0,Moderado,1,2,3
+Luana Belén,Quezada Morales,2do,14,Femenino,estudiante,1,1,1,1,2,3,2,1,1,13.0,Moderado,1,2,3
+jorge yamil,maza garcía,2a,13,Masculino,estudiante,1,1,2,1,1,1,2,0,2,11.0,Moderado,0,2,3
+kate,santa maria,2,14,Femenino,estudiante,2,1,2,3,1,1,0,1,0,11.0,Moderado,1,2,3
+Josue,Chávez,2,13,Masculino,estudiante,1,2,1,1,0,0,2,0,0,7.0,Leve,0,2,2
+aaron,uriarte,2do a,13,Masculino,estudiante,2,2,1,3,1,1,0,0,0,10.0,Moderado,0,2,3
+DANIEL,NEGREIROS,"2""A""",13,Masculino,estudiante,1,0,0,1,1,0,0,1,0,4.0,Mínimo,0,2,1
+Leandro Martín,Chocce Aiquipa,2,14,Masculino,estudiante,1,1,2,3,0,3,0,0,1,11.0,Moderado,0,2,3
+kevin,lopez,2,13,Masculino,estudiante,3,3,3,2,1,0,3,1,3,19.0,Moderadamente grave,0,2,4
+Mia,Rivera,2doA,14,Femenino,estudiante,1,1,1,1,1,1,1,0,0,7.0,Leve,1,2,2
+Tamara,Ruiz,2 A,14,Femenino,estudiante,1,1,2,2,1,2,2,1,1,13.0,Moderado,1,2,3
+Jesús,Catter,2°,13,Masculino,estudiante,1,1,1,0,1,0,1,1,0,6.0,Leve,0,2,2
+Camila,Umpire,2do,14,Femenino,estudiante,0,1,0,1,1,0,0,0,0,3.0,Mínimo,1,2,1
+Keizie,Zeña,2do,13,Femenino,estudiante,0,0,0,0,0,0,0,0,0,0.0,Mínimo,1,2,1
+Sofia,Alvarez,2do,14,Femenino,estudiante,2,1,3,2,1,2,3,1,0,15.0,Moderadamente grave,1,2,4
+Mariam,Aquije,2do,14,Femenino,estudiante,1,1,1,1,1,3,1,0,1,10.0,Moderado,1,2,3
+niklas,saravia,2doA,14,Masculino,estudiante,1,1,1,2,3,1,2,2,1,14.0,Moderado,0,2,3
+Alison,Perez,2do,13,Femenino,estudiante,1,2,1,1,1,1,2,1,1,11.0,Moderado,1,2,3
+THIAGO JESUS,RUEDA,2 A,14,Masculino,estudiante,1,1,1,2,1,1,0,1,0,8.0,Leve,0,2,2
+mara fernanda,reyes portuguez,2,13,Femenino,estudiante,3,2,3,2,1,1,3,3,0,18.0,Moderadamente grave,1,2,4
+NICOLAS,Vergara,2A,14,Masculino,estudiante,1,0,1,0,1,0,0,0,0,3.0,Mínimo,0,2,1
+Daneshka,Perez Huiza,2do,14,Femenino,estudiante,0,1,1,0,1,1,0,1,0,5.0,Leve,1,2,2
+N,SERIAL DESIGNATION,2 ¨A¨¨,13,Masculino,estudiante,0,3,3,3,3,2,1,0,3,18.0,Moderadamente grave,0,2,4
+Lucero Denise,Caballero Capaquira,2do secundaria,14,Femenino,estudiante,1,1,2,1,1,1,3,1,0,11.0,Moderado,1,2,3
+Aixa ellen,Meza,2 A,14,Femenino,estudiante,1,1,2,1,3,3,1,1,2,15.0,Moderadamente grave,1,2,4
+Almendra kamyla,Juarez huamani,2do A,14,Femenino,estudiante,1,1,1,1,0,2,1,1,3,11.0,Moderado,1,2,3
+camila,villanueva,1 secundaria,12,Femenino,estudiante,2,2,3,2,3,3,1,3,1,20.0,Grave,1,1,5
+Damaris Hoshi,Sanchez Delgadillo,1,12,Femenino,estudiante,2,2,3,2,2,3,1,0,3,18.0,Moderadamente grave,1,1,4
+Daylin,Landeo,1 secundaria,13,Femenino,estudiante,1,2,1,3,1,0,3,0,0,11.0,Moderado,1,1,3
+Ariana,Tomairo,1ro,13,Femenino,estudiante,2,1,3,2,1,2,2,2,0,15.0,Moderadamente grave,1,1,4
+darla valerie,torres yañac,"1""D""",13,Femenino,estudiante,3,1,0,1,2,3,3,0,3,16.0,Moderadamente grave,1,1,4
+ximena Nicole,villena marrufo,1 secundaria,13,Femenino,estudiante,1,3,0,1,2,1,0,1,1,10.0,Moderado,1,1,3
+valeria nicoll,chiroque alzamora,1D,13,Femenino,estudiante,2,1,3,2,2,1,2,1,3,17.0,Moderadamente grave,1,1,4
+lionel,cotera salazar,1ro d,13,Masculino,estudiante,1,2,1,2,2,1,1,0,1,11.0,Moderado,0,1,3
+Lucero karen,Zuta chuquicota,1 año,13,Femenino,estudiante,1,2,2,2,1,1,2,1,1,13.0,Moderado,1,1,3
+stephano,chavez,1ro D,13,Masculino,estudiante,1,3,0,1,0,1,0,0,1,7.0,Leve,0,1,2
+Luana Michelle,Barrientos,1ro secundaria,12,Femenino,estudiante,2,1,1,3,1,2,0,1,0,11.0,Moderado,1,1,3
+Sofia Iriel,Hernandez,1ero secundaria,12,Femenino,estudiante,1,1,1,0,0,1,0,0,0,4.0,Mínimo,1,1,1
+DANITZA LUHANA,FLORES,1D,13,Femenino,estudiante,3,1,1,1,1,2,0,0,0,9.0,Leve,1,1,2
+Lucia V,Concha,"1ro""D""",13,Femenino,estudiante,1,1,2,3,2,1,3,2,1,16.0,Moderadamente grave,1,1,4
+ARIANA GUADALUPE,ILLACONZA,1D,13,Femenino,estudiante,1,0,0,0,0,1,0,0,0,2.0,Mínimo,1,1,1
+Adriana lidia,ramos brummert,"1""D""",13,Femenino,estudiante,3,3,3,3,3,3,2,1,3,24.0,Grave,1,1,5
+FACUNDO STEFANO,ROMERO,1ro,12,Masculino,estudiante,3,0,3,1,1,2,3,1,0,14.0,Moderado,0,1,3
+Thiago André,Alarcón,1 d,12,Masculino,estudiante,3,1,3,3,1,2,2,2,3,20.0,Grave,0,1,5
+Radamel gaell,caldas saaavedra,1ro,13,Masculino,estudiante,0,1,1,1,2,0,3,1,1,10.0,Moderado,0,1,3
+Jael thiago,Tutucima,1D,12,Masculino,estudiante,1,1,1,1,2,1,1,2,3,13.0,Moderado,0,1,3
+Alvaro sebastian,Bustamante infante,1 D,12,Masculino,estudiante,1,0,0,2,2,1,1,0,0,7.0,Leve,0,1,2
+taniatita,atoche vallejos,"1""D""",12,Femenino,estudiante,3,3,3,2,2,2,1,1,1,18.0,Moderadamente grave,1,1,4
+Ian,Napa,2do secundaria,14,Masculino,estudiante,1,2,2,2,0,1,0,0,0,8.0,Leve,0,2,2
+Laura,Navarrete,2do,14,Femenino,estudiante,1,2,3,1,2,3,2,2,3,19.0,Moderadamente grave,1,2,4
+Adrian,Figueroa Torre,2do de Sec.,14,Masculino,estudiante,2,1,1,0,0,1,1,0,0,6.0,Leve,0,2,2
+camila,vasquez,2do c,13,Femenino,estudiante,1,1,3,2,0,1,2,2,1,13.0,Moderado,1,2,3
+LUZ,HUAYNALAYA,2,13,Femenino,estudiante,1,1,1,1,1,1,1,1,1,9.0,Leve,1,2,2
+Jorge Yohiro Yadiel,Chacon Olaya,2do C,14,Masculino,estudiante,1,2,0,3,0,3,0,0,0,9.0,Leve,0,2,2
+Yazlin,Sifuentes,2do C secundari,14,Femenino,estudiante,3,1,3,3,1,3,3,3,3,23.0,Grave,1,2,5
+Keyla,Ordoñez,2do C secundari,13,Femenino,estudiante,2,1,1,2,3,1,3,1,1,15.0,Moderadamente grave,1,2,4
+César,Suyco,2do sec,14,Masculino,estudiante,0,0,1,0,0,0,1,1,0,3.0,Mínimo,0,2,1
+Guianella,Tello,2do C,13,Femenino,estudiante,3,1,3,2,3,3,3,3,3,24.0,Grave,1,2,5
+keren,cayhualla,segundo,14,Femenino,estudiante,1,0,0,1,0,0,1,0,0,3.0,Mínimo,1,2,1
+Camila adriana,Callupe Ronto,2do C,14,Femenino,estudiante,1,1,0,0,0,2,1,0,1,6.0,Leve,1,2,2
+Keyla Isabel,Zapana Ramos,2do C sec,13,Femenino,estudiante,0,1,2,1,2,0,1,1,0,8.0,Leve,1,2,2
+mia milett,torres cantorin,2c,13,Femenino,estudiante,2,0,3,2,0,2,2,3,1,15.0,Moderadamente grave,1,2,4
+Luciana kate,Leon Victorio,segundo,14,Femenino,estudiante,2,3,3,3,1,2,2,2,1,19.0,Moderadamente grave,1,2,4
+Marcelo,Enriquez,2do,14,Masculino,estudiante,1,2,2,0,2,0,1,0,0,8.0,Leve,0,2,2
+Andrea Xiomara,Solórzano León,2do,14,Femenino,estudiante,1,1,2,1,2,2,1,2,2,14.0,Moderado,1,2,3
+alexa,rojas,2do secundaria,14,Femenino,estudiante,1,1,1,3,3,3,3,2,2,19.0,Moderadamente grave,1,2,4
+Emilú,Caro,2do,14,Femenino,estudiante,2,2,3,2,3,3,2,2,3,22.0,Grave,1,2,5
+Rodrigo,Neyra,2,14,Masculino,estudiante,0,1,0,1,0,0,3,0,0,5.0,Leve,0,2,2
+Eddy,Mosquipa,2do C,13,Masculino,estudiante,1,1,0,1,0,1,1,1,0,6.0,Leve,0,2,2
+selene,castro,2do secundaria,13,Femenino,estudiante,3,1,1,2,2,3,2,0,3,17.0,Moderadamente grave,1,2,4
+olenka,cusi,2c,14,Femenino,estudiante,3,1,1,3,3,0,1,1,0,13.0,Moderado,1,2,3
+Jorge Mateo,Quiroz Huarayo,2do C,14,Masculino,estudiante,0,0,1,1,2,0,0,1,0,5.0,Leve,0,2,2
+Leandro Alexander,Rosales Bereche,2 C,13,Masculino,estudiante,1,1,1,2,1,3,1,1,3,14.0,Moderado,0,2,3
+leonel,beltran,2,14,Masculino,estudiante,1,1,1,1,1,1,1,1,0,8.0,Leve,0,2,2
+Misael,Caycho,2,14,Masculino,estudiante,0,1,1,1,0,0,2,2,0,7.0,Leve,0,2,2
+alexander Edison,enrique gadea,2do secundaria,14,Masculino,estudiante,0,2,1,1,0,0,1,0,0,5.0,Leve,0,2,2
+Nayeli V,Montes ruiz,2do,13,Femenino,estudiante,1,3,1,3,3,1,2,1,0,15.0,Moderadamente grave,1,2,4
+karolina,moya,2do,14,Femenino,estudiante,2,2,3,1,0,1,1,0,0,10.0,Moderado,1,2,3
+Bryana,Ñiquen,2do,14,Femenino,estudiante,0,1,1,0,1,0,0,1,0,4.0,Mínimo,1,2,1
+LUHANA YARIVE,SEMINARIO,2,13,Femenino,estudiante,1,3,1,2,3,2,1,3,0,16.0,Moderadamente grave,1,2,4
+Fátima Antonella,Franco Vasquez,2D,13,Femenino,estudiante,3,3,3,3,2,3,3,3,3,26.0,Grave,1,2,5
+Luana,Quesada,2 D,14,Femenino,estudiante,3,1,2,1,0,3,1,1,2,14.0,Moderado,1,2,3
+Camila Massiel,Guzman,2do,14,Femenino,estudiante,3,2,3,2,2,2,1,1,2,18.0,Moderadamente grave,1,2,4
+santiago,vilchez,2do,14,Masculino,estudiante,0,0,0,1,0,0,1,0,0,2.0,Mínimo,0,2,1
+Fernando,Ubillus,2D,14,Masculino,estudiante,3,2,3,1,0,3,0,1,3,16.0,Moderadamente grave,0,2,4
+kiara,rojas,2do,14,Femenino,estudiante,1,1,2,2,2,2,2,2,3,17.0,Moderadamente grave,1,2,4
+zefora brizeida,blas palomino,segundo,13,Femenino,estudiante,2,2,3,2,3,3,2,1,2,20.0,Grave,1,2,5
+Vania Karina,Vega,2do,13,Femenino,estudiante,3,2,3,2,3,2,2,3,1,21.0,Grave,1,2,5
+Mariana Luana,Moran Sanchez,2do,14,Femenino,estudiante,3,2,3,2,1,3,3,1,3,21.0,Grave,1,2,5
+Iyari,Ñiquen Saavedra,2D,13,Femenino,estudiante,1,1,0,1,0,0,1,1,0,5.0,Leve,1,2,2
+Fabiana Illari,Padilla Alfaro,2D sec.,13,Femenino,estudiante,2,0,0,0,2,3,1,0,3,11.0,Moderado,1,2,3
+ANA,Franco,2 D SEC,13,Femenino,estudiante,1,0,0,0,0,0,0,0,0,1.0,Mínimo,1,2,1
+Dayra A,Olortegui,2do d,14,Femenino,estudiante,3,2,3,1,1,3,1,3,1,18.0,Moderadamente grave,1,2,4
+haymar kristel,soria,2,14,Femenino,estudiante,3,1,1,3,2,2,2,1,2,17.0,Moderadamente grave,1,2,4
+Dayana N,MOZOMBITE,2DO D,13,Femenino,estudiante,1,1,3,1,3,1,1,0,0,11.0,Moderado,1,2,3
+kenny,rodriguez,2do,14,Masculino,estudiante,1,2,1,1,0,0,0,0,0,5.0,Leve,0,2,2
+Alessa M,Hernández,2do D,14,Femenino,estudiante,2,1,3,2,1,1,0,1,1,12.0,Moderado,1,2,3
+THAMARA,FRANCO LUNA,2,14,Femenino,estudiante,1,1,0,1,2,1,1,1,0,8.0,Leve,1,2,2
+joaquim jesus,carrera cueva,2,13,Masculino,estudiante,1,1,1,1,1,1,0,1,1,8.0,Leve,0,2,2
+ryhana,felix,2D,13,Femenino,estudiante,1,1,3,2,1,2,1,1,1,13.0,Moderado,1,2,3
+AISHA,MORENO,2 D,14,Femenino,estudiante,2,1,3,3,1,3,1,1,0,15.0,Moderadamente grave,1,2,4
+Paolo G,otoya pejerrey,2do secundaria,14,Masculino,estudiante,0,1,0,1,0,0,0,0,0,2.0,Mínimo,0,2,1
+Adrian Javier,Larrea,2°d,14,Masculino,estudiante,1,1,2,1,2,1,1,0,0,9.0,Leve,0,2,2
+SUSAN ALICE,mamani,2 D,14,Femenino,estudiante,1,1,0,1,0,0,1,1,0,5.0,Leve,1,2,2
+diego alexander,mallqui,2do,14,Masculino,estudiante,1,0,1,2,1,0,0,0,0,5.0,Leve,0,2,2
+Baby,Garcia,2do,13,Femenino,estudiante,2,3,0,2,0,1,1,0,2,11.0,Moderado,1,2,3
+josemir,blas,2do,13,Masculino,estudiante,1,2,0,0,0,0,0,0,0,3.0,Mínimo,0,2,1
+Adrian,Curasma,5to,16,Masculino,estudiante,1,1,1,1,0,1,1,1,1,8.0,Leve,0,5,2
+Ricardo,Villacrez,5TO B,17,Masculino,estudiante,1,3,3,3,1,0,2,0,0,13.0,Moderado,0,5,3
+Carla,Gil Campos,5to secundaria,16,Femenino,estudiante,1,1,1,2,3,1,2,0,1,12.0,Moderado,1,5,3
+Aaron,Peláez,5,17,Masculino,estudiante,1,1,0,1,0,1,1,0,0,5.0,Leve,0,5,2
+Mathias,Franco,5to B,16,Masculino,estudiante,0,1,0,1,2,0,0,0,0,4.0,Mínimo,0,5,1
+Daniela Isell,Barrios Anicama,5to,16,Femenino,estudiante,1,1,0,1,0,0,0,0,0,3.0,Mínimo,1,5,1
+Ariana,Chavarria,5,16,Femenino,estudiante,3,2,3,2,3,3,1,2,3,22.0,Grave,1,5,5
+Alexia,HURTADO LEE,5TO,16,Femenino,estudiante,2,3,3,3,2,3,3,3,3,25.0,Grave,1,5,5
+MATIAS,IDROGO,5TO,17,Masculino,estudiante,1,1,3,3,1,1,1,1,1,13.0,Moderado,0,5,3
+Zunil,Torrealva,5to,17,Masculino,estudiante,1,1,1,1,0,0,1,1,1,7.0,Leve,0,5,2
+angela,mandujano,5,16,Femenino,estudiante,1,1,2,1,3,1,2,1,0,12.0,Moderado,1,5,3
+Sebastian Yair,Solis Segundo,5,18,Masculino,estudiante,3,3,2,2,1,0,2,2,1,16.0,Moderadamente grave,0,5,4
+jerico,bernuy,5 b,17,Masculino,estudiante,1,1,0,1,1,0,2,1,0,7.0,Leve,0,5,2
+emily,icahuate,5B,17,Femenino,estudiante,2,2,3,2,2,2,0,0,0,13.0,Moderado,1,5,3
+Daniela,Contreras Reto,5 B SEC,17,Femenino,estudiante,2,3,2,3,1,3,3,1,2,20.0,Grave,1,5,5
+Samaira,Puma,5,16,Femenino,estudiante,1,1,2,2,1,1,1,1,0,10.0,Moderado,1,5,3
+Mateo Julian,Salazar,5to B,16,Masculino,estudiante,0,2,1,1,0,0,1,2,0,7.0,Leve,0,5,2
+jose,castro,5to B,16,Masculino,estudiante,3,1,3,2,3,1,1,2,0,16.0,Moderadamente grave,0,5,4
+Rodrigo,Atanacio Rojas,5,16,Masculino,estudiante,1,2,2,2,2,1,2,0,0,12.0,Moderado,0,5,3
+rosa,andrade,5 B SEC,16,Femenino,estudiante,2,1,3,1,1,0,2,2,0,12.0,Moderado,1,5,3
+fabian valerio,alarcon,5to,16,Masculino,estudiante,1,1,0,1,1,2,1,2,0,9.0,Leve,0,5,2
+michael leonidas,castillo,5,17,Masculino,estudiante,1,1,2,1,1,2,3,1,2,14.0,Moderado,0,5,3
+Abdu Aslan,perez,5b,16,Masculino,estudiante,1,1,3,1,2,1,1,0,0,10.0,Moderado,0,5,3
+Belen,Caballero,5to secundaria,16,Femenino,estudiante,2,1,1,3,2,1,2,1,1,14.0,Moderado,1,5,3
+isabel antonella,nevado bocanegra,1ro,12,Femenino,estudiante,3,1,3,2,2,3,3,2,1,20.0,Grave,1,1,5
+Brianna Isabella,Gonzalez Conde,1 ''c'',12,Femenino,estudiante,1,1,1,2,0,1,1,0,0,7.0,Leve,1,1,2
+fabiola yazmin,cangalaya maza,1c,12,Femenino,estudiante,1,1,0,1,0,0,1,0,0,4.0,Mínimo,1,1,1
+leticia ingrid,villano perez,1c,12,Femenino,estudiante,1,1,0,1,0,1,1,0,0,5.0,Leve,1,1,2
+Karla Yasmin,Condemarin,1,12,Femenino,estudiante,1,1,2,1,1,1,1,2,0,10.0,Moderado,1,1,3
+Jeshua Eduardo,La Torre Castro,1°c,12,Masculino,estudiante,3,0,2,2,3,3,3,2,1,19.0,Moderadamente grave,0,1,4
+Addymar Victoria,Tablante Benitez,1 ''c'',12,Femenino,estudiante,1,1,1,0,1,0,1,0,0,5.0,Leve,1,1,2
+Darlyne Abi,Pariona,1 c,12,Femenino,estudiante,1,2,3,1,1,3,2,3,3,19.0,Moderadamente grave,1,1,4
+adriano,cordova,1c,12,Masculino,estudiante,0,1,0,0,1,0,0,0,3,5.0,Leve,0,1,2
+Christopher Leander,Ypanaque Cueva,1,12,Masculino,estudiante,1,1,1,1,0,0,1,1,0,6.0,Leve,0,1,2
+manuel remigio,huamani coello,1'c,12,Masculino,estudiante,0,2,2,1,1,2,3,1,0,12.0,Moderado,0,1,3
+fabian alejandro,calvo villacorta,1 c,12,Masculino,estudiante,1,1,2,1,0,1,0,0,0,6.0,Leve,0,1,2
+Aylin Cel,Pinedo Neira,1 ''c'',12,Femenino,estudiante,1,1,1,1,2,3,2,0,2,13.0,Moderado,1,1,3
+santiago,estupiñan,1c,12,Masculino,estudiante,0,0,1,3,0,0,1,0,0,5.0,Leve,0,1,2
+mathias alegandro,linarez briseño,primero 1 c,12,Masculino,estudiante,0,0,0,1,1,1,1,0,0,4.0,Mínimo,0,1,1
+rodrigo esteban,perez espinoza,1 C,13,Masculino,estudiante,0,1,2,2,1,1,1,0,0,8.0,Leve,0,1,2
+Hayla Ri,Nestares F,1°c,12,Femenino,estudiante,1,1,1,1,1,1,2,1,0,9.0,Leve,1,1,2
+jeanfrank es,levano fernandez,1 c,13,Masculino,estudiante,0,1,0,1,0,1,0,0,0,3.0,Mínimo,0,1,1
+steysi R,rodriguez intuscca,1 ''c'',12,Femenino,estudiante,1,0,1,1,0,1,1,0,1,6.0,Leve,1,1,2
+Khalef Adriano,Villanueva Coronado,1C,12,Masculino,estudiante,1,1,1,1,3,1,0,1,0,9.0,Leve,0,1,2
+jeremmy alejandro,geldres,1 c,12,Masculino,estudiante,0,1,2,0,3,0,1,0,0,7.0,Leve,0,1,2
+leonardo s,mayta,1c,12,Masculino,estudiante,0,0,0,0,0,0,0,0,1,1.0,Mínimo,0,1,1
+mariella grecia,mejia lopez,1 c,12,Femenino,estudiante,3,1,0,3,0,3,2,1,3,16.0,Moderadamente grave,1,1,4
+Lucia Cristina,Rosas,1ro C,12,Femenino,estudiante,0,1,1,0,0,0,0,0,0,2.0,Mínimo,1,1,1
+leonel percy,felix huaman,1c,12,Masculino,estudiante,0,2,0,0,3,0,0,1,0,6.0,Leve,0,1,2
+Nayra Sophi,Roncal Ñaupari,1 ''c'',12,Femenino,estudiante,1,0,0,0,0,1,0,0,0,2.0,Mínimo,1,1,1
+cristina sofia,ponce espinoza,1 c,12,Femenino,estudiante,1,1,3,1,3,0,0,0,0,9.0,Leve,1,1,2
+Aldo stev,Briones Pezo,1ro C,12,Masculino,estudiante,1,1,3,3,3,2,3,3,3,22.0,Grave,0,1,5
+camila sarai,serrano yanavilca,1°c,12,Femenino,estudiante,1,1,3,2,0,2,3,0,1,13.0,Moderado,1,1,3
+Hanny Kiara,Rosales Pereira,1ro,13,Femenino,estudiante,2,1,1,2,2,3,1,1,0,13.0,Moderado,1,1,3
+matias Ch,chuquimajo,1ro a,13,Masculino,estudiante,1,2,3,2,2,3,3,3,2,21.0,Grave,0,1,5
+yohalis paola  A,Ramirez Hernandez,1ro A,13,Femenino,estudiante,3,1,2,3,3,2,1,2,2,19.0,Moderadamente grave,1,1,4
+Felix Mario,Jara Perez,1 A,13,Masculino,estudiante,0,0,1,1,1,0,1,1,0,5.0,Leve,0,1,2
+ELIZABETH PATRICIA,SARAVIA HUAMAN,1ro A,13,Femenino,estudiante,3,1,2,3,0,3,0,1,0,13.0,Moderado,1,1,3
+julio german,guaman guerra,1ro a,13,Masculino,estudiante,0,0,0,1,0,0,0,0,0,1.0,Mínimo,0,1,1
+jeremias a,rodriguez benavente,1 A,13,Masculino,estudiante,1,1,3,1,3,0,3,1,0,13.0,Moderado,0,1,3
+luciana yamila,ansualdo cahuaza,1ro A,13,Femenino,estudiante,3,2,2,2,2,3,3,3,1,21.0,Grave,1,1,5
+jhunior,espinoza,1ro a,13,Masculino,estudiante,1,0,0,1,0,0,1,0,0,3.0,Mínimo,0,1,1
+Miguel,Chuquimajo,1ro A,15,Masculino,estudiante,0,0,1,0,1,3,1,0,3,9.0,Leve,0,1,2
+Fran Muller J,Quispe Teodoro,1 A,13,Masculino,estudiante,0,0,0,0,0,0,1,1,0,2.0,Mínimo,0,1,1
+Joshua Samin A,Tucasca Garcia,1 A,13,Masculino,estudiante,1,2,0,1,1,0,1,0,0,6.0,Leve,0,1,2
+sebastian,Berrocal,1ro a,13,Masculino,estudiante,1,0,0,1,1,0,1,1,0,5.0,Leve,0,1,2
+rosa priscila Crissiley,santos toro,1ro A,13,Femenino,estudiante,1,3,1,0,3,3,1,3,3,18.0,Moderadamente grave,1,1,4
+Matteo Martin,Barahona Reyes,1 A,13,Masculino,estudiante,0,3,1,0,0,1,0,0,0,5.0,Leve,0,1,2
+yeremi luis A,condori,1ro A,13,Masculino,estudiante,0,0,0,1,1,0,1,1,0,4.0,Mínimo,0,1,1
+jhael lautaro,portalatino toro,1 A,13,Masculino,estudiante,1,2,2,1,1,1,1,2,0,11.0,Moderado,0,1,3
+angel manuel AA,mendoza saravia,1 A,13,Masculino,estudiante,0,1,0,1,1,0,1,1,0,5.0,Leve,0,1,2
+Jonathan johans,bedia rosales,1ro A,14,Masculino,estudiante,2,1,2,1,1,3,1,2,0,13.0,Moderado,0,1,3
+matias Andree,chuquimajo,1ro a,13,Masculino,estudiante,3,3,3,3,3,3,3,3,3,27.0,Grave,0,1,5
+kim kardashian,garrido,1 A,13,Masculino,estudiante,1,2,3,3,1,1,1,0,1,13.0,Moderado,0,1,3
+zaida esther,añanca cornado,1 A,13,Femenino,estudiante,0,0,0,1,0,0,1,0,0,2.0,Mínimo,1,1,1
+ADRIANA CAROLINA,HUAMAN GALLEGOS,1A,13,Femenino,estudiante,1,1,2,1,1,1,1,2,1,11.0,Moderado,1,1,3
+angie nil,chacara,1ro a,13,Femenino,estudiante,2,2,2,2,1,3,1,0,3,16.0,Moderadamente grave,1,1,4
+Luciana Valentina,Montañez Callán,1ro A,13,Femenino,estudiante,1,0,1,1,0,2,0,1,0,6.0,Leve,1,1,2
+zahori naomi,panaifo ruiz,1 A,13,Femenino,estudiante,1,1,0,1,0,1,0,1,1,6.0,Leve,1,1,2
+JESUS DANIEL,ACOSTA GRATEROL,1ro A,14,Masculino,estudiante,1,1,1,1,0,1,2,0,0,7.0,Leve,0,1,2
+abigail katyi,huari,1 A,13,Femenino,estudiante,1,1,1,1,1,0,0,0,2,7.0,Leve,1,1,2
+luis armando,seminario risco,1 b,12,Masculino,estudiante,1,0,0,1,1,1,0,0,0,4.0,Mínimo,0,1,1
+Cristell Maria,De La Cruz Juarez,1ro B,13,Femenino,estudiante,3,1,3,3,1,3,1,0,2,17.0,Moderadamente grave,1,1,4
+Alessandro Dayiro,Cárdenas Tenorio,1ro B,13,Masculino,estudiante,1,1,1,0,0,0,0,1,2,6.0,Leve,0,1,2
+stefano favian,pineda ojeda,1 B,13,Masculino,estudiante,0,0,1,1,0,0,2,1,0,5.0,Leve,0,1,2
+daniel andre,la torre de la cruz,1ro b,13,Masculino,estudiante,1,1,1,3,1,3,3,3,3,19.0,Moderadamente grave,0,1,4
+camila esmeralda,patete navarro,1 b,13,Femenino,estudiante,0,0,1,1,1,1,0,2,1,7.0,Leve,1,1,2
+cesia micaela,hinostroza,1ro B,12,Femenino,estudiante,2,0,2,3,3,2,1,3,3,19.0,Moderadamente grave,1,1,4
+fabiana yale,yale astoquilca,1 B,13,Femenino,estudiante,1,1,1,2,0,2,1,3,1,12.0,Moderado,1,1,3
+Dayra Eliza A,Ureña,1ro B,13,Femenino,estudiante,1,0,1,2,1,1,1,1,0,8.0,Leve,1,1,2
+frenyerlis rebeca,Gonzalez ramos,1ro B,13,Femenino,estudiante,1,1,3,3,3,1,2,0,3,17.0,Moderadamente grave,1,1,4
+Sebastian Dave,Munive Layme,1ro b,13,Masculino,estudiante,1,0,0,1,0,0,1,0,0,3.0,Mínimo,0,1,1
+Juan Franco,Huarcaya Escalante,1ro B,13,Masculino,estudiante,1,0,0,1,0,0,0,0,0,2.0,Mínimo,0,1,1
+tatian daylin,bibiano Cabrera,1ro b,13,Femenino,estudiante,1,1,1,1,2,3,1,0,1,11.0,Moderado,1,1,3
+flavia daleska,davila almestar,1 b,13,Femenino,estudiante,1,1,2,1,1,0,0,0,0,6.0,Leve,1,1,2
+dana gianella,chirinos coyocuse,1ro b,13,Femenino,estudiante,1,1,2,2,1,3,1,2,1,14.0,Moderado,1,1,3
+irliannys rafaela,gutierrezgonzalez,1 b,13,Femenino,estudiante,1,1,1,1,1,1,1,1,1,9.0,Leve,1,1,2
+Allison Sashenka,Alfaro Nauca,1ro b,13,Femenino,estudiante,2,2,0,1,2,1,1,0,1,10.0,Moderado,1,1,3
+Dominic A,gongora muñante,1ro b,13,Masculino,estudiante,0,0,0,0,1,0,2,0,0,3.0,Mínimo,0,1,1
+jarumi valentina,gamboa torres,1ro b,13,Femenino,estudiante,1,1,1,1,1,1,1,1,1,9.0,Leve,1,1,2
+Gabriel Misael,Castillo Lévano,1ro b,12,Masculino,estudiante,1,1,2,1,1,1,2,1,0,10.0,Moderado,0,1,3
+Anthony Enrique,Ugarte Rodriguez,1ro b,13,Masculino,estudiante,1,1,0,1,0,0,1,0,0,4.0,Mínimo,0,1,1
+mathias diomar,rios,1b,13,Masculino,estudiante,1,1,1,1,2,0,0,0,0,6.0,Leve,0,1,2
+carlos enrique A,barrantes stagnaro,1 B,13,Masculino,estudiante,0,0,0,1,0,2,2,1,0,6.0,Leve,0,1,2
+Sergio Andre,Lozano Briones,1b,13,Masculino,estudiante,0,2,1,0,0,1,0,0,0,4.0,Mínimo,0,1,1
+adrian nicola,campos fasabi,1ro b,13,Masculino,estudiante,0,1,0,1,0,0,0,0,0,2.0,Mínimo,0,1,1
+Valery,Arrieta,1ro B,13,Masculino,estudiante,1,0,2,1,0,0,1,0,0,5.0,Leve,0,1,2
+diego fabiano,bustamante castro,1ro B,13,Masculino,estudiante,0,0,0,0,0,0,0,0,0,0.0,Mínimo,0,1,1
+alysson Briana,Suero Montoya,"1ro ""b""",12,Femenino,estudiante,1,1,2,3,2,3,0,1,1,14.0,Moderado,1,1,3
+lenny jisung,castillo garcia,1ro B,12,Femenino,estudiante,1,1,1,1,1,2,0,3,1,11.0,Moderado,1,1,3
+fabiana jazhiel,peyrone mego,1b,13,Femenino,estudiante,1,1,3,1,1,1,0,1,0,9.0,Leve,1,1,2
