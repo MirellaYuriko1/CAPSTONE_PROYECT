@@ -88,11 +88,9 @@ def construir_modelo_gbm(X_train, y_train, cv, ruta_png, ruta_csv):
     tr_mean = train_scores.mean(axis=1); tr_std = train_scores.std(axis=1)
     va_mean = valid_scores.mean(axis=1); va_std = valid_scores.std(axis=1)
 
-    # Pérdidas (1 - accuracy)
     loss_train_mean = 1.0 - tr_mean
     loss_valid_mean = 1.0 - va_mean
 
-    # Guardar CSV de curva (incluyendo pérdidas)
     df_curve = pd.DataFrame({
         "train_size": sizes_abs,
         "acc_train_cv_mean": np.round(tr_mean, 4),
@@ -138,7 +136,7 @@ def construir_modelo_gbm(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.ylim(0.0, 1.0)
     plt.title("Curva de pérdida de Gradient Boosting")
     plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
-    plt.ylabel("Pérdida (1 - accuracy)")
+    plt.ylabel("Pérdida")
     plt.legend()
     plt.tight_layout()
     plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)

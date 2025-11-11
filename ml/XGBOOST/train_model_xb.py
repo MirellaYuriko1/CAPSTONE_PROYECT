@@ -135,7 +135,7 @@ def construir_modelo_xgb(X_train, y_train_0based, cv, ruta_png, ruta_csv):
     plt.ylim(0.0, 1.0)
     plt.title("Curva de pérdida — XGBoost")
     plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
-    plt.ylabel("Pérdida (1 - accuracy)")
+    plt.ylabel("Pérdida")
     plt.legend()
     plt.tight_layout()
     plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)

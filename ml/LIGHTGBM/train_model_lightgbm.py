@@ -51,16 +51,16 @@ def idx_to_name(arr_int):
 LGBM_PARAMS = dict(
     objective="multiclass",
     num_class=5,
-    learning_rate=0.05,      # un poco más bajo
-    n_estimators=200,        # menos árboles
-    num_leaves=15,           # menos hojas (modelo más simple)
-    max_depth=4,             # limitar profundidad
-    min_child_samples=20,    # mínimo de muestras por hoja
-    min_split_gain=0.01,     # ganancia mínima para hacer un split
-    subsample=0.7,           # usar solo una parte de las filas por árbol
-    colsample_bytree=0.7,    # usar solo una parte de las columnas por árbol
-    reg_alpha=0.5,           # L1 más fuerte
-    reg_lambda=1.0,          # L2 más fuerte
+    learning_rate=0.05,      
+    n_estimators=200,       
+    num_leaves=15,           
+    max_depth=4,             
+    min_child_samples=20,    
+    min_split_gain=0.01,     
+    subsample=0.7,           
+    colsample_bytree=0.7,    
+    reg_alpha=0.5,           
+    reg_lambda=1.0,          
     random_state=SEED,
     n_jobs=-1
 )
@@ -141,7 +141,7 @@ def construir_modelo_LightGBM(X_train, y_train_enc, cv, ruta_png, ruta_csv):
     plt.ylim(0.0, 1.0)
     plt.title("Curva de pérdida de LightGBM")
     plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
-    plt.ylabel("Pérdida (1 - accuracy)")
+    plt.ylabel("Pérdida")
     plt.legend()
     plt.tight_layout()
     plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)
