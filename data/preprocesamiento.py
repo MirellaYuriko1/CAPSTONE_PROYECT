@@ -169,6 +169,36 @@ def eda_distribuciones(df_can: pd.DataFrame):
         out = EDA_DIR / "12_hist_puntaje_total.png"
         plt.savefig(out, dpi=300); plt.close(); print(f"[FIG] {out}")
 
+    # --- Barras: NIVELES (SIN normalizar etiquetas) ---
+    if "nivel" in df_can.columns:
+        niveles_raw = df_can["nivel"].dropna().astype(str)
+        conteo = niveles_raw.value_counts()
+
+        # Si tus etiquetas coinciden con CLASES_ORDEN, respeta ese orden; si no, usa el natural
+        if set(conteo.index).issubset(set(CLASES_ORDEN)):
+            conteo = conteo.reindex([c for c in CLASES_ORDEN if c in conteo.index])
+
+        plt.figure(figsize=(7, 4))
+        plt.bar(conteo.index, conteo.values, edgecolor="black", linewidth=0.6, alpha=0.9)
+        for i, v in enumerate(conteo.values):
+            plt.text(i, v + 1, str(int(v)), ha="center", va="bottom", fontsize=9)
+        plt.title("Distribución de los niveles de depresión")
+        plt.xlabel("Niveles de depresión"); plt.ylabel("Frecuencia")
+        plt.grid(axis="y", linestyle="--", alpha=0.4)
+        plt.tight_layout()
+        out = EDA_DIR / "13_hist_niveles_depresion.png"
+        plt.savefig(out, dpi=300); plt.close(); print(f"[FIG] {out}")
+
+        # Info en consola
+        total_df = len(df_can)
+        total_conteo = int(conteo.sum())
+        nan_nivel = total_df - len(niveles_raw)  # filas donde 'nivel' es NaN
+        print("[INFO] Frecuencia de niveles (sin normalizar):")
+        print(conteo.to_string())
+        print(f"[INFO] Total filas DF: {total_df} | Contadas en gráfico: {total_conteo} | NaN en 'nivel': {nan_nivel}")
+
+        
+
 def eda_boxplots_items(df_can: pd.DataFrame,
                        items: list[str] = PHQ_ITEMS,
                        outname: str = "13_boxitems_phq9.png"):
@@ -227,7 +257,7 @@ def eda_correlaciones_pearson(df_can: pd.DataFrame, thr_abs: float = 0.8):
     if len(cols_full) >= 2:
         corr_full = df[cols_full].corr(method="pearson")
         _plot_corr_heatmap(corr_full,
-                           "Matriz de correlaciones de las variables del estudio",
+                           "Matriz de correlación de las variables del estudio",
                            EDA_DIR / "20_corr_full_pearson.png")
 
     if len(cols_pred) >= 2:
