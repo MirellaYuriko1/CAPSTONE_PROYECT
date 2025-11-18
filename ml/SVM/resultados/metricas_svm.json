@@ -12,7 +12,9 @@
   "test_size": 93,
   "cv5_train": {
     "accuracy_mean": 0.9027027027027026,
-    "accuracy_std": 0.02620367490495313
+    "accuracy_std": 0.02620367490495313,
+    "roc_auc_ovr_macro_mean": 0.9903129366502157,
+    "roc_auc_ovr_macro_std": 0.003305349654561311
   },
   "curve": {
     "train_sizes": [

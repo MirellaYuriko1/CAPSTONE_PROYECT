@@ -57,9 +57,7 @@ SVM_PARAMS = dict(
     random_state=SEED
 )
 
-# ----------------------------------------------------------
 # Curva de aprendizaje (Accuracy y Pérdida, exporta CSV)
-# ----------------------------------------------------------
 def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
     modelo = Pipeline(steps=[
         ("scaler", StandardScaler()),
@@ -95,9 +93,7 @@ def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
     df_curve.to_csv(ruta_csv, index=False, encoding="utf-8-sig")
     print(f"[OK] CSV de curva guardado en: {ruta_csv}")
 
-    # -------------------------
     # FIGURA 1: Accuracy
-    # -------------------------
     eps = 1e-3
     tr_line = np.clip(tr_mean, 0.0, 1.0 - eps)
     va_line = np.clip(va_mean, 0.0, 1.0 - eps)
@@ -123,9 +119,7 @@ def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.close()
     print(f"[OK] Curva ENTRENAMIENTO/VALIDACIÓN (Accuracy CV-5) guardada en: {ruta_png}")
 
-    # -------------------------
     # FIGURA 2: Pérdida (1 - accuracy)
-    # -------------------------
     plt.figure(figsize=(7.8, 5.6))
     plt.plot(sizes_abs, loss_train_mean, marker="o", label="Pérdida entrenamiento")
     plt.plot(sizes_abs, loss_valid_mean, marker="s", label="Pérdida validación")
@@ -142,9 +136,7 @@ def construir_modelo_SVM(X_train, y_train, cv, ruta_png, ruta_csv):
 
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist(), tr_std.tolist(), va_std.tolist()
 
-# ==========================================================
 # PROCESO PRINCIPAL
-# ==========================================================
 def main():
     # ===== Datos =====
     if not RUTA_DATOS.exists():
@@ -155,21 +147,21 @@ def main():
     y = df[TARGET].astype(int).copy()
     assert not X.isna().any().any(), "Hay NaN en features; revisa el preprocesamiento."
 
-    # ===== Split 80/20 estratificado =====
+    #Split 80/20 estratificado
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, stratify=y, random_state=SEED
     )
     print(f"[INFO] Entrenamiento = {len(X_train)} | Prueba = {len(X_test)}")
 
-    # ===== CV estratificada =====
+    # CV estratificada 
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-    # ===== Curva de aprendizaje =====
+    # Curva de aprendizaje
     sizes_abs, tr_mean, va_mean, tr_std, va_std = construir_modelo_SVM(
         X_train, y_train, cv, RUTA_CURVA_IMG, RUTA_CURVA_CSV
     )
 
-    # ===== CV accuracy promedio en TRAIN =====
+    #CV accuracy promedio en TRAIN
     modelo_cv = Pipeline([
         ("scaler", StandardScaler()),
         ("svc", SVC(**SVM_PARAMS))
@@ -191,7 +183,7 @@ def main():
 
     # ===== EVALUACIÓN EN TEST =====
     y_pred = model.predict(X_test)
-    proba_test = model.predict_proba(X_test)  # para ROC-AUC multiclase
+    proba_test = model.predict_proba(X_test)  
 
     acc_test   = accuracy_score(y_test, y_pred)
     bacc_test  = balanced_accuracy_score(y_test, y_pred)

@@ -21,8 +21,11 @@ from sklearn.metrics import (
     classification_report,
     roc_auc_score,
     confusion_matrix,
-    ConfusionMatrixDisplay
+    ConfusionMatrixDisplay,
+    roc_curve,
+    auc,
 )
+from sklearn.preprocessing import label_binarize
 import joblib
 
 # =========================
@@ -38,6 +41,7 @@ RUTA_CURVA_IMG             = DIR_OUT / "curva_entrenamiento_validacion_svl.png"
 RUTA_CURVA_CSV             = DIR_OUT / "curva_entrenamiento_validacion_svl.csv"
 RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_svl.png"
 RUTA_MATRIZ_CONFUSION      = DIR_OUT / "matriz_confusion_svl.png"
+RUTA_CURVA_ROC_IMG         = DIR_OUT / "curva_roc_svl.png"
 RUTA_METRICAS              = DIR_OUT / "metricas_svl.json"
 RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_svl.txt"
 RUTA_MODELO                = DIR_OUT / "modelo_svl.pkl"
@@ -197,23 +201,71 @@ def main():
     rec_macro  = recall_score(y_test, y_pred, average="macro", zero_division=0)
 
     try:
-        roc_auc_macro = roc_auc_score(y_test, proba_test, multi_class="ovr", average="macro")
+        roc_auc_macro = roc_auc_score(
+            y_test, proba_test, multi_class="ovr", average="macro"
+        )
     except ValueError:
         roc_auc_macro = None
 
+    # --------------------------------------------------
+    # Curva ROC micro-promedio (tipo binaria, bonita)
+    # --------------------------------------------------
+    classes_int = [1, 2, 3, 4, 5]
+    y_test_bin = label_binarize(y_test, classes=classes_int)
+
+    # ROC micro: todas las clases apiladas
+    fpr, tpr, _ = roc_curve(y_test_bin.ravel(), proba_test.ravel())
+    roc_auc_micro = auc(fpr, tpr)
+
+    # Forzar que pase por (0,0) y (1,1)
+    if fpr[0] > 0.0 or tpr[0] > 0.0:
+        fpr = np.insert(fpr, 0, 0.0)
+        tpr = np.insert(tpr, 0, 0.0)
+    if fpr[-1] < 1.0 or tpr[-1] < 1.0:
+        fpr = np.append(fpr, 1.0)
+        tpr = np.append(tpr, 1.0)
+
+    plt.figure(figsize=(6, 4.5))
+    plt.plot(
+        fpr,
+        tpr,
+        label=f"SVM lineal (AUC = {roc_auc_micro:.2f})",
+        linewidth=2,
+    )
+    plt.plot([0, 1], [0, 1], "k--", label="Clasificador aleatorio")
+
+    plt.xlim([-0.02, 1.02])   
+    plt.ylim([-0.02, 1.02])
+    plt.xlabel("Tasa de falsos positivos (FPR)")
+    plt.ylabel("Tasa de verdaderos positivos (TPR)")
+    plt.title("Curva ROC — SVM lineal")
+    plt.legend(loc="lower right")
+    plt.tight_layout()
+    plt.savefig(RUTA_CURVA_ROC_IMG, dpi=300)
+    plt.close()
+    print("[OK] Curva ROC guardada en:", RUTA_CURVA_ROC_IMG)
+
+    # --------------------------------------------------
+    # Impresión de métricas
+    # --------------------------------------------------
     print("\n=== MÉTRICAS EN TEST (GLOBAL / PROMEDIO ENTRE CLASES) ===")
     print(f"Accuracy                = {acc_test:.4f}")
     print(f"Balanced Accuracy       = {bacc_test:.4f}")
     print(f"Precisión (macro)       = {prec_macro:.4f}")
     print(f"Recall (macro)          = {rec_macro:.4f}")
     print(f"F1-Score (macro)        = {f1m_test:.4f}")
-    print(f"ROC-AUC (macro OVR)     = {roc_auc_macro:.4f}" if roc_auc_macro is not None else "ROC-AUC (macro OVR)     = N/A")
+    print(
+        f"ROC-AUC (macro OVR)     = {roc_auc_macro:.4f}"
+        if roc_auc_macro is not None
+        else "ROC-AUC (macro OVR)     = N/A"
+    )
 
     print("\n--- RESUMEN SVM LINEAL (TEST HOLD-OUT 20%) ---")
     resumen_svm = (
         f"SVM lineal — Accuracy = {acc_test:.2f}, Precisión = {prec_macro:.2f}, "
         f"Sensibilidad = {rec_macro:.2f}, F1-Score = {f1m_test:.2f}, "
-        f"ROC-AUC = {roc_auc_macro:.2f}" if roc_auc_macro is not None
+        f"ROC-AUC = {roc_auc_macro:.2f}"
+        if roc_auc_macro is not None
         else f"SVM lineal — Accuracy = {acc_test:.2f}, Precisión = {prec_macro:.2f}, "
              f"Sensibilidad = {rec_macro:.2f}, F1-Score = {f1m_test:.2f}, ROC-AUC = N/A"
     )
