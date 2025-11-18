@@ -1,0 +1,4 @@
+﻿Sintoma,Precision,Recall,F1,Accuracy,BalancedAccuracy,AUC_OVR,Brier,n
+Dificultad para concentrarse,0.379,0.428,0.376,0.378,0.428,0.693,0.656,463
+Agitación,0.364,0.395,0.356,0.413,0.395,0.68,0.625,463
+Ideacion suicida,0.416,0.444,0.418,0.531,0.444,0.756,0.526,463

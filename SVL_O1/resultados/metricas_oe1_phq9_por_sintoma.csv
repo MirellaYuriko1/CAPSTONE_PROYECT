@@ -1,0 +1,4 @@
+﻿Sintoma,Precision,Recall,F1,Accuracy,BalancedAccuracy,AUC_OVR,Brier,n
+Pérdida de interés,0.428,0.493,0.423,0.438,0.493,0.759,0.529,463
+Estado de ánimo,0.386,0.45,0.365,0.378,0.45,0.68,0.59,463
+Sentimientos de fracaso,0.47,0.496,0.473,0.488,0.496,0.764,0.592,463
