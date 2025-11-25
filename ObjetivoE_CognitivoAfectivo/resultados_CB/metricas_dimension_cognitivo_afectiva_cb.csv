@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,AUC_OVR,Brier,n
+CatBoost,0.639,0.705,0.537,0.705,0.521,0.786,0.713,581

@@ -1,0 +1,6 @@
+﻿Clase,Precision,Recall,F1,Soporte,Accuracy,BalancedAccuracy,AUC_OVR,Brier,n
+Nada,0.385,0.833,0.526,6,,,,,
+Varios días,0.541,0.922,0.682,180,,,,,
+Más de la mitad de los días,0.45,0.228,0.303,158,,,,,
+Casi todos los días,0.867,0.662,0.751,237,,,,,
+GLOBAL,0.561,0.661,0.565,581,0.627,0.661,0.759,0.788,581.0

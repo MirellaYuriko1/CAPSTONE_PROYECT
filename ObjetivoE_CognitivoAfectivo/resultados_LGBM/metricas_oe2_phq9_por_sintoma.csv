@@ -1,0 +1,7 @@
+﻿Sintoma,Precision,Recall,F1,Accuracy,BalancedAccuracy,AUC_OVR,Brier,n
+Estado de ánimo,0.438,0.41,0.413,0.57,0.41,0.753,0.56,581
+Pérdida de interés,0.492,0.386,0.409,0.566,0.386,0.695,0.585,581
+Fracaso / inutilidad,0.474,0.466,0.462,0.511,0.466,0.741,0.627,581
+Dificultad para concentrarse,0.43,0.386,0.397,0.458,0.386,0.673,0.674,581
+Intranquilidad / agitación,0.402,0.369,0.375,0.482,0.369,0.676,0.649,581
+Ideación suicida,0.458,0.435,0.442,0.594,0.435,0.747,0.54,581
