@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,AUC_OVR,Brier,n
+GradientBoosting,0.552,0.453,0.524,0.453,0.433,0.773,0.675,581

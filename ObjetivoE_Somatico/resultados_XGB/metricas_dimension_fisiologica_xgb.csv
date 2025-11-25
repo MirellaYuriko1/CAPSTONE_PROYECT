@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,AUC_OVR,Brier,n
+XGBoost,0.558,0.468,0.505,0.468,0.449,0.777,0.668,581

@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,AUC_OVR,Brier,n
+NaiveBayes,0.534,0.548,0.498,0.548,0.458,0.751,0.748,581
