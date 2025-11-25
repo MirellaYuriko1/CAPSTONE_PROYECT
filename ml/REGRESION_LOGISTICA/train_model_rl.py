@@ -47,7 +47,7 @@ RUTA_METRICAS_DEPLOY = DIR_MODELS / "metrics_v1.json"
 
 RUTA_CURVA_IMG             = DIR_OUT / "curva_entrenamiento_validacion_lr.png"
 RUTA_CURVA_CSV             = DIR_OUT / "curva_entrenamiento_validacion_lr.csv"
-RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_lr.png"   # NUEVA: curva de pérdida
+RUTA_CURVA_PERDIDA_IMG     = DIR_OUT / "curva_perdida_lr.png"  
 RUTA_MATRIZ_CONFUSION      = DIR_OUT / "matriz_confusion_lr.png"
 RUTA_METRICAS              = DIR_OUT / "metricas_lr.json"
 RUTA_REPORTE_CLASIFICACION = DIR_OUT / "reporte_clasificacion_lr.txt"
@@ -59,7 +59,7 @@ RUTA_PARAMS                = DIR_OUT / "parametros_lr.json"
 # =========================
 FEATURES = [
     "age", "genero_bin",
-    "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
+    "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8"
 ]
 TARGET   = "nivel_idx"
 

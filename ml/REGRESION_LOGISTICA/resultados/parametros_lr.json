@@ -9,8 +9,7 @@
     "phq5",
     "phq6",
     "phq7",
-    "phq8",
-    "phq9"
+    "phq8"
   ],
   "lr_params": {
     "penalty": "l2",

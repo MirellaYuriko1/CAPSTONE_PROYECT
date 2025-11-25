@@ -36,7 +36,7 @@ RUTA_PARAMS                = DIR_OUT / "parametros_svm.json"
 # Variables
 FEATURES = [
     "age", "genero_bin",
-    "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
+    "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8"
 ]
 TARGET   = "nivel_idx"
 

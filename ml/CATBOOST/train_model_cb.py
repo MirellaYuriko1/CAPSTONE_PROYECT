@@ -71,10 +71,13 @@ CB_PARAMS_SERIALIZABLE = CB_PARAMS.copy()
 # ==========================================================
 # CURVA DE APRENDIZAJE (CV-5) + CSV + PÉRDIDA
 # ==========================================================
+
 def construir_modelo_catboost(X_train, y_train, cv, ruta_png, ruta_csv):
     modelo = CatBoostClassifier(**CB_PARAMS)
 
     train_sizes_rel = np.linspace(0.1, 1.0, 8)
+
+    SCORES_METRIC = "f1_macro"
 
     sizes_abs, train_scores, valid_scores = learning_curve(
         estimator=modelo,
@@ -82,7 +85,7 @@ def construir_modelo_catboost(X_train, y_train, cv, ruta_png, ruta_csv):
         y=y_train,
         train_sizes=train_sizes_rel,
         cv=cv,
-        scoring="accuracy",
+        scoring= SCORES_METRIC,
         n_jobs=-1,
         shuffle=True,
         random_state=SEED
@@ -98,12 +101,12 @@ def construir_modelo_catboost(X_train, y_train, cv, ruta_png, ruta_csv):
 
     df_curve = pd.DataFrame({
         "train_size":        sizes_abs,
-        "acc_train_cv_mean": np.round(tr_mean, 4),
-        "acc_train_cv_std":  np.round(tr_std, 4),
-        "acc_valid_cv_mean": np.round(va_mean, 4),
-        "acc_valid_cv_std":  np.round(va_std, 4),
-        "loss_train_mean":   np.round(loss_train_mean, 4),
-        "loss_valid_mean":   np.round(loss_valid_mean, 4),
+        "f1_macro_train_cv_mean": np.round(tr_mean, 4), 
+        "f1_macro_train_cv_std":  np.round(tr_std, 4),  
+        "f1_macro_valid_cv_mean": np.round(va_mean, 4), 
+        "f1_macro_valid_cv_std":  np.round(va_std, 4),  
+        "loss_train_mean":    np.round(loss_train_mean, 4),
+        "loss_valid_mean":    np.round(loss_valid_mean, 4),
     })
     df_curve.to_csv(ruta_csv, index=False, encoding="utf-8-sig")
     print("[OK] CSV de curva guardado en:", ruta_csv)
@@ -127,12 +130,12 @@ def construir_modelo_catboost(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.ylim(0, 1)
     plt.title("Curva de aprendizaje de CatBoost")
     plt.xlabel("Tamaño del conjunto de entrenamiento (TRAIN)")
-    plt.ylabel("Accuracy (CV 5-fold)")
+    plt.ylabel("F1-Score Macro (CV 5-fold)")
     plt.legend()
     plt.tight_layout()
     plt.savefig(ruta_png, dpi=300)
     plt.close()
-    print("[OK] Curva ENTRENAMIENTO/VALIDACIÓN (Accuracy CV 5-fold) guardada en:", ruta_png)
+    print("[OK] Curva ENTRENAMIENTO/VALIDACIÓN (F1-Score Macro CV 5-fold) guardada en:", ruta_png)
 
     # ---- Plot Pérdida ----
     plt.figure(figsize=(7.8, 5.6))
@@ -147,7 +150,7 @@ def construir_modelo_catboost(X_train, y_train, cv, ruta_png, ruta_csv):
     plt.tight_layout()
     plt.savefig(RUTA_CURVA_PERDIDA_IMG, dpi=300)
     plt.close()
-    print("[OK] Curva de PÉRDIDA (1 - accuracy) guardada en:", RUTA_CURVA_PERDIDA_IMG)
+    print("[OK] Curva de PÉRDIDA (1 - F1-Score Macro) guardada en:", RUTA_CURVA_PERDIDA_IMG)
 
     # Devuelvo medias y std para el JSON
     return sizes_abs.tolist(), tr_mean.tolist(), va_mean.tolist(), tr_std.tolist(), va_std.tolist()
@@ -178,8 +181,8 @@ def main():
 
     # Rendimiento promedio en CV-5 (SOLO TRAIN)
     cv_model = CatBoostClassifier(**CB_PARAMS)
-    cv_acc = cross_val_score(cv_model, X_train, y_train, cv=cv, scoring="accuracy", n_jobs=-1)
-    print(f"[CV-5] Accuracy (TRAIN) = {cv_acc.mean():.4f} ± {cv_acc.std():.4f}")
+    cv_f1 = cross_val_score(cv_model, X_train, y_train, cv=cv, scoring="f1_macro", n_jobs=-1)
+    print(f"[CV-5] F1-Score Macro (TRAIN) = {cv_f1.mean():.4f} ± {cv_f1.std():.4f}")
 
     # Entrenamiento final y evaluación en TEST
     model = CatBoostClassifier(**CB_PARAMS)
@@ -252,30 +255,29 @@ def main():
         "train_size": int(len(X_train)),
         "test_size": int(len(X_test)),
         "cv5_train": {
-            "accuracy_mean": float(cv_acc.mean()),
-            "accuracy_std":  float(cv_acc.std())
+            "f1_macro_mean": float(cv_f1.mean()), # <-- ETIQUETA CAMBIADA
+            "f1_macro_std":  float(cv_f1.std())  # <-- ETIQUETA CAMBIADA
         },
         "oob_score": None,
         "curve": {
-            "train_sizes":         sizes_abs,
-            "train_accuracy_mean": [float(x) for x in tr_mean],
-            "train_accuracy_std":  [float(x) for x in tr_std],
-            "valid_accuracy_mean": [float(x) for x in va_mean],
-            "valid_accuracy_std":  [float(x) for x in va_std],
+            "train_sizes":           sizes_abs,
+            "train_f1_macro_mean": [float(x) for x in tr_mean], # <-- ETIQUETA CAMBIADA
+            "train_f1_macro_std":  [float(x) for x in tr_std],  # <-- ETIQUETA CAMBIADA
+            "valid_f1_macro_mean": [float(x) for x in va_mean], # <-- ETIQUETA CAMBIADA
+            "valid_f1_macro_std":  [float(x) for x in va_std],  # <-- ETIQUETA CAMBIADA
             "train_loss_mean":     loss_train_mean,
             "valid_loss_mean":     loss_valid_mean,
         },
+        # ... [Resto del JSON sin cambios en las métricas de TEST] ...
         "test_metrics": {
-            "accuracy":          float(acc_test),
-            "balanced_accuracy": float(bacc_test),
-            "precision_macro":   float(prec_macro),
-            "recall_macro":      float(rec_macro),
-            "f1_macro":          float(f1m_test),
-            "roc_auc_macro":     (float(roc_auc_macro) if roc_auc_macro is not None else None)
+             "accuracy":          float(acc_test),
+             "balanced_accuracy": float(bacc_test),
+             "precision_macro":   float(prec_macro),
+             "recall_macro":      float(rec_macro),
+             "f1_macro":          float(f1m_test),
+             "roc_auc_macro":     (float(roc_auc_macro) if roc_auc_macro is not None else None)
         },
-        "confusion_matrix": cm.tolist(),
-        "labels_plot": CLASSES_FIG,
-        "labels_full": CLASSES
+        # ... [Resto del JSON] ...
     }
 
     with open(RUTA_METRICAS, "w", encoding="utf-8") as f:

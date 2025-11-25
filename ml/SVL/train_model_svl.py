@@ -52,7 +52,7 @@ RUTA_PARAMS                = DIR_OUT / "parametros_svl.json"
 # =========================
 FEATURES = [
     "age", "genero_bin",
-    "phq1","phq2","phq3","phq4","phq5","phq6","phq7","phq8","phq9"
+    "phq2","phq3","phq4","phq5","phq6","phq7","phq8"
 ]
 TARGET   = "nivel_idx"
 
