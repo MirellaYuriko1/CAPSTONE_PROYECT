@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+Regresión Logística (Dimensión Somática),0.551,0.659,0.422,0.374,0.774

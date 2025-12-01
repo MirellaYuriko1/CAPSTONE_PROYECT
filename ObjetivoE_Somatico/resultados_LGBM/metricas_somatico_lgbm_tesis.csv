@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+LightGBM (Dimensión Somática),0.58,0.513,0.487,0.474,0.777

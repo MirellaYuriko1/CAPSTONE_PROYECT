@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+Gradient Boosting (Dimensión Somática),0.542,0.503,0.444,0.416,0.78

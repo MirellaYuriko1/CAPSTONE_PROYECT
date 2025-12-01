@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+Random Forest (Dimensión Somática),0.539,0.475,0.577,0.467,0.793

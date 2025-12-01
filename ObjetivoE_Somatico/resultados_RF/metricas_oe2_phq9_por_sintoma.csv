@@ -1,4 +1,0 @@
-﻿Sintoma,Precision,Recall,F1,Accuracy,BalancedAccuracy,AUC_OVR,Brier,n
-Problemas de sueño,0.377,0.403,0.382,0.382,0.403,0.669,0.689,581
-Cansancio,0.424,0.447,0.43,0.475,0.447,0.742,0.633,581
-Cambios en el apetito,0.411,0.432,0.416,0.454,0.432,0.697,0.657,581
