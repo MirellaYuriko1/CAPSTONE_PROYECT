@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+SVM (RBF) (Dimensión Cognitivo-Afectiva),0.57,0.493,0.606,0.452,0.732

@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+CatBoost (Dimensión Cognitivo-Afectiva),0.639,0.537,0.705,0.521,0.786

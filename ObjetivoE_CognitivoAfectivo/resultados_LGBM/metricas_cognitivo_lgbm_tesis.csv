@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+LightGBM (Dimensión Cognitivo-Afectiva),0.621,0.541,0.614,0.524,0.761

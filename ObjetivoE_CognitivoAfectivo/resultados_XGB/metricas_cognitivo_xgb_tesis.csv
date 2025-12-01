@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+XGBoost (Dimensión Cognitivo-Afectiva),0.589,0.535,0.548,0.48,0.758

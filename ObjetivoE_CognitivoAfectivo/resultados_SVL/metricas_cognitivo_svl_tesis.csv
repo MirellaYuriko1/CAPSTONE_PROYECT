@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+SVM Lineal (Dimensión Cognitivo-Afectiva),0.468,0.459,0.531,0.387,0.722

@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+Naive Bayes (Dimensión Cognitivo-Afectiva),0.523,0.438,0.573,0.391,0.722

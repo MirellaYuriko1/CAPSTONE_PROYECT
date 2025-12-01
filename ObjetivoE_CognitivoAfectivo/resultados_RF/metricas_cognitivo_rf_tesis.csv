@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,Precision_macro,Recall_macro,F1_macro,ROC-AUC
+Random Forest (Dimensión Cognitivo-Afectiva),0.614,0.521,0.683,0.493,0.786

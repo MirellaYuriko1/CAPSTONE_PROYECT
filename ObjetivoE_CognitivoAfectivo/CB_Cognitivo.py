@@ -1,21 +1,16 @@
-# CB_O3/CB_O3.py  (puedes dejar el nombre que quieras al archivo)
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.metrics import (
     confusion_matrix,
     classification_report,
-    f1_score,
     accuracy_score,
-    balanced_accuracy_score,
     roc_auc_score,
-    precision_score,
-    recall_score,
 )
-from catboost import CatBoostClassifier
 
 # =========================
 # CONFIGURACIÓN GENERAL
@@ -23,19 +18,24 @@ from catboost import CatBoostClassifier
 SEED = 42
 RUTA_DATOS = Path("data/final/phq9_final.csv")
 
-# Carpeta para resultados de CatBoost en el objetivo cognitivo-afectivo
-DIR_OUT = Path("ObjetivoE_CognitivoAfectivo/resultados_CB")
+# Carpeta específica para resultados de GBM en el objetivo cognitivo
+# NOTA: Asegúrate de que la carpeta 'ml' exista en tu directorio raíz
+DIR_OUT = Path("ml/ObjetivoE_CognitivoAfectivo/resultados_GBM")
 DIR_OUT.mkdir(parents=True, exist_ok=True)
 
-# Síntomas que quieres analizar en este OE (PHQ-9) - DIMENSIÓN COGNITIVO-AFECTIVA
+# ---------------------------------------------------------------------
+# DIMENSIÓN COGNITIVO-AFECTIVA
+# ---------------------------------------------------------------------
+# Usamos las preguntas mentales/emocionales (NO las somáticas 3, 4, 5)
 ITEMS = ["phq1", "phq2", "phq6", "phq7", "phq8", "phq9"]
+
 ITEMS_LABELS = {
-    "phq1": "Estado de ánimo",
-    "phq2": "Pérdida de interés",
-    "phq6": "Fracaso",
+    "phq1": "Estado de ánimo (Tristeza)",
+    "phq2": "Pérdida de interés (Anhedonia)",
+    "phq6": "Sentimiento de Fracaso",
     "phq7": "Dificultad para concentrarse",
-    "phq8": "Intranquilidad",
-    "phq9": "Ideación suicida",
+    "phq8": "Intranquilidad o Lentitud",
+    "phq9": "Pensamientos de muerte/autolesión",
 }
 
 # Escala Likert del PHQ-9 (0–3)
@@ -47,82 +47,27 @@ LIKERT_LABELS = [
     "Casi todos los días",
 ]
 
+# Todas las columnas del PHQ para usar de contexto
 PHQ_COLS = [f"phq{i}" for i in range(1, 10)]
 
-# Hiperparámetros CatBoost (los mismos de tu modelo general)
-CB_PARAMS = dict(
-    loss_function="MultiClass",
-    eval_metric="MultiClass",
-    random_seed=SEED,
-    auto_class_weights="Balanced",
-    verbose=False,
-    iterations=250,
-    depth=4,
-    learning_rate=0.06,
-    l2_leaf_reg=28,
-    grow_policy="Lossguide",
-    min_data_in_leaf=30,
-    max_leaves=31,
-    bootstrap_type="Bernoulli",
-    subsample=0.65,
-    rsm=0.70,
-    random_strength=8,
-    leaf_estimation_iterations=2,
-    border_count=64,
+# =========================
+# HIPERPARÁMETROS GBM (Idénticos al General)
+# =========================
+GBM_PARAMS = dict(
+    max_depth=2,
+    min_samples_leaf=15,
+    min_samples_split=20,
+    n_estimators=140,
+    learning_rate=0.05,
+    subsample=0.5,
+    max_features=0.3,
+    n_iter_no_change=10,
+    validation_fraction=0.1,
+    random_state=SEED,
 )
-CB_PARAMS_SERIALIZABLE = CB_PARAMS.copy()
-
 
 # =========================
-# FUNCIONES AUXILIARES
-# =========================
-def _brier_multiclass(y_true, proba, classes):
-    """Brier score multicategoría."""
-    y_true = np.array(y_true)
-    proba = np.array(proba)
-    Y = np.zeros_like(proba)
-    class_to_idx = {c: i for i, c in enumerate(classes)}
-    for i, y in enumerate(y_true):
-        Y[i, class_to_idx[y]] = 1.0
-    return float(np.mean(np.sum((proba - Y) ** 2, axis=1)))
-
-
-def ovr_counts_and_metrics(y_true, y_pred, labels):
-    filas = []
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-
-    for lbl, nombre in zip(labels, LIKERT_LABELS):
-        tp = int(((y_true == lbl) & (y_pred == lbl)).sum())
-        fp = int(((y_true != lbl) & (y_pred == lbl)).sum())
-        fn = int(((y_true == lbl) & (y_pred != lbl)).sum())
-        tn = int(((y_true != lbl) & (y_pred != lbl)).sum())
-
-        total = tp + tn + fp + fn
-        acc = (tp + tn) / total if total > 0 else 0.0
-        prec = tp / (tp + fp) if (tp + fp) > 0 else 0.0
-        rec = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
-
-        filas.append(
-            {
-                "Nivel": nombre,
-                "f00": tn,
-                "f01": fp,
-                "f10": fn,
-                "f11": tp,
-                "Accuracy": round(acc, 3),
-                "Recall": round(rec, 3),
-                "Precision": round(prec, 3),
-                "F1-score": round(f1, 3),
-            }
-        )
-
-    return pd.DataFrame(filas)
-
-
-# =========================
-# PROCESO PRINCIPAL OE COGNITIVO-AFECTIVO CB
+# PROCESO PRINCIPAL
 # =========================
 def main():
     if not RUTA_DATOS.exists():
@@ -137,352 +82,114 @@ def main():
 
     n_estudiantes = len(df)
     print(f"[INFO] Número de estudiantes = {n_estudiantes}")
+    print(f"[INFO] Analizando Dimensión Cognitivo-Afectiva con GBM ({len(ITEMS)} ítems).")
 
-    # ---------- TABLA TIPO “TABLA 13” ----------
-    tabla = pd.DataFrame({"Nivel": LIKERT_LABELS})
-
-    # ---------- FIGURA CON 2 ZONAS: CABECERA (líneas + textos) Y GRÁFICO ----------
-    fig = plt.figure(figsize=(8.5, 5.0), dpi=160)
-    gs = fig.add_gridspec(2, 1, height_ratios=[1, 4], hspace=0.05)
-
-    ax_top = fig.add_subplot(gs[0])   # cabecera
-    ax = fig.add_subplot(gs[1])       # gráfico de líneas
-
-    ax_top.set_xlim(0, 1)
-    ax_top.set_ylim(0, 1)
-    ax_top.axis("off")
-
-    handles_exp = []
-    handles_pred = []
-
-    # Para construir OE a nivel estudiante
+    # Estructuras para guardar resultados temporales
     preds_por_item = {}
 
-    # ---------- MODELOS POR ÍTEM Y GRÁFICO PRINCIPAL ----------
+    # ---------------------------------------------------------
+    # 1. ENTRENAMIENTO POR ÍTEM (Individual)
+    # ---------------------------------------------------------
     for item in ITEMS:
-        if item not in df.columns:
-            raise ValueError(f"No se encontró la columna {item} en {RUTA_DATOS}")
-
-        nombre_bonito = ITEMS_LABELS.get(item, item)
-
+        print(f"... Procesando síntoma: {item} ({ITEMS_LABELS[item]})")
+        
+        # DEFINICIÓN DE FEATURES: Contexto (Todo MENOS el ítem actual)
         feature_cols = ["age", "genero_bin"] + [c for c in PHQ_COLS if c != item]
+        
         X = df[feature_cols].copy()
         y = df[item].astype(int).copy()
 
-        clf = CatBoostClassifier(**CB_PARAMS)
+        clf = GradientBoostingClassifier(**GBM_PARAMS)
         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 
-        # Predicciones con CV 5-fold
+        # Cross Validation para obtener predicciones limpias
         y_pred = cross_val_predict(clf, X, y, cv=skf, method="predict")
-        y_pred = np.array(y_pred).ravel()
+        # Probabilidades para AUC
         proba = cross_val_predict(clf, X, y, cv=skf, method="predict_proba")
 
         preds_por_item[item] = {
-            "y_true": y.values,   # (n,)
-            "y_pred": y_pred,     # (n,)
-            "proba": proba,       # (n, 4)
+            "y_pred": y_pred,
+            "proba": proba,
         }
 
-        # Conteos por categoría para la tabla tipo Tabla 13
-        counts_exp = pd.Series(y).value_counts().reindex(LIKERT_VALUES, fill_value=0)
-        counts_pred = (
-            pd.Series(y_pred).value_counts().reindex(LIKERT_VALUES, fill_value=0)
-        )
-
-        col_pred = f"Predicción {nombre_bonito}"
-        col_exp = nombre_bonito
-        tabla[col_pred] = counts_pred.values
-        tabla[col_exp] = counts_exp.values
-
-        x = np.arange(len(LIKERT_VALUES))
-
-        # Línea esperada
-        line_exp, = ax.plot(
-            x,
-            counts_exp.values,
-            marker="o",
-            linewidth=2,
-        )
-        # Línea predicha
-        line_pred, = ax.plot(
-            x,
-            counts_pred.values,
-            marker="o",
-            linewidth=2,
-            linestyle="--",
-        )
-
-        handles_exp.append((nombre_bonito, line_exp))
-        handles_pred.append((f"Predicción {nombre_bonito}", line_pred))
-
-    # Fila TOTAL de la tabla
-    tot = {"Nivel": "TOTAL"}
-    for col in tabla.columns[1:]:
-        tot[col] = int(tabla[col].sum())
-    tabla = pd.concat([tabla, pd.DataFrame([tot])], ignore_index=True)
-
-    ruta_tabla = DIR_OUT / "tabla_oe_cog_phq9_pred_vs_esp_cb.csv"
-    tabla.to_csv(ruta_tabla, index=False, encoding="utf-8-sig")
-    print(f"[OK] Tabla guardada en: {ruta_tabla}")
-
-    # ---------- CONFIGURACIÓN DEL GRÁFICO PRINCIPAL ----------
-    ax.set_xticks(np.arange(len(LIKERT_LABELS)))
-    ax.set_xticklabels(LIKERT_LABELS)
-    ax.set_xlabel("Nivel de frecuencia del síntoma")
-    ax.set_ylabel("Número de estudiantes")
-    ax.grid(axis="y", alpha=0.2)
-
-    sintomas_titulo = ", ".join(ITEMS_LABELS[i] for i in ITEMS)
-    fig.suptitle(
-        f"Gráfico comparación entre diagnósticos predichos y diagnósticos esperados\n"
-        f"con respecto a los síntomas de {sintomas_titulo} (dimensión cognitivo-afectiva).",
-        fontsize=12,
-        y=0.98,
-    )
-
-    # ---------- “LEYENDA” PERSONALIZADA ARRIBA ----------
-    ys = [0.80, 0.65, 0.50, 0.35, 0.20, 0.05]  # seis filas (hay 6 síntomas)
-
-    # Columna izquierda: observados (3 primeros síntomas)
-    for (texto, line), y in zip(handles_exp[:3], ys[:3]):
-        color = line.get_color()
-        ax_top.plot([0.05, 0.13], [y, y], color=color, linewidth=2)
-        ax_top.text(0.135, y, texto, va="center", fontsize=8)
-
-    # Columna derecha: observados (resto)
-    for (texto, line), y in zip(handles_exp[3:], ys[:3]):
-        color = line.get_color()
-        ax_top.plot([0.35, 0.43], [y, y], color=color, linewidth=2)
-        ax_top.text(0.435, y, texto, va="center", fontsize=8)
-
-    # Predicciones (dos columnas a la derecha)
-    for (texto, line), y in zip(handles_pred[:3], ys[:3]):
-        color = line.get_color()
-        ax_top.plot([0.65, 0.73], [y, y], color=color, linewidth=2, linestyle="--")
-        ax_top.text(0.735, y, texto, va="center", fontsize=8)
-
-    for (texto, line), y in zip(handles_pred[3:], ys[:3]):
-        color = line.get_color()
-        ax_top.plot([0.85, 0.93], [y, y], color=color, linewidth=2, linestyle="--")
-        ax_top.text(0.935, y, texto, va="center", fontsize=8, ha="right")
-
-    fig.tight_layout(rect=(0, 0, 1, 0.88))
-
-    ruta_fig = DIR_OUT / "fig_oe_cog_phq9_sintomas_pred_vs_esp_cb.png"
-    fig.savefig(ruta_fig, dpi=300)
-    plt.close(fig)
-    print(f"[OK] Figura guardada en:", ruta_fig)
-
-    # ======================================================
-    #   MÉTRICAS GLOBALES DEL OE (DIMENSIÓN COGNITIVO-AFECTIVA)
-    # ======================================================
-
-    # Nivel esperado OE = máximo de los 6 síntomas (0–3)
+    # ---------------------------------------------------------
+    # 2. CONSTRUCCIÓN DE LA MÉTRICA DE DIMENSIÓN
+    # ---------------------------------------------------------
+    # Nivel Real = Máximo valor registrado en los 6 síntomas cognitivos
     y_oe_true = df[ITEMS].max(axis=1).astype(int).values
 
-    # Nivel predicho OE = máximo de las predicciones de los 6 modelos
-    preds_matrix = np.column_stack(
-        [preds_por_item[item]["y_pred"] for item in ITEMS]
-    )
+    # Nivel Predicho = Máximo valor predicho entre los 6 modelos
+    preds_matrix = np.column_stack([preds_por_item[item]["y_pred"] for item in ITEMS])
     y_oe_pred = preds_matrix.max(axis=1)
 
-    # Probabilidad OE = promedio de las probabilidades de los 6 modelos
-    proba_stack = np.stack(
-        [preds_por_item[item]["proba"] for item in ITEMS], axis=0
-    )  # (6, n, 4)
-    proba_oe = proba_stack.mean(axis=0)  # (n, 4)
+    # Probabilidad promedio (aproximación para AUC)
+    proba_stack = np.stack([preds_por_item[item]["proba"] for item in ITEMS], axis=0)
+    proba_oe = proba_stack.mean(axis=0)
 
-    # --- Matriz de confusión ---
+    # ---------------------------------------------------------
+    # 3. GENERACIÓN DE ENTREGABLES (Matriz y Métricas)
+    # ---------------------------------------------------------
+
+    # --- A) Matriz de Confusión ---
     cm = confusion_matrix(y_oe_true, y_oe_pred, labels=LIKERT_VALUES)
+    
+    xtick_labels = ["Nada", "Varios\ndías", "Más de la\nmitad", "Casi todos\nlos días"]
+    ytick_labels = ["Nada", "Varios días", "Más de la mitad", "Casi todos los días"]
 
-    xtick_labels = [
-        "Nada",
-        "Varios\ndías",
-        "Más de la\nmitad de los días",
-        "Casi todos\nlos días",
-    ]
-    ytick_labels = [
-        "Nada",
-        "Varios días",
-        "Más de la mitad\nde los días",
-        "Casi todos los días",
-    ]
-
-    fig_cm, ax_cm = plt.subplots(figsize=(5.5, 4.8), dpi=160)
+    fig_cm, ax_cm = plt.subplots(figsize=(6, 5), dpi=160)
     im = ax_cm.imshow(cm, cmap="Blues", aspect="auto")
 
-    ax_cm.set_title("Matriz de confusión — Dimensión cognitivo-afectiva (CatBoost)", fontsize=12)
-    ax_cm.set_xlabel("Predicho", fontsize=10)
-    ax_cm.set_ylabel("Esperado", fontsize=10)
+    ax_cm.set_title("Matriz de Confusión: Dimensión Cognitivo-Afectiva (GBM)", fontsize=12, weight='bold')
+    ax_cm.set_xlabel("Predicción del Nivel Cognitivo", fontsize=10)
+    ax_cm.set_ylabel("Nivel Cognitivo Real (Max)", fontsize=10)
 
     ax_cm.set_xticks(range(len(xtick_labels)))
-    ax_cm.set_xticklabels(xtick_labels, rotation=45, ha="right")
+    ax_cm.set_xticklabels(xtick_labels, rotation=0, fontsize=9)
     ax_cm.set_yticks(range(len(ytick_labels)))
-    ax_cm.set_yticklabels(ytick_labels)
+    ax_cm.set_yticklabels(ytick_labels, fontsize=9)
 
+    # Poner números en las celdas
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
-            ax_cm.text(j, i, int(cm[i, j]),
-                       ha="center", va="center", fontsize=9)
+            ax_cm.text(j, i, int(cm[i, j]), ha="center", va="center", 
+                     color="white" if cm[i, j] > cm.max()/2 else "black")
 
-    cbar = plt.colorbar(im, ax=ax_cm)
-    cbar.set_label("Casos")
+    plt.colorbar(im, ax=ax_cm)
+    plt.tight_layout()
+    ruta_cm = DIR_OUT / "matriz_confusion_cognitivo_gbm.png"
+    plt.savefig(ruta_cm, dpi=300)
+    plt.close()
+    print(f"[OK] Matriz de confusión guardada en: {ruta_cm}")
 
-    fig_cm.tight_layout()
-    ruta_cm = DIR_OUT / "matriz_confusion_oe_cog_phq9_cb.png"
-    fig_cm.savefig(ruta_cm, dpi=300)
-    plt.close(fig_cm)
-    print(f"[OK] Matriz de confusión guardada en:", ruta_cm)
-
-    # --- Métricas globales ---
+    # --- B) Métricas y CSV ---
     acc = accuracy_score(y_oe_true, y_oe_pred)
-    bal_acc = balanced_accuracy_score(y_oe_true, y_oe_pred)
-    f1_macro = f1_score(y_oe_true, y_oe_pred, average="macro")
-
+    
+    # Reporte completo para extraer medias macro
+    rep = classification_report(
+        y_oe_true, y_oe_pred, labels=LIKERT_VALUES, target_names=LIKERT_LABELS, output_dict=True, zero_division=0
+    )
+    
     try:
-        auc_macro = roc_auc_score(
-            y_oe_true, proba_oe, multi_class="ovr", average="macro"
-        )
+        auc_macro = roc_auc_score(y_oe_true, proba_oe, multi_class="ovr", average="macro")
     except ValueError:
         auc_macro = None
 
-    brier = _brier_multiclass(y_oe_true, proba_oe, LIKERT_VALUES)
+    # Crear DataFrame resumen para la tesis
+    df_global_modelo = pd.DataFrame([{
+        "Modelo": "Gradient Boosting (Dimensión Cognitivo-Afectiva)",
+        "Accuracy": round(acc, 3),
+        "Precision_macro": round(rep["macro avg"]["precision"], 3),
+        "Recall_macro": round(rep["macro avg"]["recall"], 3),
+        "F1_macro": round(rep["macro avg"]["f1-score"], 3),
+        "ROC-AUC": round(auc_macro, 3) if auc_macro else "N/A"
+    }])
 
-    rep = classification_report(
-        y_oe_true,
-        y_oe_pred,
-        labels=LIKERT_VALUES,
-        target_names=LIKERT_LABELS,
-        output_dict=True,
-        zero_division=0,
-    )
+    ruta_csv_tesis = DIR_OUT / "metricas_cognitivo_gbm_tesis.csv"
+    df_global_modelo.to_csv(ruta_csv_tesis, index=False, encoding="utf-8-sig")
+    print(f"[OK] CSV resumen para tesis guardado en: {ruta_csv_tesis}")
 
-    # ---- CSV tipo tabla12_ovr PER SÍNTOMA (solo f00, f01, f10, f11) ----
-    df_ovr_multi = None
-    for item in ITEMS:
-        nombre_bonito = ITEMS_LABELS.get(item, item)
-        y_true_i = preds_por_item[item]["y_true"]
-        y_pred_i = preds_por_item[item]["y_pred"]
-
-        df_item = ovr_counts_and_metrics(y_true_i, y_pred_i, LIKERT_VALUES)
-        df_item = df_item[["Nivel", "f00", "f01", "f10", "f11"]]
-
-        rename_map = {
-            col: f"{nombre_bonito}_{col}"
-            for col in df_item.columns
-            if col != "Nivel"
-        }
-        df_item = df_item.rename(columns=rename_map)
-
-        if df_ovr_multi is None:
-            df_ovr_multi = df_item
-        else:
-            df_ovr_multi = df_ovr_multi.merge(df_item, on="Nivel")
-
-    ruta_ovr = DIR_OUT / "tabla_oe_cog_phq9_ovr_cb.csv"
-    df_ovr_multi.to_csv(ruta_ovr, index=False, encoding="utf-8-sig")
-    print(f"[OK] Tabla OVR por síntoma guardada en:", ruta_ovr)
-
-    # ---- CSV DE MÉTRICAS POR SÍNTOMA (resumen tipo metricas_por_sintoma) ----
-    filas_sintomas = []
-    for item in ITEMS:
-        nombre_bonito = ITEMS_LABELS.get(item, item)
-        y_true_i = preds_por_item[item]["y_true"]
-        y_pred_i = preds_por_item[item]["y_pred"]
-        proba_i = preds_por_item[item]["proba"]
-
-        acc_i = accuracy_score(y_true_i, y_pred_i)
-        bal_acc_i = balanced_accuracy_score(y_true_i, y_pred_i)
-        prec_i = precision_score(y_true_i, y_pred_i, average="macro", zero_division=0)
-        rec_i = recall_score(y_true_i, y_pred_i, average="macro", zero_division=0)
-        f1_i = f1_score(y_true_i, y_pred_i, average="macro", zero_division=0)
-
-        try:
-            auc_i = roc_auc_score(
-                y_true_i, proba_i, multi_class="ovr", average="macro"
-            )
-        except ValueError:
-            auc_i = None
-
-        brier_i = _brier_multiclass(y_true_i, proba_i, LIKERT_VALUES)
-
-        filas_sintomas.append(
-            {
-                "Sintoma": nombre_bonito,
-                "Precision": round(prec_i, 3),
-                "Recall": round(rec_i, 3),
-                "F1": round(f1_i, 3),
-                "Accuracy": round(acc_i, 3),
-                "BalancedAccuracy": round(bal_acc_i, 3),
-                "AUC_OVR": None if auc_i is None else round(auc_i, 3),
-                "Brier": round(brier_i, 3),
-                "n": int(len(y_true_i)),
-            }
-        )
-
-    df_sintomas = pd.DataFrame(filas_sintomas)
-    ruta_sintomas = DIR_OUT / "metricas_oe_cog_phq9_por_sintoma_cb.csv"
-    df_sintomas.to_csv(ruta_sintomas, index=False, encoding="utf-8-sig")
-    print(f"[OK] Métricas por síntoma guardadas en:", ruta_sintomas)
-
-    # ---- CSV tipo metricas_UpperBound GLOBAL (por clase + fila GLOBAL) ----
-    filas = []
-    for lbl, nombre in zip(LIKERT_VALUES, LIKERT_LABELS):
-        d = rep.get(nombre, {})
-        filas.append(
-            {
-                "Clase": nombre,
-                "Precision": round(d.get("precision", 0), 3),
-                "Recall": round(d.get("recall", 0), 3),
-                "F1": round(d.get("f1-score", 0), 3),
-                "Soporte": int(d.get("support", 0)),
-            }
-        )
-
-    filas.append(
-        {
-            "Clase": "GLOBAL",
-            "Precision": round(rep["macro avg"]["precision"], 3),
-            "Recall": round(rep["macro avg"]["recall"], 3),
-            "F1": round(rep["macro avg"]["f1-score"], 3),
-            "Soporte": int(len(y_oe_true)),
-            "Accuracy": round(acc, 3),
-            "BalancedAccuracy": round(bal_acc, 3),
-            "AUC_OVR": None if auc_macro is None else round(auc_macro, 3),
-            "Brier": round(brier, 3),
-            "n": int(len(y_oe_true)),
-        }
-    )
-
-    df_metricas = pd.DataFrame(filas)
-    ruta_metricas = DIR_OUT / "metricas_oe_cog_phq9_cb.csv"
-    df_metricas.to_csv(ruta_metricas, index=False, encoding="utf-8-sig")
-    print(f"[OK] Métricas globales guardadas en:", ruta_metricas)
-
-    # ======================================================
-    #   CSV RESUMEN GLOBAL PARA LA DIMENSIÓN
-    #   (LISTO PARA LA TABLA 3 DE LA TESIS)
-    # ======================================================
-    df_global_modelo = pd.DataFrame(
-        [
-            {
-                "Modelo": "CatBoost",
-                "Accuracy": round(acc, 3),
-                "BalancedAccuracy": round(bal_acc, 3),
-                "Precision_macro": round(rep["macro avg"]["precision"], 3),
-                "Recall_macro": round(rep["macro avg"]["recall"], 3),
-                "F1_macro": round(rep["macro avg"]["f1-score"], 3),
-                "AUC_OVR": None if auc_macro is None else round(auc_macro, 3),
-                "Brier": round(brier, 3),
-                "n": int(len(y_oe_true)),
-            }
-        ]
-    )
-
-    ruta_global = DIR_OUT / "metricas_dimension_cognitivo_afectiva_cb.csv"
-    df_global_modelo.to_csv(ruta_global, index=False, encoding="utf-8-sig")
-    print("[OK] Métricas globales de la dimensión (para tabla) guardadas en:", ruta_global)
-
+    print("\n=== RESULTADOS FINALES GBM (COGNITIVO-AFECTIVO) ===")
+    print(df_global_modelo.to_string(index=False))
 
 if __name__ == "__main__":
     main()

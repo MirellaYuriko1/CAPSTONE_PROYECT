@@ -1,2 +1,0 @@
-﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,AUC_OVR,Brier,n
-LogisticRegression,0.585,0.541,0.499,0.541,0.472,0.737,0.786,581
