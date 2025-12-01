@@ -1,12 +1,12 @@
 {
   "params": {
     "max_depth": 2,
-    "min_samples_leaf": 30,
-    "min_samples_split": 60,
+    "min_samples_leaf": 15,
+    "min_samples_split": 20,
     "n_estimators": 140,
-    "learning_rate": 0.055,
-    "subsample": 0.6,
-    "max_features": 0.5,
+    "learning_rate": 0.05,
+    "subsample": 0.5,
+    "max_features": 0.3,
     "n_iter_no_change": 10,
     "validation_fraction": 0.1,
     "random_state": 42

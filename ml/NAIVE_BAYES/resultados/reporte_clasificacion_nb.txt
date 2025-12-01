@@ -1,11 +1,11 @@
                       precision    recall  f1-score   support
 
-              Mínimo       0.82      0.79      0.81        39
-                Leve       0.69      0.82      0.75        33
+              Mínimo       0.84      0.82      0.83        39
+                Leve       0.70      0.79      0.74        33
             Moderada       0.71      0.77      0.74        22
-Moderadamente severa       0.91      0.77      0.83        13
+Moderadamente severa       0.92      0.92      0.92        13
               Severa       1.00      0.50      0.67        10
 
-            accuracy                           0.77       117
-           macro avg       0.83      0.73      0.76       117
-        weighted avg       0.79      0.77      0.77       117
+            accuracy                           0.79       117
+           macro avg       0.84      0.76      0.78       117
+        weighted avg       0.80      0.79      0.79       117

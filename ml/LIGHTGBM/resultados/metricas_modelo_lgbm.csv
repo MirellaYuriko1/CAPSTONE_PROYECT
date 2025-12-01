@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,ROC_AUC_macro,n
+LightGBM,0.726,0.636,0.813,0.636,0.676,0.93,117

@@ -1,5 +1,7 @@
 {
-  "params": {},
+  "params": {
+    "var_smoothing": 0.05
+  },
   "features_used": [
     "age",
     "genero_bin",

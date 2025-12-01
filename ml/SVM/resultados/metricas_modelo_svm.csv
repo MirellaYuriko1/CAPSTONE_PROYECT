@@ -1,0 +1,2 @@
+﻿Modelo,Accuracy,BalancedAccuracy,Precision_macro,Recall_macro,F1_macro,ROC_AUC_macro,n
+SVM (RBF),0.795,0.739,0.837,0.739,0.744,0.981,117

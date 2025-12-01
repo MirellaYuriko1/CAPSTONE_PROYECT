@@ -1,19 +1,20 @@
 {
-  "params_lgbm": {
+  "params": {
     "objective": "multiclass",
     "num_class": 5,
-    "learning_rate": 0.05,
-    "n_estimators": 200,
-    "num_leaves": 15,
-    "max_depth": 4,
-    "min_child_samples": 20,
-    "min_split_gain": 0.01,
-    "subsample": 0.7,
-    "colsample_bytree": 0.7,
-    "reg_alpha": 0.5,
-    "reg_lambda": 1.0,
+    "learning_rate": 0.03,
+    "n_estimators": 250,
+    "num_leaves": 8,
+    "max_depth": 3,
+    "min_child_samples": 25,
+    "min_split_gain": 0.02,
+    "subsample": 0.6,
+    "colsample_bytree": 0.6,
+    "reg_alpha": 0.1,
+    "reg_lambda": 10.0,
     "random_state": 42,
-    "n_jobs": -1
+    "n_jobs": -1,
+    "verbose": -1
   },
   "features_used": [
     "age",
