@@ -229,16 +229,19 @@ def _plot_corr_heatmap(corr: pd.DataFrame, title: str, outfile: Path):
     fig_w = max(8, 0.6 * n + 4)
     fig_h = max(6, 0.6 * n + 2)
     fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    
     im = ax.imshow(corr.values, vmin=-1, vmax=1)
-    plt.colorbar(im, ax=ax, label="r de Pearson")
-    ax.set_title(title, fontsize=14, weight="bold")
+    cbar = plt.colorbar(im, ax=ax, label="")
+    cbar.ax.tick_params(labelsize=14)
+
+    ax.set_title(title, fontsize=21, weight="bold")
     ax.set_xticks(range(n)); ax.set_yticks(range(n))
-    ax.set_xticklabels(labels, rotation=45, ha="right")
-    ax.set_yticklabels(labels)
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=14)
+    ax.set_yticklabels(labels, fontsize=14)
 
     for i in range(n):
         for j in range(n):
-            ax.text(j, i, f"{corr.values[i, j]:.2f}", ha="center", va="center", fontsize=8)
+            ax.text(j, i, f"{corr.values[i, j]:.2f}", ha="center", va="center", fontsize=13,weight="500")
     fig.tight_layout()
     fig.savefig(outfile, dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -262,10 +265,6 @@ def eda_correlaciones_pearson(df_can: pd.DataFrame, thr_abs: float = 0.8):
 
     if len(cols_pred) >= 2:
         corr_pred = df[cols_pred].corr(method="pearson")
-        _plot_corr_heatmap(corr_pred,
-                           "Mapa de calor — Correlaciones (Pearson) entre predictores (sin variables de resultado)",
-                           EDA_DIR / "21_corr_predictoras_pearson.png")
-
         abs_corr = corr_pred.abs()
         pairs = []
         for i in range(len(cols_pred)):
